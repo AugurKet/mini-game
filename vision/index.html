@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Vision Test — Color Difference (Odd Tile)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#020617;
+    --ink:#e5e7eb;
+    --muted:#94a3b8;
+    --line:#1f2a44;
+    --btn:#2563eb;
+    --btn2:#334155;
+  }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
+  .wrap{
+    width:420px;
+    background:var(--panel);
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,.6);
+  }
+  h2{ margin:6px 0 10px; text-align:center; }
+  .sub{
+    margin:-2px 0 12px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.35;
+  }
+  .top{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .pill{
+    background:#0b1224;
+    border:1px solid var(--line);
+    padding:8px 10px;
+    border-radius:12px;
+    font-size:13px;
+    min-width:120px;
+  }
+  .pill b{ color:#fff; }
+  .controls{
+    display:flex;
+    gap:10px;
+    margin:10px 0 8px;
+  }
+  button, select{
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:#0b1224;
+    color:var(--ink);
+    padding:10px 10px;
+    font-size:14px;
+  }
+  button{
+    cursor:pointer;
+    border:none;
+    background:var(--btn);
+    flex:1;
+  }
+  button.secondary{ background:var(--btn2); }
+  select{ flex:1; }
+  .grid{
+    display:grid;
+    gap:8px;
+    margin:10px 0 10px;
+    touch-action: manipulation;
+  }
+  .tile{
+    border-radius:10px;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.06);
+    transition: transform .08s ease;
+  }
+  .tile:active{ transform:scale(.985); }
+  .panel{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 12px;
+    background:#0b1224;
+    margin-top:10px;
+  }
+  .panel h3{
+    margin:0 0 8px;
+    font-size:15px;
+  }
+  .panel p, .panel li{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.45;
+  }
+  .row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .tag{
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:12px;
+    color:var(--muted);
+    background:#071022;
+  }
+  .good{ color:#bbf7d0; border-color:#14532d; background:#052013; }
+  .mid{ color:#fde68a; border-color:#7c5f00; background:#221a05; }
+  .low{ color:#fecaca; border-color:#7f1d1d; background:#220707; }
+  .hidden{ display:none; }
+  a{ color:#93c5fd; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h2>Vision Test: Odd Tile</h2>
+  <div class="sub">
+    Tap the one tile that is slightly different.<br>
+    Levels increase by reducing the color difference.
+  </div>
+
+  <div class="top">
+    <div class="pill">Level: <b id="level">1</b></div>
+    <div class="pill">Time: <b id="time">0.0</b>s</div>
+    <div class="pill">Mistakes: <b id="mistakes">0</b></div>
+    <div class="pill">Best Level: <b id="best">—</b></div>
+  </div>
+
+  <div class="controls">
+    <select id="mode" title="Test Mode">
+      <option value="standard" selected>Standard (balanced)</option>
+      <option value="hard">Hard (smaller differences sooner)</option>
+      <option value="training">Training (easier / warm-up)</option>
+    </select>
+    <button id="start">Start</button>
+    <button class="secondary" id="reset">Reset</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="panel">
+    <h3>Your Result</h3>
+    <div id="resultTags" class="row hidden"></div>
+    <p id="resultText">Press <b>Start</b> to begin. Your summary and interpretation will appear here after you finish.</p>
+  </div>
+
+  <div class="panel">
+    <h3>How to Test Fairly</h3>
+    <ul>
+      <li>Set screen brightness to ~70–100% (avoid night mode / blue filter).</li>
+      <li>Use normal indoor lighting (avoid strong sunlight glare).</li>
+      <li>Hold phone ~35–45cm away. Keep the angle straight.</li>
+      <li>If possible, test each eye separately by covering one eye (don’t press on the eye).</li>
+      <li>This is a <b>screen-based game</b>—results vary across devices.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>What This Test Does (and Doesn’t) Mean</h3>
+    <p>
+      This game mainly checks your ability to detect <b>small color differences and contrast</b> on your screen.
+      It is <b>not</b> a medical diagnosis. If you notice sudden changes, one eye is much worse than the other,
+      or you have headaches/eye strain, consider a professional eye exam.
+    </p>
+  </div>
+</div>
+
+<script>
+  // ---------- UI ----------
+  const gridEl = document.getElementById("grid");
+  const levelEl = document.getElementById("level");
+  const timeEl  = document.getElementById("time");
+  const mistakesEl = document.getElementById("mistakes");
+  const bestEl  = document.getElementById("best");
+  const modeEl  = document.getElementById("mode");
+  const startBtn = document.getElementById("start");
+  const resetBtn = document.getElementById("reset");
+  const resultText = document.getElementById("resultText");
+  const resultTags = document.getElementById("resultTags");
+
+  // ---------- State ----------
+  let level = 1;
+  let mistakes = 0;
+  let started = false;
+  let startTs = 0;
+  let rafId = 0;
+
+  let answerIndex = 0;
+  let sessionStartLevel = 1; // for summary
+
+  // ---------- Helpers ----------
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+  function rgb(c){ return `rgb(${c.r},${c.g},${c.b})`; }
+
+  function bestKey(){ return `vision_best_${modeEl.value}`; }
+  function loadBest(){
+    const v = parseInt(localStorage.getItem(bestKey()) || "0", 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  function saveBest(v){
+    localStorage.setItem(bestKey(), String(v));
+  }
+  function updateBestUI(){
+    const b = loadBest();
+    bestEl.textContent = b ? String(b) : "—";
+  }
+
+  function randomBaseColor(){
+    // Avoid extreme values so the task remains "difference" not "brightness"
+    const r = Math.floor(70 + Math.random()*140);
+    const g = Math.floor(70 + Math.random()*140);
+    const b = Math.floor(70 + Math.random()*140);
+    return {r,g,b};
+  }
+
+  function makeDiffColor(base, delta){
+    const channel = Math.floor(Math.random()*3);
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    const d = sign * delta;
+    const c = {...base};
+    if (channel === 0) c.r = clamp(c.r + d, 0, 255);
+    if (channel === 1) c.g = clamp(c.g + d, 0, 255);
+    if (channel === 2) c.b = clamp(c.b + d, 0, 255);
+    return c;
+  }
+
+  function stopTimer(){
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+  function tick(){
+    if (!started) return;
+    const t = (performance.now() - startTs)/1000;
+    timeEl.textContent = t.toFixed(1);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function setResult(tags, text){
+    resultTags.classList.remove("hidden");
+    resultTags.innerHTML = "";
+    tags.forEach(t => {
+      const span = document.createElement("span");
+      span.className = "tag " + (t.kind || "");
+      span.textContent = t.label;
+      resultTags.appendChild(span);
+    });
+    resultText.textContent = text;
+  }
+
+  // ---------- Difficulty Model ----------
+  function difficultyForLevel(lvl){
+    // grid grows; delta shrinks as lvl rises.
+    // different modes adjust the curve.
+    const mode = modeEl.value;
+
+    // size 2..8
+    const sizeBase = 2 + Math.floor(lvl/3);
+    const size = clamp(sizeBase, 2, 8);
+    const total = size * size;
+
+    // delta curve per mode
+    let delta;
+    if (mode === "training") {
+      delta = Math.round(55 - lvl*1.6);  // easier
+    } else if (mode === "hard") {
+      delta = Math.round(38 - lvl*2.3);  // harder
+    } else {
+      delta = Math.round(45 - lvl*2.0);  // standard
+    }
+    delta = clamp(delta, 5, 60);
+
+    // tile height adapts
+    const tileH = clamp(62 - size*3, 34, 62);
+    return { size, total, delta, tileH };
+  }
+
+  // ---------- Core Game ----------
+  function buildBoard(){
+    const { size, total, delta, tileH } = difficultyForLevel(level);
+
+    gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    gridEl.innerHTML = "";
+
+    const base = randomBaseColor();
+    const diff = makeDiffColor(base, delta);
+
+    answerIndex = Math.floor(Math.random() * total);
+
+    for (let i=0;i<total;i++){
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.style.height = tileH + "px";
+      tile.style.background = (i === answerIndex) ? rgb(diff) : rgb(base);
+      tile.addEventListener("click", () => onPick(i));
+      gridEl.appendChild(tile);
+    }
+
+    levelEl.textContent = String(level);
+    mistakesEl.textContent = String(mistakes);
+  }
+
+  function startRun(){
+    started = true;
+    startTs = performance.now();
+    tick();
+  }
+
+  function stopRun(){
+    started = false;
+    stopTimer();
+  }
+
+  function newSession(){
+    level = 1;
+    mistakes = 0;
+    sessionStartLevel = 1;
+    timeEl.textContent = "0.0";
+    levelEl.textContent = "1";
+    mistakesEl.textContent = "0";
+    updateBestUI();
+    buildBoard();
+
+    // Result area reset
+    resultTags.classList.add("hidden");
+    resultText.textContent = "Find the different tile. If you miss, the test ends and you’ll see a summary.";
+    startRun();
+  }
+
+  function interpret(levelReached, t, missCount){
+    // Light-touch interpretation. Device-dependent.
+    // Provide bands with cautious language.
+    const mode = modeEl.value;
+    const speed = levelReached / Math.max(1, t); // levels per second
+    let band, advice;
+
+    // Bands: tuned for typical casual play on phones.
+    if (levelReached >= 18 && missCount <= 1) {
+      band = "Excellent";
+      advice = "You detected very small color differences on this screen. If you want a tougher challenge, switch to Hard mode.";
+    } else if (levelReached >= 12) {
+      band = "Good";
+      advice = "Above-average performance for a screen-based test. Try testing each eye separately for comparison.";
+    } else if (levelReached >= 7) {
+      band = "Average";
+      advice = "Typical result. Screen brightness, glare, and color settings can lower your score. Try again with higher brightness and neutral color settings.";
+    } else {
+      band = "Low";
+      advice = "This score can happen with low brightness, strong glare, tired eyes, or color/contrast sensitivity differences. If one eye is consistently much worse, consider an eye exam.";
+    }
+
+    const best = loadBest();
+    if (levelReached > best) saveBest(levelReached);
+    updateBestUI();
+
+    const tags = [
+      { label: `Band: ${band}`, kind: band === "Excellent" ? "good" : band === "Good" ? "good" : band === "Average" ? "mid" : "low" },
+      { label: `Mode: ${mode}` },
+      { label: `Level: ${levelReached}` },
+      { label: `Time: ${t.toFixed(1)}s` },
+      { label: `Mistakes: ${missCount}` },
+      { label: `Speed: ${speed.toFixed(2)} lvl/s` },
+    ];
+
+    const text =
+      `${band} (screen-based). You reached Level ${levelReached} in ${t.toFixed(1)} seconds with ${missCount} mistake(s). ` +
+      advice +
+      " Reminder: results vary by device. For best comparison, use the same device/settings and repeat 2–3 times.";
+
+    setResult(tags, text);
+  }
+
+  function finish(levelReached){
+    stopRun();
+    const t = parseFloat(timeEl.textContent);
+    interpret(levelReached, t, mistakes);
+  }
+
+  function onPick(i){
+    if (!started) return;
+
+    if (i === answerIndex){
+      level++;
+      buildBoard();
+    } else {
+      mistakes++;
+      // End on first mistake to keep it “test-like”
+      // If you prefer 3 lives, I can modify it.
+      finish(level);
+    }
+  }
+
+  // ---------- Events ----------
+  startBtn.addEventListener("click", () => {
+    newSession();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    stopRun();
+    level = 1;
+    mistakes = 0;
+    timeEl.textContent = "0.0";
+    levelEl.textContent = "1";
+    mistakesEl.textContent = "0";
+    updateBestUI();
+    buildBoard();
+    resultTags.classList.add("hidden");
+    resultText.textContent = "Press Start to begin. (Reset does not start the timer.)";
+  });
+
+  modeEl.addEventListener("change", () => {
+    // changing mode resets the board and best display
+    stopRun();
+    updateBestUI();
+    buildBoard();
+    resultTags.classList.add("hidden");
+    resultText.textContent = "Mode changed. Press Start to begin a new test in this mode.";
+  });
+
+  // Initial preview
+  updateBestUI();
+  buildBoard();
+  resultText.textContent = "Press Start to begin. For a fair test, increase brightness and avoid night mode.";
+</script>
+
+</body>
+</html>
