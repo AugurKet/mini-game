@@ -1,131 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Memory Flip</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>Memory Flip+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-  body {
-    margin: 0;
-    background: #0f172a;
-    color: #e5e7eb;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+  body{
+    margin:0;
+    background:#0f172a;
+    color:#e5e7eb;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
   }
-  .game {
-    width: 340px;
-    background: #020617;
-    border-radius: 14px;
-    padding: 14px;
-    box-shadow: 0 15px 40px rgba(0,0,0,.6);
+  .game{
+    width:360px;
+    background:#020617;
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,.6);
   }
-  h2 {
-    text-align: center;
-    margin: 8px 0 12px;
+  h2{
+    text-align:center;
+    margin:8px 0 10px;
   }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+  .top{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    margin-bottom:10px;
   }
-  .card {
-    background: #334155;
-    height: 70px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28px;
-    user-select: none;
-    transition: transform .2s;
+  .pill{
+    background:#0b1224;
+    border:1px solid #1f2a44;
+    padding:8px 10px;
+    border-radius:12px;
+    font-size:13px;
+    display:flex;
+    gap:8px;
+    align-items:center;
   }
-  .card.flipped {
-    background: #22c55e;
-    transform: scale(1.05);
+  .pill b{ color:#fff; }
+  select, button{
+    border-radius:10px;
+    border:1px solid #1f2a44;
+    background:#0b1224;
+    color:#e5e7eb;
+    padding:8px 10px;
+    font-size:14px;
   }
-  .card.matched {
-    background: #16a34a;
-    cursor: default;
+  button{
+    cursor:pointer;
+    background:#2563eb;
+    border:none;
   }
-  button {
-    width: 100%;
-    margin-top: 12px;
-    padding: 10px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+  button.secondary{
+    background:#334155;
+  }
+  .grid{
+    display:grid;
+    gap:10px;
+  }
+  .card{
+    background:#334155;
+    border-radius:10px;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    user-select:none;
+    height:70px;
+    transition:transform .15s, background .15s;
+  }
+  .card.flipped{
+    background:#22c55e;
+    transform:scale(1.03);
+  }
+  .card.matched{
+    background:#16a34a;
+    cursor:default;
+    opacity:.95;
+  }
+  .footer{
+    margin-top:10px;
+    display:flex;
+    gap:10px;
+  }
+  .footer button{
+    width:50%;
+  }
+  .hint{
+    font-size:12px;
+    opacity:.8;
+    margin-top:8px;
+    text-align:center;
   }
 </style>
 </head>
 <body>
 
 <div class="game">
-  <h2>Memory Flip</h2>
+  <h2>Memory Flip+</h2>
+
+  <div class="top">
+    <div class="pill">Time: <b id="time">0.0</b>s</div>
+    <div class="pill">Moves: <b id="moves">0</b></div>
+    <div class="pill">Best: <b id="best">—</b></div>
+
+    <select id="difficulty" title="Difficulty">
+      <option value="easy">Easy (4×3)</option>
+      <option value="medium" selected>Medium (4×4)</option>
+      <option value="hard">Hard (6×4)</option>
+    </select>
+  </div>
+
   <div class="grid" id="grid"></div>
-  <button id="restart">Restart</button>
+
+  <div class="footer">
+    <button id="start">Start</button>
+    <button id="restart" class="secondary">Restart</button>
+  </div>
+
+  <div class="hint">Tip: Click Start, then match all pairs with fewer moves and faster time.</div>
 </div>
 
 <script>
-  const emojis = ["🍎","🍌","🍇","🍒","🍋","🍉"];
-  let cards = [...emojis, ...emojis];
-  let first = null;
-  let lock = false;
+  // ---------- Config ----------
+  const EMOJIS = ["🍎","🍌","🍇","🍒","🍋","🍉","🥝","🍓","🥑","🍑","🍍","🥥","🍈","🍏","🍐","🍊","🍔","🍕","🍩","🍪"];
+  const DIFF = {
+    easy:   { cols: 4, rows: 3 }, // 12 cards / 6 pairs
+    medium: { cols: 4, rows: 4 }, // 16 cards / 8 pairs
+    hard:   { cols: 6, rows: 4 }  // 24 cards / 12 pairs
+  };
 
+  // ---------- State ----------
   const grid = document.getElementById("grid");
+  const timeEl = document.getElementById("time");
+  const movesEl = document.getElementById("moves");
+  const bestEl = document.getElementById("best");
+  const difficultyEl = document.getElementById("difficulty");
+  const startBtn = document.getElementById("start");
   const restartBtn = document.getElementById("restart");
 
+  let first = null;
+  let lock = false;
+  let moves = 0;
+  let matchedCount = 0;
+  let started = false;
+
+  let startTs = 0;
+  let rafId = 0;
+
   function shuffle(arr) {
-    return arr.sort(() => Math.random() - 0.5);
+    // Fisher-Yates
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
 
-  function setup() {
-    grid.innerHTML = "";
+  function bestKey(diff) {
+    return `memory_best_${diff}`;
+  }
+
+  function loadBest(diff) {
+    const raw = localStorage.getItem(bestKey(diff));
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+
+  function saveBest(diff, record) {
+    localStorage.setItem(bestKey(diff), JSON.stringify(record));
+  }
+
+  function formatBest(rec) {
+    if (!rec) return "—";
+    return `${rec.time.toFixed(1)}s / ${rec.moves} moves`;
+  }
+
+  function updateBestUI() {
+    const diff = difficultyEl.value;
+    bestEl.textContent = formatBest(loadBest(diff));
+  }
+
+  function setGridLayout(cols, rows) {
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    // card height a bit smaller on hard to fit
+    const cardHeight = (cols >= 6) ? 62 : 70;
+    grid.querySelectorAll(".card").forEach(c => c.style.height = cardHeight + "px");
+  }
+
+  function stopTimer() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function tick() {
+    if (!started) return;
+    const t = (performance.now() - startTs) / 1000;
+    timeEl.textContent = t.toFixed(1);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function resetStats() {
     first = null;
     lock = false;
-    shuffle(cards).forEach(icon => {
+    moves = 0;
+    matchedCount = 0;
+    started = false;
+    stopTimer();
+    timeEl.textContent = "0.0";
+    movesEl.textContent = "0";
+  }
+
+  function buildBoard() {
+    resetStats();
+    updateBestUI();
+
+    const diff = difficultyEl.value;
+    const { cols, rows } = DIFF[diff];
+    const totalCards = cols * rows;
+    const pairs = totalCards / 2;
+
+    // pick enough unique emojis
+    const picks = shuffle(EMOJIS).slice(0, pairs);
+    const cards = shuffle([...picks, ...picks]);
+
+    grid.innerHTML = "";
+    grid.dataset.total = String(totalCards);
+
+    cards.forEach(icon => {
       const div = document.createElement("div");
       div.className = "card";
-      div.textContent = icon;
+      div.textContent = "❓";          // face-down
       div.dataset.icon = icon;
       div.addEventListener("click", () => flip(div));
       grid.appendChild(div);
     });
+
+    setGridLayout(cols, rows);
+  }
+
+  function reveal(card) {
+    card.classList.add("flipped");
+    card.textContent = card.dataset.icon;
+  }
+
+  function hide(card) {
+    card.classList.remove("flipped");
+    card.textContent = "❓";
+  }
+
+  function markMatched(card) {
+    card.classList.add("matched");
+  }
+
+  function maybeStartTimer() {
+    if (started) return;
+    started = true;
+    startTs = performance.now();
+    tick();
+  }
+
+  function finishGame() {
+    started = false;
+    stopTimer();
+
+    const diff = difficultyEl.value;
+    const time = parseFloat(timeEl.textContent);
+    const record = loadBest(diff);
+
+    const current = { time, moves };
+    const isBetter =
+      !record ||
+      time < record.time ||
+      (time === record.time && moves < record.moves);
+
+    if (isBetter) saveBest(diff, current);
+    updateBestUI();
+
+    setTimeout(() => {
+      alert(isBetter
+        ? `🎉 New Best on ${diff.toUpperCase()}!\nTime: ${time.toFixed(1)}s\nMoves: ${moves}`
+        : `✅ Completed!\nTime: ${time.toFixed(1)}s\nMoves: ${moves}`);
+    }, 50);
   }
 
   function flip(card) {
-    if (lock || card.classList.contains("matched") || card === first) return;
+    if (lock) return;
+    if (card.classList.contains("matched")) return;
+    if (card === first) return;
 
-    card.classList.add("flipped");
+    maybeStartTimer();
+    reveal(card);
 
     if (!first) {
       first = card;
-    } else {
-      lock = true;
-      setTimeout(() => {
-        if (first.dataset.icon === card.dataset.icon) {
-          first.classList.add("matched");
-          card.classList.add("matched");
-        } else {
-          first.classList.remove("flipped");
-          card.classList.remove("flipped");
-        }
-        first = null;
-        lock = false;
-      }, 600);
+      return;
     }
+
+    // second card clicked
+    moves++;
+    movesEl.textContent = String(moves);
+
+    lock = true;
+    const a = first;
+    const b = card;
+
+    setTimeout(() => {
+      if (a.dataset.icon === b.dataset.icon) {
+        markMatched(a);
+        markMatched(b);
+        matchedCount += 2;
+      } else {
+        hide(a);
+        hide(b);
+      }
+
+      first = null;
+      lock = false;
+
+      // win check
+      const total = parseInt(grid.dataset.total, 10);
+      if (matchedCount >= total) finishGame();
+    }, 550);
   }
 
-  restartBtn.addEventListener("click", setup);
+  // ---------- UI Events ----------
+  difficultyEl.addEventListener("change", () => {
+    buildBoard();
+  });
 
-  setup();
+  startBtn.addEventListener("click", () => {
+    // Start just resets + builds (timer begins on first click)
+    buildBoard();
+  });
+
+  restartBtn.addEventListener("click", () => {
+    buildBoard();
+  });
+
+  // initial load
+  buildBoard();
 </script>
 
 </body>
 </html>
+
