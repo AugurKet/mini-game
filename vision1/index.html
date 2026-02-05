@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Vision Test — Odd Tile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  body{
+    margin:0;
+    background:#0f172a;
+    color:#e5e7eb;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
+  .wrap{
+    width:380px;
+    background:#020617;
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,.6);
+  }
+  h2{ margin:6px 0 12px; text-align:center; }
+  .top{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .pill{
+    background:#0b1224;
+    border:1px solid #1f2a44;
+    padding:8px 10px;
+    border-radius:12px;
+    font-size:13px;
+  }
+  .pill b{ color:#fff; }
+  .grid{
+    display:grid;
+    gap:8px;
+    margin:10px 0 12px;
+    touch-action: manipulation;
+  }
+  .tile{
+    border-radius:10px;
+    cursor:pointer;
+    height:52px;
+    border:1px solid rgba(255,255,255,.06);
+    transition: transform .08s ease;
+  }
+  .tile:active{ transform: scale(.98); }
+  .row{
+    display:flex;
+    gap:10px;
+  }
+  button{
+    flex:1;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    color:#fff;
+  }
+  .primary{ background:#2563eb; }
+  .secondary{ background:#334155; }
+  .note{
+    font-size:12px;
+    opacity:.8;
+    text-align:center;
+    margin-top:8px;
+    line-height:1.4;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h2>Vision Test: Odd Tile</h2>
+
+  <div class="top">
+    <div class="pill">Level: <b id="level">1</b></div>
+    <div class="pill">Time: <b id="time">0.0</b>s</div>
+    <div class="pill">Streak: <b id="streak">0</b></div>
+    <div class="pill">Best: <b id="best">—</b></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="row">
+    <button class="primary" id="start">Start</button>
+    <button class="secondary" id="restart">Restart</button>
+  </div>
+
+  <div class="note">
+    Find the one tile with a slightly different color.<br/>
+    As levels increase, the difference becomes harder to see.
+  </div>
+</div>
+
+<script>
+  const gridEl = document.getElementById("grid");
+  const levelEl = document.getElementById("level");
+  const timeEl  = document.getElementById("time");
+  const streakEl= document.getElementById("streak");
+  const bestEl  = document.getElementById("best");
+  const startBtn= document.getElementById("start");
+  const restartBtn = document.getElementById("restart");
+
+  let level = 1;
+  let streak = 0;
+  let started = false;
+  let startTs = 0;
+  let rafId = 0;
+
+  function bestKey(){ return "vision_best_level"; }
+  function loadBest(){
+    const v = parseInt(localStorage.getItem(bestKey()) || "0", 10);
+    return Number.isFinite(v) ? v : 0;
+  }
+  function saveBest(v){
+    localStorage.setItem(bestKey(), String(v));
+  }
+  function updateBest(){
+    const b = loadBest();
+    bestEl.textContent = b ? String(b) : "—";
+  }
+
+  function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+  // Generate base color and slightly different color
+  function randomBaseColor(){
+    // avoid too-dark and too-light extremes to keep it fair
+    const r = Math.floor(60 + Math.random()*160);
+    const g = Math.floor(60 + Math.random()*160);
+    const b = Math.floor(60 + Math.random()*160);
+    return {r,g,b};
+  }
+
+  function rgb({r,g,b}){ return `rgb(${r},${g},${b})`; }
+
+  function makeDiffColor(base, delta){
+    // delta can be positive or negative, apply to one channel
+    const channel = Math.floor(Math.random()*3);
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    const d = sign * delta;
+
+    const c = { ...base };
+    if (channel === 0) c.r = clamp(c.r + d, 0, 255);
+    if (channel === 1) c.g = clamp(c.g + d, 0, 255);
+    if (channel === 2) c.b = clamp(c.b + d, 0, 255);
+    return c;
+  }
+
+  function stopTimer(){
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function tick(){
+    if (!started) return;
+    const t = (performance.now() - startTs)/1000;
+    timeEl.textContent = t.toFixed(1);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function resetRun(){
+    started = false;
+    stopTimer();
+    timeEl.textContent = "0.0";
+  }
+
+  function startRun(){
+    started = true;
+    startTs = performance.now();
+    tick();
+  }
+
+  function difficultyForLevel(lvl){
+    // grid grows slowly; delta shrinks (harder) as level increases
+    const size = clamp(2 + Math.floor(lvl/3), 2, 8); // 2..8
+    const total = size * size;
+
+    // delta starts large and reduces; never goes below 6 (still possible)
+    const delta = clamp(Math.round(42 - lvl*2), 6, 42);
+
+    // tile size: smaller for bigger grids
+    const tileH = clamp(60 - size*3, 34, 60);
+
+    return { size, total, delta, tileH };
+  }
+
+  let answerIndex = 0;
+
+  function buildBoard(){
+    resetRun();
+
+    const { size, total, delta, tileH } = difficultyForLevel(level);
+    gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+    const base = randomBaseColor();
+    const diff = makeDiffColor(base, delta);
+
+    answerIndex = Math.floor(Math.random() * total);
+    gridEl.innerHTML = "";
+
+    for (let i=0;i<total;i++){
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.style.height = tileH + "px";
+      tile.style.background = (i === answerIndex) ? rgb(diff) : rgb(base);
+      tile.addEventListener("click", () => onPick(i));
+      gridEl.appendChild(tile);
+    }
+
+    levelEl.textContent = String(level);
+    streakEl.textContent = String(streak);
+
+    // Start timer on first board shown after Start/Restart
+    startRun();
+  }
+
+  function onPick(i){
+    if (!started) return;
+
+    if (i === answerIndex){
+      // correct
+      streak++;
+      level++;
+      if (level - 1 > loadBest()){
+        saveBest(level - 1);
+        updateBest();
+      }
+      // quick feedback by rebuilding
+      buildBoard();
+    } else {
+      // wrong: end round
+      started = false;
+      stopTimer();
+      streak = 0;
+      streakEl.textContent = "0";
+
+      const finalTime = parseFloat(timeEl.textContent);
+      const reached = level;
+
+      setTimeout(() => {
+        alert(`❌ Wrong tile!\nYou reached Level ${reached}.\nTime: ${finalTime.toFixed(1)}s\nTry again!`);
+      }, 30);
+    }
+  }
+
+  function newGame(){
+    level = 1;
+    streak = 0;
+    updateBest();
+    buildBoard();
+  }
+
+  startBtn.addEventListener("click", newGame);
+  restartBtn.addEventListener("click", newGame);
+
+  updateBest();
+  // show a starter grid preview (not running timer)
+  (function preview(){
+    const { size, total, delta, tileH } = difficultyForLevel(1);
+    gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    const base = {r:90,g:140,b:200};
+    const diff = makeDiffColor(base, delta);
+    answerIndex = 0;
+    gridEl.innerHTML = "";
+    for (let i=0;i<total;i++){
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.style.height = tileH + "px";
+      tile.style.background = (i===0) ? rgb(diff) : rgb(base);
+      tile.addEventListener("click", () => {});
+      gridEl.appendChild(tile);
+    }
+  })();
+</script>
+
+</body>
+</html>
