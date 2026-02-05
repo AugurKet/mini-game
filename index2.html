@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Click the Box</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .game {
+      width: 320px;
+      height: 480px;
+      background: #020617;
+      border-radius: 12px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+      overflow: hidden;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 6px 0;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .box {
+      width: 50px;
+      height: 50px;
+      background: #22c55e;
+      position: absolute;
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .start {
+      width: 100%;
+      padding: 10px;
+      background: #2563eb;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game">
+  <h2>Click the Box</h2>
+  <div class="stats">
+    <div>Score: <span id="score">0</span></div>
+    <div>Time: <span id="time">15</span>s</div>
+  </div>
+
+  <button class="start" id="startBtn">Start Game</button>
+  <div class="box" id="box"></div>
+</div>
+
+<script>
+  const box = document.getElementById("box");
+  const startBtn = document.getElementById("startBtn");
+  const scoreEl = document.getElementById("score");
+  const timeEl = document.getElementById("time");
+  const gameArea = document.querySelector(".game");
+
+  let score = 0;
+  let time = 15;
+  let timer;
+
+  function randomPosition() {
+    const maxX = gameArea.clientWidth - 50;
+    const maxY = gameArea.clientHeight - 50;
+    box.style.left = Math.random() * maxX + "px";
+    box.style.top = Math.random() * maxY + "px";
+  }
+
+  box.addEventListener("click", () => {
+    score++;
+    scoreEl.textContent = score;
+    randomPosition();
+  });
+
+  startBtn.addEventListener("click", () => {
+    score = 0;
+    time = 15;
+    scoreEl.textContent = score;
+    timeEl.textContent = time;
+    startBtn.style.display = "none";
+    box.style.display = "block";
+    randomPosition();
+
+    timer = setInterval(() => {
+      time--;
+      timeEl.textContent = time;
+      if (time <= 0) {
+        clearInterval(timer);
+        box.style.display = "none";
+        startBtn.style.display = "block";
+        startBtn.textContent = "Play Again";
+        alert("Time's up! Your score: " + score);
+      }
+    }, 1000);
+  });
+</script>
+
+</body>
+</html>
