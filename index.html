@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Catch Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h3 { margin: 10px 0; }
+    canvas {
+      background: #222;
+      display: block;
+      margin: 10px auto;
+      border: 2px solid #0f0;
+    }
+  </style>
+</head>
+<body>
+
+<h3>Catch Game</h3>
+<canvas id="game" width="300" height="420"></canvas>
+<div id="score">Score: 0</div>
+
+<script>
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  let paddleX = 120;
+  let ballY = 0;
+  let score = 0;
+
+  document.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    paddleX = e.clientX - rect.left - 30;
+  });
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#0f0";
+    ctx.fillRect(paddleX, 400, 60, 10);
+
+    ctx.beginPath();
+    ctx.arc(150, ballY, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ballY += 3;
+
+    if (ballY > 400 && paddleX < 150 && paddleX + 60 > 150) {
+      score++;
+      ballY = 0;
+      document.getElementById("score").textContent = "Score: " + score;
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+</script>
+
+</body>
+</html>
