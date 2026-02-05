@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Personality Test</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#0b1020;color:#e9eefc}
+    .wrap{max-width:820px;margin:0 auto;padding:28px}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:0 0 10px;font-size:26px}
+    p{opacity:.9;line-height:1.5}
+    .meta{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 18px}
+    .pill{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+    .q{margin-top:18px}
+    .q-title{font-weight:700;margin-bottom:10px}
+    .choices{display:grid;gap:10px}
+    button.choice{
+      text-align:left; padding:12px 12px; border-radius:12px; cursor:pointer;
+      background:rgba(255,255,255,.06); color:#e9eefc;
+      border:1px solid rgba(255,255,255,.14);
+      transition:.15s transform,.15s background,.15s border;
+    }
+    button.choice:hover{transform:translateY(-1px);background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22)}
+    .row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .btn{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#e9eefc;cursor:pointer}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+    .fill{height:100%;width:0%;background:rgba(120,170,255,.9)}
+    .result-title{font-size:22px;font-weight:800;margin:6px 0 6px}
+    .grid2{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:720px){.grid2{grid-template-columns:1fr 1fr}}
+    .mini{font-size:12px;opacity:.85}
+    .scoreline{display:flex;justify-content:space-between;gap:10px;font-size:13px;opacity:.9}
+    a{color:#a9c7ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Personality Test</h1>
+      <p class="mini">Static HTML/JS — perfect for GitHub Pages. Edit the <code>QUESTIONS</code> and <code>TYPES</code> objects to customize.</p>
+
+      <div class="meta">
+        <span class="pill" id="pillCount">0 questions</span>
+        <span class="pill" id="pillProgress">Progress: 0%</span>
+      </div>
+
+      <div class="bar"><div class="fill" id="fill"></div></div>
+
+      <div id="app"></div>
+
+      <div class="row">
+        <button class="btn" id="backBtn">Back</button>
+        <button class="btn" id="restartBtn">Restart</button>
+        <button class="btn" id="shareBtn">Copy share link</button>
+      </div>
+
+      <p class="mini" style="margin-top:14px;">
+        Tip: Put this file in your repo root, then link it from <code>index.html</code>.
+      </p>
+    </div>
+  </div>
+
+<script>
+/** 1) Define your result types (short + long descriptions). */
+const TYPES = {
+  "Explorer": {
+    tagline: "Curious, adaptable, thrives on variety.",
+    details: "You like learning by doing, collecting experiences, and keeping options open. You recharge by exploring new places, ideas, or skills."
+  },
+  "Strategist": {
+    tagline: "Analytical, future-focused, loves systems.",
+    details: "You think in frameworks. You enjoy planning, optimizing, and turning messy problems into clean steps."
+  },
+  "Connector": {
+    tagline: "People-first, empathetic, community builder.",
+    details: "You’re energized by meaningful conversations and collaboration. You notice social dynamics and make others feel included."
+  },
+  "Creator": {
+    tagline: "Imaginative, expressive, loves making things.",
+    details: "You’re drawn to aesthetics and originality. You enjoy crafting something unique—stories, designs, music, or new ways of doing things."
+  }
+};
+
+/** 2) Questions: each choice gives points to one or more TYPES. */
+const QUESTIONS = [
+  {
+    text: "A free Saturday appears. What sounds best?",
+    choices: [
+      { text: "Try something new I’ve never done before", score: { Explorer: 2, Creator: 1 } },
+      { text: "Plan and finish a personal project", score: { Strategist: 2, Creator: 1 } },
+      { text: "Meet friends / family and catch up deeply", score: { Connector: 2 } },
+      { text: "Quiet time to reset, read, and reflect", score: { Strategist: 1, Explorer: 1 } }
+    ]
+  },
+  {
+    text: "In a group, you usually become the…",
+    choices: [
+      { text: "Idea generator", score: { Creator: 2, Explorer: 1 } },
+      { text: "Organizer / decision maker", score: { Strategist: 2 } },
+      { text: "Mood-setter / mediator", score: { Connector: 2 } },
+      { text: "Wildcard who tries things first", score: { Explorer: 2 } }
+    ]
+  },
+  {
+    text: "When learning something difficult, you prefer…",
+    choices: [
+      { text: "Hands-on practice immediately", score: { Explorer: 2 } },
+      { text: "A structured roadmap and milestones", score: { Strategist: 2 } },
+      { text: "Learning with people / discussion", score: { Connector: 2 } },
+      { text: "Creative experiments and personal twists", score: { Creator: 2 } }
+    ]
+  },
+  {
+    text: "What motivates you the most?",
+    choices: [
+      { text: "Freedom and discovery", score: { Explorer: 2 } },
+      { text: "Mastery and progress", score: { Strategist: 2 } },
+      { text: "Belonging and contribution", score: { Connector: 2 } },
+      { text: "Expression and originality", score: { Creator: 2 } }
+    ]
+  },
+  {
+    text: "Your ideal work environment feels…",
+    choices: [
+      { text: "Fast-changing, lots of variety", score: { Explorer: 2 } },
+      { text: "Clear goals, clean process, measurable outcomes", score: { Strategist: 2 } },
+      { text: "Supportive team, open communication", score: { Connector: 2 } },
+      { text: "Flexible, aesthetic, room to create", score: { Creator: 2 } }
+    ]
+  }
+];
+
+/** --- Engine --- */
+const state = {
+  i: 0,
+  answers: Array(QUESTIONS.length).fill(null),
+  scores: Object.fromEntries(Object.keys(TYPES).map(k => [k, 0])),
+};
+
+const app = document.getElementById("app");
+const backBtn = document.getElementById("backBtn");
+const restartBtn = document.getElementById("restartBtn");
+const shareBtn = document.getElementById("shareBtn");
+const pillCount = document.getElementById("pillCount");
+const pillProgress = document.getElementById("pillProgress");
+const fill = document.getElementById("fill");
+
+pillCount.textContent = `${QUESTIONS.length} questions`;
+
+function recomputeScores() {
+  state.scores = Object.fromEntries(Object.keys(TYPES).map(k => [k, 0]));
+  state.answers.forEach((choiceIndex, qIndex) => {
+    if (choiceIndex === null) return;
+    const choice = QUESTIONS[qIndex].choices[choiceIndex];
+    for (const [k, v] of Object.entries(choice.score)) state.scores[k] += v;
+  });
+}
+
+function progressPct() {
+  const answered = state.answers.filter(x => x !== null).length;
+  return Math.round((answered / QUESTIONS.length) * 100);
+}
+
+function setProgressUI() {
+  const pct = progressPct();
+  pillProgress.textContent = `Progress: ${pct}%`;
+  fill.style.width = pct + "%";
+  backBtn.disabled = state.i === 0;
+}
+
+function topResult() {
+  const entries = Object.entries(state.scores);
+  entries.sort((a,b) => b[1]-a[1]);
+  const [bestType, bestScore] = entries[0];
+  const ties = entries.filter(e => e[1] === bestScore).map(e => e[0]);
+  return { bestType, bestScore, ties, entries };
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[state.i];
+  setProgressUI();
+
+  app.innerHTML = `
+    <div class="q">
+      <div class="q-title">Q${state.i + 1}. ${q.text}</div>
+      <div class="choices">
+        ${q.choices.map((c, idx) => `
+          <button class="choice" data-idx="${idx}">
+            ${c.text}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
+  app.querySelectorAll("button.choice").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.dataset.idx);
+      state.answers[state.i] = idx;
+      recomputeScores();
+      if (state.i < QUESTIONS.length - 1) {
+        state.i++;
+        renderQuestion();
+      } else {
+        renderResult();
+      }
+    });
+  });
+}
+
+function renderResult() {
+  recomputeScores();
+  setProgressUI();
+  const { bestType, ties, entries } = topResult();
+
+  const type = TYPES[bestType];
+  const tieNote = ties.length > 1
+    ? `<p class="mini">Tie-break: you matched multiple types (${ties.join(", ")}). We’ll show the first by score order. Add 2–3 more questions to reduce ties.</p>`
+    : "";
+
+  const breakdown = entries.map(([k,v]) => `
+    <div>
+      <div class="scoreline"><span>${k}</span><span>${v}</span></div>
+      <div class="bar"><div class="fill" style="width:${Math.min(100, v*20)}%"></div></div>
+    </div>
+  `).join("");
+
+  app.innerHTML = `
+    <div class="q">
+      <div class="pill">Your result</div>
+      <div class="result-title">${bestType}</div>
+      <p><strong>${type.tagline}</strong></p>
+      <p>${type.details}</p>
+      ${tieNote}
+
+      <div class="grid2" style="margin-top:14px;">
+        <div class="card" style="padding:14px;border-radius:14px;background:rgba(255,255,255,.04)">
+          <div style="font-weight:800;margin-bottom:10px;">Score breakdown</div>
+          <div style="display:grid;gap:10px;">
+            ${breakdown}
+          </div>
+        </div>
+
+        <div class="card" style="padding:14px;border-radius:14px;background:rgba(255,255,255,.04)">
+          <div style="font-weight:800;margin-bottom:10px;">Next upgrades</div>
+          <ul class="mini" style="margin:0;padding-left:16px;line-height:1.6">
+            <li>Store results in <code>localStorage</code> (best score + last result)</li>
+            <li>Add a name input, shareable result image, or “compare with friends” mode</li>
+            <li>Add more questions and balance scoring weights</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+backBtn.addEventListener("click", () => {
+  if (state.i > 0) state.i--;
+  renderQuestion();
+});
+
+restartBtn.addEventListener("click", () => {
+  state.i = 0;
+  state.answers = Array(QUESTIONS.length).fill(null);
+  recomputeScores();
+  renderQuestion();
+});
+
+shareBtn.addEventListener("click", async () => {
+  // Simple share link: encodes answers as a compact string in URL hash.
+  const compact = state.answers.map(x => (x===null ? "x" : String(x))).join("");
+  const url = new URL(location.href);
+  url.hash = "a=" + compact;
+  try {
+    await navigator.clipboard.writeText(url.toString());
+    shareBtn.textContent = "Copied!";
+    setTimeout(() => shareBtn.textContent = "Copy share link", 1200);
+  } catch {
+    alert("Clipboard blocked. Copy manually:\n" + url.toString());
+  }
+});
+
+// Load from share link if present
+(function initFromHash() {
+  const m = location.hash.match(/a=([0-9x]+)/);
+  if (!m) return;
+  const str = m[1];
+  for (let i=0; i<Math.min(str.length, QUESTIONS.length); i++) {
+    state.answers[i] = (str[i] === "x") ? null : Number(str[i]);
+  }
+  recomputeScores();
+  // Jump to first unanswered, else show result
+  const firstUnanswered = state.answers.findIndex(x => x === null);
+  if (firstUnanswered === -1) renderResult();
+  else { state.i = firstUnanswered; renderQuestion(); }
+})();
+
+recomputeScores();
+renderQuestion();
+</script>
+</body>
+</html>
