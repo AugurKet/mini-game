@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wheel Word — Spin & Guess</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1b33;
+      --panel2:#0c162b;
+      --text:#e8efff;
+      --muted:#9fb3d8;
+      --accent:#2f6dff;
+      --accent2:#00d4ff;
+      --good:#2dd4bf;
+      --bad:#fb7185;
+      --warn:#fbbf24;
+      --card:#0d1a34;
+      --border:rgba(255,255,255,.08);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 600px at 20% 0%, rgba(47,109,255,.18), transparent 60%),
+        radial-gradient(1000px 600px at 80% 10%, rgba(0,212,255,.12), transparent 55%),
+        radial-gradient(1200px 800px at 50% 100%, rgba(45,212,191,.08), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+    header{
+      max-width:1200px;
+      margin: 26px auto 10px;
+      padding: 0 16px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .title{
+      display:flex;flex-direction:column;gap:6px;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(22px, 2.2vw, 30px);
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size: 14px;
+    }
+    .top-actions{
+      display:flex; gap:10px; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .btn{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      color:var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      transition:.15s transform, .15s opacity, .15s border-color;
+      box-shadow: 0 6px 18px rgba(0,0,0,.22);
+      user-select:none;
+      font-weight:600;
+      font-size: 13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.14); }
+    .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(47,109,255,.95), rgba(47,109,255,.65));
+      border-color: rgba(47,109,255,.8);
+    }
+    .btn.good{
+      background: linear-gradient(180deg, rgba(45,212,191,.95), rgba(45,212,191,.55));
+      border-color: rgba(45,212,191,.8);
+      color:#07151a;
+    }
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(251,113,133,.9), rgba(251,113,133,.55));
+      border-color: rgba(251,113,133,.8);
+    }
+
+    main{
+      max-width:1200px;
+      margin: 14px auto 32px;
+      padding: 0 16px;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      main{ grid-template-columns: 1fr; }
+    }
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel .hd{
+      padding:14px 14px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+    }
+    .hd .label{
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size: 13px;
+      color: rgba(232,239,255,.9);
+    }
+    .hd .mini{
+      color:var(--muted);
+      font-size: 12px;
+    }
+
+    /* Left: wheel + stats */
+    .wheel-wrap{ padding:14px; display:flex; flex-direction:column; gap:12px; }
+    .wheel-stage{
+      position:relative;
+      background: radial-gradient(600px 380px at 50% 45%, rgba(0,212,255,.08), transparent 55%),
+                  linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.15));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    canvas{ width:100%; height:auto; display:block; }
+    .pointer{
+      position:absolute;
+      top:6px;
+      left:50%;
+      transform: translateX(-50%);
+      width:0;height:0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 22px solid var(--warn);
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .stat{
+      background: rgba(12,22,43,.55);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .stat .k{
+      color:var(--muted);
+      font-size: 12px;
+    }
+    .stat .v{
+      font-weight:900;
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+    .log{
+      background: rgba(12,22,43,.55);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding:10px;
+      min-height: 86px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .log .k{ color:var(--muted); font-size:12px; }
+    .log .msg{ font-weight:700; line-height:1.3; }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.07);
+      font-size:12px;
+      color:rgba(232,239,255,.9);
+    }
+
+    /* Right: puzzle */
+    .game-wrap{ padding: 14px; display:flex; flex-direction:column; gap:12px; }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .select, input[type="text"]{
+      background: rgba(12,22,43,.55);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      border-radius: 12px;
+      padding:10px 12px;
+      font-weight:700;
+      outline:none;
+    }
+    input[type="text"]{ width: min(360px, 100%); }
+    .hint{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .board{
+      background: rgba(12,22,43,.55);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: 18px;
+      padding: 16px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .category{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color: rgba(232,239,255,.9);
+      font-weight:900;
+      letter-spacing:.25px;
+    }
+    .category small{ color:var(--muted); font-weight:700; }
+    .phrase{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      padding: 8px 0 2px;
+    }
+    .tile{
+      width: 34px;
+      height: 42px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 900;
+      letter-spacing:.5px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      text-transform: uppercase;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+    }
+    .tile.revealed{
+      background: rgba(47,109,255,.22);
+      border-color: rgba(47,109,255,.35);
+    }
+    .tile.space{
+      width: 14px;
+      background: transparent;
+      border-color: transparent;
+      box-shadow:none;
+    }
+    .tile.punct{
+      width: 18px;
+      background: transparent;
+      border-color: transparent;
+      box-shadow:none;
+      color: rgba(232,239,255,.85);
+    }
+
+    .keyboard{
+      display:grid;
+      grid-template-columns: repeat(13, 1fr);
+      gap:8px;
+      margin-top: 6px;
+    }
+    @media (max-width: 650px){
+      .keyboard{ grid-template-columns: repeat(9, 1fr); }
+    }
+    .key{
+      padding: 10px 0;
+      text-align:center;
+      border-radius: 12px;
+      cursor:pointer;
+      user-select:none;
+      font-weight: 900;
+      letter-spacing:.4px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      transition: .12s transform, .12s opacity, .12s border-color;
+    }
+    .key:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.14); }
+    .key:active{ transform: translateY(0px) scale(.98); }
+    .key.used{ opacity:.38; cursor:not-allowed; transform:none; }
+    .key.good{ background: rgba(45,212,191,.18); border-color: rgba(45,212,191,.35); }
+    .key.bad{ background: rgba(251,113,133,.16); border-color: rgba(251,113,133,.35); }
+
+    .footer-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+    }
+    .modal{
+      width: min(560px, 100%);
+      background: linear-gradient(180deg, rgba(15,27,51,.96), rgba(10,18,34,.96));
+      border:1px solid rgba(255,255,255,.1);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.55);
+      padding: 16px;
+    }
+    .modal h2{ margin:0 0 6px; font-size: 20px; }
+    .modal p{ margin: 8px 0; color: var(--muted); line-height:1.45; }
+    .modal .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin: 12px 0 6px;
+    }
+    .modal .grid .stat{ background: rgba(255,255,255,.04); }
+    .modal .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap; }
+    .small{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    a.link { color: rgba(159,179,216,.95); text-decoration: none; border-bottom: 1px dashed rgba(159,179,216,.45); }
+    a.link:hover{ border-bottom-color: rgba(159,179,216,.9); }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="title">
+      <h1>Wheel Word — Spin & Guess</h1>
+      <div class="subtitle">Wheel of Fortune × Hangman • Pure HTML/CSS/JS • Keyboard supported</div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btnHow">❔ How to Play</button>
+      <button class="btn" id="btnMute">🔊 Sound: ON</button>
+      <button class="btn primary" id="btnNew">🔄 New Round</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT -->
+    <section class="panel">
+      <div class="hd">
+        <div class="label">Wheel</div>
+        <div class="mini"><span class="pill" id="spinState">Ready</span></div>
+      </div>
+
+      <div class="wheel-wrap">
+        <div class="wheel-stage">
+          <div class="pointer" aria-hidden="true"></div>
+          <canvas id="wheel" width="520" height="520"></canvas>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="k">Score</div>
+            <div class="v" id="score">0</div>
+          </div>
+          <div class="stat">
+            <div class="k">Lives</div>
+            <div class="v" id="lives">6</div>
+          </div>
+          <div class="stat">
+            <div class="k">Current Spin</div>
+            <div class="v" id="spinValue">—</div>
+          </div>
+          <div class="stat">
+            <div class="k">Correct Letters</div>
+            <div class="v" id="correctCount">0</div>
+          </div>
+        </div>
+
+        <div class="log" role="status" aria-live="polite">
+          <div class="k">Game Log</div>
+          <div class="msg" id="logMsg">Spin the wheel to start.</div>
+          <div class="small" id="logSub"></div>
+        </div>
+
+        <div class="footer-actions">
+          <button class="btn good" id="btnSpin">🎡 Spin</button>
+          <button class="btn" id="btnHint">💡 Hint (cost)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section class="panel">
+      <div class="hd">
+        <div class="label">Puzzle</div>
+        <div class="mini">Type a letter on your keyboard or click below</div>
+      </div>
+
+      <div class="game-wrap">
+        <div class="row">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <label class="small" for="categorySel">Category</label>
+            <select class="select" id="categorySel" aria-label="Category">
+              <option value="random">🎲 Random</option>
+              <option value="movies">🎬 Movies</option>
+              <option value="quotes">💬 Quotes</option>
+              <option value="tech">💻 Tech</option>
+              <option value="places">🗺️ Places</option>
+            </select>
+            <span class="pill" id="roundTag">Round 1</span>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <input id="solveInput" type="text" maxlength="60" placeholder="Optional: Solve the whole phrase…" />
+            <button class="btn primary" id="btnSolve">✅ Solve</button>
+          </div>
+        </div>
+
+        <div class="board">
+          <div class="category">
+            <span id="categoryName">—</span>
+            <small id="categoryClue">Clue will appear here</small>
+          </div>
+          <div class="phrase" id="phrase"></div>
+          <div class="hint" id="hint">
+            Tip: you must <b>Spin</b> before letters score points. Wrong guesses cost a life.
+          </div>
+        </div>
+
+        <div class="keyboard" id="keyboard" aria-label="Letter keyboard"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBack">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Title</h2>
+      <p id="modalText">Text</p>
+
+      <div class="grid">
+        <div class="stat">
+          <div class="k">Final Score</div>
+          <div class="v" id="finalScore">0</div>
+        </div>
+        <div class="stat">
+          <div class="k">Phrase</div>
+          <div class="v" id="finalPhrase">—</div>
+        </div>
+      </div>
+
+      <p class="small" id="highScoreNote"></p>
+
+      <div class="actions">
+        <button class="btn" id="btnCloseModal">Close</button>
+        <button class="btn primary" id="btnNextRound">Next Round</button>
+        <button class="btn danger" id="btnResetAll">Reset Game</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // --------------------------
+  // Word bank (edit freely)
+  // --------------------------
+  const BANK = {
+    movies: [
+      { phrase: "THE DARK KNIGHT", clue: "A caped crusader in Gotham." },
+      { phrase: "INCEPTION", clue: "A dream within a dream." },
+      { phrase: "SPIRITED AWAY", clue: "A girl in a spirit world." },
+      { phrase: "THE GODFATHER", clue: "A legendary crime family saga." },
+      { phrase: "INTERSTELLAR", clue: "Space, time, and love." }
+    ],
+    quotes: [
+      { phrase: "STAY HUNGRY STAY FOOLISH", clue: "Famous commencement advice." },
+      { phrase: "THE ONLY LIMIT IS YOU", clue: "Motivation in 5 words." },
+      { phrase: "KNOWLEDGE IS POWER", clue: "Classic saying." },
+      { phrase: "LESS IS MORE", clue: "Minimalism principle." },
+      { phrase: "TIME IS MONEY", clue: "Efficiency mindset." }
+    ],
+    tech: [
+      { phrase: "OPEN SOURCE", clue: "Code that welcomes collaboration." },
+      { phrase: "JAVASCRIPT", clue: "Runs the web." },
+      { phrase: "VERSION CONTROL", clue: "Git helps with this." },
+      { phrase: "USER EXPERIENCE", clue: "Design that feels good." },
+      { phrase: "FULL STACK DEVELOPER", clue: "Front + back." }
+    ],
+    places: [
+      { phrase: "KUALA LUMPUR", clue: "Capital of Malaysia." },
+      { phrase: "SILICON VALLEY", clue: "Tech hub in California." },
+      { phrase: "NEW YORK CITY", clue: "The city that never sleeps." },
+      { phrase: "MOUNT EVEREST", clue: "Highest peak on Earth." },
+      { phrase: "THE GREAT WALL", clue: "Ancient structure in China." }
+    ]
+  };
+
+  // --------------------------
+  // Wheel segments
+  // --------------------------
+  // Values can be: number (points), "BANKRUPT", "LOSE"
+  const SEGMENTS = [
+    100, 150, 200, 250, 300, 350, 400,
+    "LOSE",
+    450, 500, 600,
+    "BANKRUPT",
+    700, 800, 900, 1000
+  ];
+
+  // --------------------------
+  // DOM refs
+  // --------------------------
+  const el = (id) => document.getElementById(id);
+  const wheelCanvas = el("wheel");
+  const ctx = wheelCanvas.getContext("2d");
+
+  const scoreEl = el("score");
+  const livesEl = el("lives");
+  const spinValueEl = el("spinValue");
+  const correctCountEl = el("correctCount");
+
+  const logMsg = el("logMsg");
+  const logSub = el("logSub");
+  const spinState = el("spinState");
+
+  const phraseEl = el("phrase");
+  const keyboardEl = el("keyboard");
+
+  const categorySel = el("categorySel");
+  const categoryNameEl = el("categoryName");
+  const categoryClueEl = el("categoryClue");
+
+  const solveInput = el("solveInput");
+  const btnSolve = el("btnSolve");
+
+  const btnSpin = el("btnSpin");
+  const btnHint = el("btnHint");
+  const btnNew = el("btnNew");
+  const btnHow = el("btnHow");
+  const btnMute = el("btnMute");
+
+  const modalBack = el("modalBack");
+  const modalTitle = el("modalTitle");
+  const modalText = el("modalText");
+  const finalScore = el("finalScore");
+  const finalPhrase = el("finalPhrase");
+  const highScoreNote = el("highScoreNote");
+  const btnCloseModal = el("btnCloseModal");
+  const btnNextRound = el("btnNextRound");
+  const btnResetAll = el("btnResetAll");
+
+  const roundTag = el("roundTag");
+
+  // --------------------------
+  // Audio (simple WebAudio beeps)
+  // --------------------------
+  let soundOn = true;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let actx = null;
+
+  function beep(freq=440, dur=0.08, type="sine", gain=0.06){
+    if(!soundOn) return;
+    if(!AudioCtx) return;
+    if(!actx) actx = new AudioCtx();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = gain;
+    o.connect(g); g.connect(actx.destination);
+    o.start();
+    o.stop(actx.currentTime + dur);
+  }
+  function sfxSpin(){ beep(220, 0.05, "sawtooth", 0.04); }
+  function sfxGood(){ beep(660, 0.06, "triangle", 0.06); setTimeout(()=>beep(880,0.07,"triangle",0.05), 70); }
+  function sfxBad(){ beep(180, 0.12, "square", 0.05); }
+  function sfxWin(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.08,"triangle",0.06), i*90)); }
+  function sfxLose(){ [392,330,262].forEach((f,i)=>setTimeout(()=>beep(f,0.11,"sine",0.05), i*110)); }
+
+  // --------------------------
+  // Game state
+  // --------------------------
+  const VOWELS = new Set(["A","E","I","O","U"]);
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  let round = 1;
+  let score = 0;
+  let lives = 6;
+  let currentSpin = null; // null until you spin
+  let spinning = false;
+
+  let categoryKey = "random";
+  let phrase = "";
+  let clue = "";
+  let guessed = new Set();
+  let correctLetters = 0; // count of revealed letters (not spaces/punct)
+
+  // high score (localStorage)
+  const HS_KEY = "wheelword_highscore_v1";
+  function getHighScore(){
+    const v = localStorage.getItem(HS_KEY);
+    return v ? Number(v) : 0;
+  }
+  function setHighScore(v){
+    localStorage.setItem(HS_KEY, String(v));
+  }
+
+  // --------------------------
+  // Helpers
+  // --------------------------
+  function normalizePhrase(s){
+    return s.toUpperCase();
+  }
+  function isLetter(ch){
+    return ch >= "A" && ch <= "Z";
+  }
+  function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+  function pickPhrase(){
+    categoryKey = categorySel.value;
+    const keys = Object.keys(BANK);
+    const actualKey = categoryKey === "random" ? keys[Math.floor(Math.random()*keys.length)] : categoryKey;
+    const list = BANK[actualKey];
+    const pick = list[Math.floor(Math.random()*list.length)];
+    phrase = normalizePhrase(pick.phrase);
+    clue = pick.clue || "";
+    categoryNameEl.textContent = actualKey.toUpperCase();
+    categoryClueEl.textContent = "• " + clue;
+  }
+
+  function countLettersInPhrase(){
+    let c = 0;
+    for(const ch of phrase) if(isLetter(ch)) c++;
+    return c;
+  }
+
+  function computeRevealedCount(){
+    let c = 0;
+    for(const ch of phrase){
+      if(isLetter(ch) && guessed.has(ch)) c++;
+    }
+    return c;
+  }
+
+  function renderPhrase(){
+    phraseEl.innerHTML = "";
+    for(const ch of phrase){
+      const d = document.createElement("div");
+      if(ch === " "){
+        d.className = "tile space";
+        d.textContent = "";
+      } else if(!isLetter(ch)){
+        d.className = "tile punct";
+        d.textContent = ch;
+      } else {
+        const revealed = guessed.has(ch);
+        d.className = "tile" + (revealed ? " revealed" : "");
+        d.textContent = revealed ? ch : "";
+      }
+      phraseEl.appendChild(d);
+    }
+  }
+
+  function renderKeyboard(){
+    keyboardEl.innerHTML = "";
+    for(const ch of ALPHABET){
+      const k = document.createElement("div");
+      k.className = "key";
+      k.textContent = ch;
+      k.setAttribute("role", "button");
+      k.setAttribute("tabindex", "0");
+
+      if(guessed.has(ch)) k.classList.add("used");
+
+      k.addEventListener("click", () => handleGuess(ch));
+      k.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " ") handleGuess(ch);
+      });
+
+      keyboardEl.appendChild(k);
+    }
+    // After guess results, we will paint good/bad per letter via updateKeyboardColors()
+    updateKeyboardColors();
+  }
+
+  let letterResult = new Map(); // ch -> "good"|"bad"
+  function updateKeyboardColors(){
+    [...keyboardEl.children].forEach(node => {
+      const ch = node.textContent;
+      node.classList.remove("good","bad");
+      const r = letterResult.get(ch);
+      if(r) node.classList.add(r);
+    });
+  }
+
+  function setLog(main, sub=""){
+    logMsg.textContent = main;
+    logSub.textContent = sub;
+  }
+
+  function setSpinTag(text){
+    spinState.textContent = text;
+  }
+
+  function updateStats(){
+    scoreEl.textContent = score.toLocaleString();
+    livesEl.textContent = lives;
+    spinValueEl.textContent = currentSpin === null ? "—" : String(currentSpin);
+    correctLetters = computeRevealedCount();
+    correctCountEl.textContent = correctLetters;
+    roundTag.textContent = `Round ${round}`;
+  }
+
+  function canGuess(){
+    return !spinning && lives > 0;
+  }
+
+  function resetRound(){
+    guessed = new Set();
+    letterResult = new Map();
+    currentSpin = null;
+    lives = 6;
+    pickPhrase();
+    renderPhrase();
+    renderKeyboard();
+    updateStats();
+    setSpinTag("Ready");
+    setLog("Spin the wheel to start.", "Tip: After you spin, each correct letter scores points based on the wheel.");
+    solveInput.value = "";
+    btnSpin.disabled = false;
+  }
+
+  function resetAll(){
+    round = 1;
+    score = 0;
+    resetRound();
+  }
+
+  function revealRandomVowel(){
+    const vowelsInPhrase = [];
+    for(const ch of phrase){
+      if(isLetter(ch) && VOWELS.has(ch) && !guessed.has(ch)){
+        vowelsInPhrase.push(ch);
+      }
+    }
+    if(vowelsInPhrase.length === 0) return null;
+    return vowelsInPhrase[Math.floor(Math.random()*vowelsInPhrase.length)];
+  }
+
+  function checkWin(){
+    return computeRevealedCount() === countLettersInPhrase();
+  }
+
+  function endRound(win, reason=""){
+    btnSpin.disabled = true;
+    const hs = getHighScore();
+    let hsText = "";
+    if(score > hs){
+      setHighScore(score);
+      hsText = `New High Score! (${score.toLocaleString()}) saved in your browser (localStorage).`;
+    } else {
+      hsText = `High Score: ${hs.toLocaleString()} (saved in your browser).`;
+    }
+
+    modalTitle.textContent = win ? "🎉 You solved it!" : "💀 Round over";
+    modalText.textContent = win
+      ? (reason || "Great job — next round gets a fresh puzzle.")
+      : (reason || "Out of lives. Try again!");
+    finalScore.textContent = score.toLocaleString();
+    finalPhrase.textContent = phrase;
+    highScoreNote.textContent = hsText;
+
+    modalBack.style.display = "flex";
+    if(win) sfxWin(); else sfxLose();
+  }
+
+  function closeModal(){
+    modalBack.style.display = "none";
+  }
+
+  // --------------------------
+  // Guessing logic
+  // --------------------------
+  function handleGuess(ch){
+    if(!canGuess()) return;
+    ch = String(ch).toUpperCase();
+
+    if(!isLetter(ch)) return;
+    if(guessed.has(ch)) return;
+
+    // Require spin before scoring points, but allow guessing anyway
+    const hasSpin = currentSpin !== null;
+
+    guessed.add(ch);
+
+    const matches = [...phrase].filter(c => c === ch).length;
+    if(matches > 0){
+      letterResult.set(ch, "good");
+      renderPhrase();
+
+      if(hasSpin && typeof currentSpin === "number"){
+        const gained = currentSpin * matches;
+        score += gained;
+        setLog(`✅ ${ch} appears ${matches} time(s)!`, `+${gained.toLocaleString()} points`);
+      } else {
+        setLog(`✅ ${ch} appears ${matches} time(s)!`, `Spin first to earn points on letter hits.`);
+      }
+      sfxGood();
+    } else {
+      letterResult.set(ch, "bad");
+      lives -= 1;
+      setLog(`❌ No ${ch}.`, `-1 life. ${lives} remaining.`);
+      sfxBad();
+      if(lives <= 0){
+        renderPhrase();
+        endRound(false, "You ran out of lives.");
+        updateStats();
+        renderKeyboard();
+        return;
+      }
+    }
+
+    updateStats();
+    renderKeyboard();
+
+    if(checkWin()){
+      renderPhrase();
+      endRound(true, "Solved by letter guessing!");
+    }
+  }
+
+  function handleSolveAttempt(){
+    if(!canGuess()) return;
+    const attempt = normalizePhrase(solveInput.value || "").trim();
+    if(!attempt){
+      setLog("Type a full phrase in the solve box first.", "");
+      return;
+    }
+    if(attempt === phrase){
+      // reveal all letters
+      for(const ch of phrase){
+        if(isLetter(ch)) guessed.add(ch);
+      }
+      renderPhrase();
+      score += 500; // solve bonus
+      updateStats();
+      setLog("🎯 Correct solve!", "+500 solve bonus");
+      endRound(true, "Solved the whole phrase!");
+    } else {
+      lives -= 2; // penalty
+      setLog("❌ Wrong solve attempt.", "-2 lives penalty");
+      sfxBad();
+      lives = clamp(lives, 0, 99);
+      updateStats();
+      if(lives <= 0){
+        endRound(false, "Wrong solve attempt drained your remaining lives.");
+      }
+    }
+  }
+
+  // --------------------------
+  // Wheel rendering + spinning
+  // --------------------------
+  const W = wheelCanvas.width;
+  const H = wheelCanvas.height;
+  const cx = W/2, cy = H/2;
+  const radius = Math.min(W,H)/2 - 14;
+  const segCount = SEGMENTS.length;
+  const segAngle = (Math.PI * 2) / segCount;
+
+  let wheelAngle = 0; // radians
+  let wheelVel = 0;   // radians per frame
+  let targetStop = false;
+
+  function drawWheel(){
+    ctx.clearRect(0,0,W,H);
+
+    // background ring
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // subtle glow
+    const grad = ctx.createRadialGradient(0,0,radius*0.15, 0,0,radius);
+    grad.addColorStop(0, "rgba(47,109,255,0.18)");
+    grad.addColorStop(0.55, "rgba(0,212,255,0.10)");
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0,0,radius+8,0,Math.PI*2);
+    ctx.fill();
+
+    // wheel segments
+    ctx.rotate(wheelAngle);
+
+    for(let i=0; i<segCount; i++){
+      const start = i*segAngle;
+      const end = start + segAngle;
+
+      // alternating color scheme (no hard-coded palette list; use HSL)
+      const hue = (i * (360/segCount) + 210) % 360;
+      const fill = `hsla(${hue}, 70%, 55%, 0.22)`;
+      const stroke = "rgba(255,255,255,0.10)";
+
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.arc(0,0,radius,start,end);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // label
+      const label = SEGMENTS[i];
+      const mid = (start + end)/2;
+      ctx.save();
+      ctx.rotate(mid);
+      ctx.translate(radius*0.68, 0);
+
+      ctx.rotate(Math.PI/2); // make text upright-ish
+
+      ctx.font = "800 20px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      ctx.fillStyle = "rgba(232,239,255,0.92)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      let text = "";
+      if(typeof label === "number") text = label.toString();
+      else if(label === "BANKRUPT") text = "BANKRUPT";
+      else if(label === "LOSE") text = "LOSE TURN";
+
+      // reduce font for long strings
+      if(text.length > 6) ctx.font = "900 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+
+      ctx.fillText(text, 0, 0);
+      ctx.restore();
+    }
+
+    // center cap
+    ctx.beginPath();
+    ctx.arc(0,0,radius*0.20,0,Math.PI*2);
+    ctx.fillStyle = "rgba(15,27,51,0.95)";
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255,255,255,0.16)";
+    ctx.stroke();
+
+    ctx.font = "900 15px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial";
+    ctx.fillStyle = "rgba(159,179,216,0.95)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("SPIN", 0, 1);
+
+    ctx.restore();
+  }
+
+  function angleToIndex(angle){
+    // Pointer is at top. We need segment under pointer.
+    // Wheel rotates by wheelAngle, pointer fixed at -90deg (top).
+    // Determine which segment's mid aligns with top.
+    // Convert so that angle 0 means segment 0 starts at 0.
+    // We'll compute pointer angle in wheel space:
+    const pointer = -Math.PI/2; // top
+    let a = (pointer - angle) % (Math.PI*2);
+    if(a < 0) a += Math.PI*2;
+    const idx = Math.floor(a / segAngle) % segCount;
+    return idx;
+  }
+
+  function finishSpin(){
+    spinning = false;
+    btnSpin.disabled = false;
+    setSpinTag("Ready");
+    const idx = angleToIndex(wheelAngle);
+    const landed = SEGMENTS[idx];
+
+    if(landed === "BANKRUPT"){
+      score = 0;
+      currentSpin = "BANKRUPT";
+      setLog("💸 BANKRUPT!", "Your score dropped to 0. Spin again.");
+      sfxBad();
+    } else if(landed === "LOSE"){
+      currentSpin = "LOSE TURN";
+      setLog("⛔ Lose a turn.", "No points this spin. Spin again.");
+      sfxBad();
+    } else {
+      currentSpin = landed;
+      setLog(`🎯 Landed on ${landed}`, "Now guess a letter to score points.");
+      sfxGood();
+    }
+
+    updateStats();
+  }
+
+  function animate(){
+    if(spinning){
+      // friction
+      wheelAngle += wheelVel;
+      wheelVel *= 0.985;
+
+      // little tick sound feel
+      if(Math.random() < 0.12) sfxSpin();
+
+      if(Math.abs(wheelVel) < 0.004){
+        wheelVel = 0;
+        finishSpin();
+      }
+    }
+
+    drawWheel();
+    requestAnimationFrame(animate);
+  }
+
+  function spin(){
+    if(spinning) return;
+    if(lives <= 0) return;
+
+    spinning = true;
+    btnSpin.disabled = true;
+    currentSpin = null;
+    updateStats();
+
+    setSpinTag("Spinning…");
+    setLog("🎡 Spinning the wheel…", "Good luck!");
+    // random velocity
+    const base = 0.35 + Math.random()*0.25;
+    wheelVel = base;
+  }
+
+  // --------------------------
+  // Hint behavior
+  // --------------------------
+  function hint(){
+    if(!canGuess()) return;
+
+    // cost points OR lives
+    const hs = revealRandomVowel();
+    if(!hs){
+      setLog("No vowels left to reveal.", "Try guessing consonants or solve the phrase.");
+      return;
+    }
+
+    // Hint cost: -150 points (min 0), or -1 life if score too low
+    if(score >= 150){
+      score -= 150;
+      setLog(`💡 Hint revealed vowel: ${hs}`, "-150 points");
+    } else {
+      lives -= 1;
+      setLog(`💡 Hint revealed vowel: ${hs}`, "-1 life");
+      if(lives <= 0){
+        updateStats();
+        endRound(false, "Hint cost used your last life.");
+        return;
+      }
+    }
+
+    guessed.add(hs);
+    letterResult.set(hs, "good");
+    renderPhrase();
+    renderKeyboard();
+    updateStats();
+
+    if(checkWin()){
+      endRound(true, "Solved with a hint!");
+    }
+  }
+
+  // --------------------------
+  // UI events
+  // --------------------------
+  btnSpin.addEventListener("click", () => spin());
+
+  btnHint.addEventListener("click", () => hint());
+
+  btnNew.addEventListener("click", () => {
+    round++;
+    resetRound();
+  });
+
+  btnSolve.addEventListener("click", () => handleSolveAttempt());
+  solveInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") handleSolveAttempt();
+  });
+
+  categorySel.addEventListener("change", () => {
+    // New round when category changes
+    round++;
+    resetRound();
+  });
+
+  btnHow.addEventListener("click", () => {
+    modalTitle.textContent = "How to Play";
+    modalText.textContent =
+      "1) Click SPIN. 2) Guess letters (keyboard or on-screen). Correct letters reveal the puzzle. " +
+      "If you spun a number, each revealed letter earns that many points. " +
+      "BANKRUPT resets your score. LOSE TURN means you must spin again. " +
+      "You have 6 lives. Wrong letter = -1 life. Wrong SOLVE attempt = -2 lives.";
+    finalScore.textContent = score.toLocaleString();
+    finalPhrase.textContent = "—";
+    highScoreNote.textContent = `High Score: ${getHighScore().toLocaleString()} (localStorage).`;
+    modalBack.style.display = "flex";
+  });
+
+  btnMute.addEventListener("click", () => {
+    soundOn = !soundOn;
+    btnMute.textContent = soundOn ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+    if(soundOn) beep(660,0.06,"triangle",0.05);
+  });
+
+  btnCloseModal.addEventListener("click", closeModal);
+  modalBack.addEventListener("click", (e) => {
+    if(e.target === modalBack) closeModal();
+  });
+
+  btnNextRound.addEventListener("click", () => {
+    closeModal();
+    round++;
+    resetRound();
+  });
+
+  btnResetAll.addEventListener("click", () => {
+    closeModal();
+    resetAll();
+  });
+
+  // Physical keyboard support
+  window.addEventListener("keydown", (e) => {
+    if(modalBack.style.display === "flex"){
+      if(e.key === "Escape") closeModal();
+      return;
+    }
+    if(e.key === "Escape") return;
+
+    const k = e.key.toUpperCase();
+    if(k.length === 1 && k >= "A" && k <= "Z"){
+      handleGuess(k);
+    } else if(e.key === " "){
+      // space to spin
+      spin();
+    }
+  });
+
+  // --------------------------
+  // Start
+  // --------------------------
+  function init(){
+    renderKeyboard();
+    resetAll();
+    drawWheel();
+    requestAnimationFrame(animate);
+  }
+  init();
+
+})();
+</script>
+</body>
+</html>
