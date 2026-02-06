@@ -1,68 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mini Catch Game</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      background: #111;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    h3 { margin: 10px 0; }
-    canvas {
-      background: #222;
-      display: block;
-      margin: 10px auto;
-      border: 2px solid #0f0;
-    }
-  </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<title>Mini Games & Vision Demos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<h3>Catch Game</h3>
-<canvas id="game" width="300" height="420"></canvas>
-<div id="score">Score: 0</div>
-
-<script>
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-
-  let paddleX = 120;
-  let ballY = 0;
-  let score = 0;
-
-  document.addEventListener("mousemove", e => {
-    const rect = canvas.getBoundingClientRect();
-    paddleX = e.clientX - rect.left - 30;
-  });
-
-  function loop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#0f0";
-    ctx.fillRect(paddleX, 400, 60, 10);
-
-    ctx.beginPath();
-    ctx.arc(150, ballY, 8, 0, Math.PI * 2);
-    ctx.fill();
-
-    ballY += 3;
-
-    if (ballY > 400 && paddleX < 150 && paddleX + 60 > 150) {
-      score++;
-      ballY = 0;
-      document.getElementById("score").textContent = "Score: " + score;
-    }
-
-    requestAnimationFrame(loop);
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#020617;
+    --card:#0b1224;
+    --ink:#e5e7eb;
+    --muted:#94a3b8;
+    --line:#1f2a44;
+    --btn:#2563eb;
   }
 
-  loop();
-</script>
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Arial, sans-serif;
+    min-height:100vh;
+  }
+
+  header{
+    padding:24px 16px 10px;
+    text-align:center;
+  }
+
+  header h1{
+    margin:0 0 6px;
+    font-size:26px;
+  }
+
+  header p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .container{
+    max-width:900px;
+    margin:0 auto;
+    padding:20px 16px 40px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:16px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .card h3{
+    margin:0;
+    font-size:18px;
+  }
+
+  .card p{
+    margin:0;
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.4;
+    flex:1;
+  }
+
+  .card a{
+    text-decoration:none;
+    background:var(--btn);
+    color:white;
+    padding:10px;
+    border-radius:10px;
+    text-align:center;
+    font-size:14px;
+    font-weight:bold;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding-top:20px;
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Mini Games & Vision Demos</h1>
+  <p>Interactive experiments • Built with HTML, CSS & JavaScript</p>
+</header>
+
+<div class="container">
+  <div class="grid">
+
+    <div class="card">
+      <h3>🎯 Click the Box</h3>
+      <p>
+        A fast reaction mini-game. Click the box as quickly as possible to
+        increase your score before time runs out.
+      </p>
+      <a href="click/">Play</a>
+    </div>
+
+    <div class="card">
+      <h3>🧠 Memory Flip</h3>
+      <p>
+        A classic memory matching game with difficulty levels,
+        timer, move counter and best score tracking.
+      </p>
+      <a href="memory/">Play</a>
+    </div>
+
+    <div class="card">
+      <h3>👁️ Vision Test (Color Difference)</h3>
+      <p>
+        Find the odd-colored tile as levels increase.
+        Tests color discrimination and visual contrast sensitivity.
+      </p>
+      <a href="vision/">Start Test</a>
+    </div>
+
+    <div class="card">
+      <h3>🌀 Astigmatism Dial</h3>
+      <p>
+        Astigmatism-style dial combined with a short questionnaire.
+        Helps screen for visual distortion patterns (non-diagnostic).
+      </p>
+      <a href="astigmatism/">Open</a>
+    </div>
+
+    <div class="card">
+      <h3>👀 Peripheral Attention Test</h3>
+      <p>
+        Keep your eyes on the center while detecting targets at the edges.
+        Measures attention span, reaction time, and left/right bias.
+      </p>
+      <a href="peripheral/">Start Test</a>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>
+      ⚠️ These tools are for demonstration and screening purposes only.<br>
+      Results may vary by device, screen settings, and environment.
+    </p>
+  </footer>
+</div>
 
 </body>
 </html>
