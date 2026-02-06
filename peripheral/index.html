@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Peripheral Vision / Attention Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  :root{
+    --bg:#0f172a; --panel:#020617; --ink:#e5e7eb; --muted:#94a3b8;
+    --line:#1f2a44; --btn:#2563eb; --btn2:#334155; --good:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+  }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:Arial, sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh;
+  }
+  .wrap{
+    width:460px; background:var(--panel); border-radius:14px; padding:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,.6);
+  }
+  h2{ margin:6px 0 6px; text-align:center; }
+  .sub{ margin:0 0 12px; text-align:center; color:var(--muted); font-size:13px; line-height:1.35; }
+  .top{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:space-between; margin-bottom:10px;
+  }
+  .pill{
+    background:#0b1224; border:1px solid var(--line); padding:8px 10px; border-radius:12px; font-size:13px;
+    min-width:140px; flex:1;
+  }
+  .pill b{ color:#fff; }
+  .arena{
+    position:relative;
+    width:100%;
+    height:520px;
+    background:#0b1224;
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    touch-action: manipulation;
+  }
+  .centerDot{
+    position:absolute;
+    left:50%; top:50%;
+    width:10px; height:10px;
+    background:#fff; border-radius:50%;
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 0 10px rgba(255,255,255,.06);
+  }
+  .hint{
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    color:var(--muted);
+    text-align:center;
+    font-size:13px;
+    line-height:1.35;
+    width:80%;
+    pointer-events:none;
+  }
+  .target{
+    position:absolute;
+    width:32px; height:32px;
+    border-radius:8px;
+    display:none;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .controls{
+    display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;
+  }
+  button, select{
+    border-radius:10px; border:1px solid var(--line); background:#0b1224; color:var(--ink);
+    padding:10px 10px; font-size:14px;
+  }
+  button{
+    cursor:pointer; border:none; background:var(--btn); flex:1;
+  }
+  button.secondary{ background:var(--btn2); }
+  select{ flex:1; min-width:180px; }
+  .panel{
+    background:#0b1224; border:1px solid var(--line); border-radius:12px; padding:12px; margin-top:10px;
+  }
+  .panel h3{ margin:0 0 8px; font-size:15px; }
+  .panel p, .panel li{ color:var(--muted); font-size:13px; line-height:1.45; }
+  .tags{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .tag{
+    padding:6px 10px; border-radius:999px; font-size:12px;
+    border:1px solid var(--line); background:#071022; color:var(--muted);
+  }
+  .tag.good{ border-color:#14532d; background:#052013; color:#bbf7d0; }
+  .tag.warn{ border-color:#7c5f00; background:#221a05; color:#fde68a; }
+  .tag.bad{ border-color:#7f1d1d; background:#220707; color:#fecaca; }
+
+  /* Mobile height adjustment */
+  @media (max-width: 480px){
+    .wrap{ width: 92vw; }
+    .arena{ height: 460px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h2>Peripheral Attention Test</h2>
+  <div class="sub">
+    Keep your eyes on the <b>center dot</b>. Tap the target as soon as you notice it near the edges.
+    This is a <b>screening-style</b> game, not a medical diagnosis.
+  </div>
+
+  <div class="top">
+    <div class="pill">Round: <b id="round">0</b>/<span id="total">12</span></div>
+    <div class="pill">Hits: <b id="hits">0</b> | Misses: <b id="misses">0</b></div>
+    <div class="pill">Avg RT: <b id="avg">—</b></div>
+  </div>
+
+  <div class="arena" id="arena">
+    <div class="centerDot"></div>
+    <div class="hint" id="hint">
+      Press <b>Start</b>.<br>
+      Don’t chase the target with your eyes — try to notice it with peripheral vision.
+    </div>
+    <div class="target" id="target"></div>
+  </div>
+
+  <div class="controls">
+    <select id="difficulty">
+      <option value="easy">Easy (bigger, slower)</option>
+      <option value="standard" selected>Standard</option>
+      <option value="hard">Hard (smaller, faster)</option>
+    </select>
+    <button id="start">Start</button>
+    <button class="secondary" id="reset">Reset</button>
+  </div>
+
+  <div class="panel">
+    <h3>Result & Interpretation</h3>
+    <div class="tags" id="tags"></div>
+    <p id="interpret">After the test ends, you’ll get a summary here.</p>
+    <p style="margin-top:8px;">
+      <b>Tips for fairness:</b> brightness ~70–100%, avoid night mode/blue filter, neutral lighting, phone ~35–45cm away.
+      Try left eye then right eye (cover one eye gently) and compare.
+    </p>
+  </div>
+</div>
+
+<script>
+  const arena = document.getElementById("arena");
+  const target = document.getElementById("target");
+  const hint = document.getElementById("hint");
+
+  const roundEl = document.getElementById("round");
+  const totalEl = document.getElementById("total");
+  const hitsEl = document.getElementById("hits");
+  const missesEl = document.getElementById("misses");
+  const avgEl = document.getElementById("avg");
+
+  const diffEl = document.getElementById("difficulty");
+  const startBtn = document.getElementById("start");
+  const resetBtn = document.getElementById("reset");
+
+  const tagsEl = document.getElementById("tags");
+  const interpretEl = document.getElementById("interpret");
+
+  // Config
+  const TOTAL_ROUNDS = 12;
+  totalEl.textContent = String(TOTAL_ROUNDS);
+
+  const DIFF = {
+    easy:     { size: 42, appearMsMin: 900, appearMsMax: 1500, showMs: 1200 },
+    standard: { size: 34, appearMsMin: 750, appearMsMax: 1300, showMs: 1000 },
+    hard:     { size: 26, appearMsMin: 600, appearMsMax: 1100, showMs: 800  }
+  };
+
+  // State
+  let running = false;
+  let round = 0;
+  let hits = 0;
+  let misses = 0;
+
+  let showTimer = null;
+  let nextTimer = null;
+
+  let shownAt = 0;
+  let currentSide = "none"; // left/right/top/bottom
+  let rts = []; // reaction times in ms
+  let sideCounts = { left:0, right:0, top:0, bottom:0 };
+  let sideHits   = { left:0, right:0, top:0, bottom:0 };
+
+  function randInt(min, max){
+    return Math.floor(min + Math.random() * (max - min + 1));
+  }
+
+  function clearTimers(){
+    if (showTimer) clearTimeout(showTimer);
+    if (nextTimer) clearTimeout(nextTimer);
+    showTimer = null;
+    nextTimer = null;
+  }
+
+  function resetUI(){
+    roundEl.textContent = "0";
+    hitsEl.textContent = "0";
+    missesEl.textContent = "0";
+    avgEl.textContent = "—";
+    tagsEl.innerHTML = "";
+    interpretEl.textContent = "After the test ends, you’ll get a summary here.";
+    target.style.display = "none";
+    hint.style.display = "block";
+  }
+
+  function resetState(){
+    running = false;
+    round = 0;
+    hits = 0;
+    misses = 0;
+    rts = [];
+    currentSide = "none";
+    sideCounts = { left:0, right:0, top:0, bottom:0 };
+    sideHits   = { left:0, right:0, top:0, bottom:0 };
+    clearTimers();
+    resetUI();
+  }
+
+  function setTag(kind, text){
+    const t = document.createElement("span");
+    t.className = "tag " + kind;
+    t.textContent = text;
+    tagsEl.appendChild(t);
+  }
+
+  function placeTarget(){
+    const diff = DIFF[diffEl.value];
+    const size = diff.size;
+
+    const rect = arena.getBoundingClientRect();
+    const pad = 16;
+    const edgeBand = 70; // keep targets near edges
+    const W = rect.width;
+    const H = rect.height;
+
+    // Choose side randomly
+    const sides = ["left","right","top","bottom"];
+    const side = sides[Math.floor(Math.random()*sides.length)];
+    currentSide = side;
+    sideCounts[side]++;
+
+    // Compute position constrained to an "edge band"
+    let x, y;
+
+    if (side === "left"){
+      x = randInt(pad, pad + edgeBand);
+      y = randInt(pad, H - pad - size);
+    } else if (side === "right"){
+      x = randInt(W - pad - edgeBand - size, W - pad - size);
+      y = randInt(pad, H - pad - size);
+    } else if (side === "top"){
+      x = randInt(pad, W - pad - size);
+      y = randInt(pad, pad + edgeBand);
+    } else { // bottom
+      x = randInt(pad, W - pad - size);
+      y = randInt(H - pad - edgeBand - size, H - pad - size);
+    }
+
+    // Style target (simple but visible)
+    target.style.width = size + "px";
+    target.style.height = size + "px";
+    target.style.left = x + "px";
+    target.style.top  = y + "px";
+
+    // Randomize color a bit (but keep it noticeable)
+    const hue = randInt(120, 210);
+    target.style.background = `hsl(${hue} 80% 55%)`;
+
+    target.style.display = "block";
+    shownAt = performance.now();
+  }
+
+  function hideTarget(){
+    target.style.display = "none";
+    currentSide = "none";
+    shownAt = 0;
+  }
+
+  function scheduleNext(){
+    if (!running) return;
+
+    const diff = DIFF[diffEl.value];
+    const delay = randInt(diff.appearMsMin, diff.appearMsMax);
+
+    nextTimer = setTimeout(() => {
+      if (!running) return;
+
+      // show next target
+      placeTarget();
+
+      // auto-miss if not clicked in time
+      showTimer = setTimeout(() => {
+        if (!running) return;
+        // If still visible, it's a miss
+        if (target.style.display === "block"){
+          misses++;
+          missesEl.textContent = String(misses);
+          hideTarget();
+          advanceRound();
+        }
+      }, diff.showMs);
+
+    }, delay);
+  }
+
+  function advanceRound(){
+    round++;
+    roundEl.textContent = String(round);
+
+    // update avg
+    if (rts.length){
+      const avg = rts.reduce((a,b)=>a+b,0) / rts.length;
+      avgEl.textContent = `${Math.round(avg)} ms`;
+    } else {
+      avgEl.textContent = "—";
+    }
+
+    if (round >= TOTAL_ROUNDS){
+      endTest();
+      return;
+    }
+    scheduleNext();
+  }
+
+  function startTest(){
+    resetState();
+    running = true;
+    hint.style.display = "none";
+    roundEl.textContent = "0";
+    scheduleNext();
+  }
+
+  function endTest(){
+    running = false;
+    clearTimers();
+    hideTarget();
+
+    // Summaries
+    const avg = rts.length ? Math.round(rts.reduce((a,b)=>a+b,0)/rts.length) : null;
+    const best = rts.length ? Math.min(...rts) : null;
+
+    // Left vs right bias (hits only)
+    const leftHit = sideHits.left;
+    const rightHit = sideHits.right;
+    const totalLR = leftHit + rightHit;
+    const lrBias = totalLR ? Math.round(((rightHit - leftHit) / totalLR) * 100) : 0;
+
+    // Score-ish
+    const hitRate = Math.round((hits / TOTAL_ROUNDS) * 100);
+
+    tagsEl.innerHTML = "";
+    setTag(hitRate >= 75 ? "good" : hitRate >= 50 ? "warn" : "bad", `Hit rate: ${hitRate}%`);
+    setTag("tag", `Hits: ${hits}`);
+    setTag("tag", `Misses: ${misses}`);
+    setTag(avg !== null ? (avg <= 320 ? "good" : avg <= 450 ? "warn" : "bad") : "warn", `Avg RT: ${avg !== null ? avg + " ms" : "—"}`);
+    setTag(best !== null ? "tag" : "warn", `Best RT: ${best !== null ? best + " ms" : "—"}`);
+
+    if (totalLR >= 4){
+      setTag(Math.abs(lrBias) <= 15 ? "good" : "warn", `L/R bias: ${lrBias}%`);
+    } else {
+      setTag("warn", "L/R bias: not enough data");
+    }
+
+    // Interpretation (gentle, non-medical)
+    let msg = `Completed ${TOTAL_ROUNDS} rounds on ${diffEl.value.toUpperCase()} mode. `;
+
+    if (hitRate >= 75 && avg !== null && avg <= 350){
+      msg += "Your detection and response look strong for a screen-based peripheral attention test. ";
+    } else if (hitRate >= 50){
+      msg += "Your result is in a typical range. Performance often drops with glare, low brightness, fatigue, or distractions. ";
+    } else {
+      msg += "You missed many targets. Try again with higher brightness, fewer distractions, and keep eyes on the center dot. ";
+    }
+
+    if (totalLR >= 4 && Math.abs(lrBias) > 25){
+      msg += "You showed a noticeable left/right difference in hits. If this repeats consistently (especially one eye at a time), consider discussing it during an eye exam. ";
+    } else {
+      msg += "No strong left/right imbalance was detected in this run. ";
+    }
+
+    msg += "For better reliability, do 2–3 runs and compare results. You can also test each eye separately by covering one eye.";
+
+    interpretEl.textContent = msg;
+    hint.style.display = "block";
+    hint.innerHTML = "Test finished. Press <b>Start</b> to try again.";
+  }
+
+  // Target click = hit
+  target.addEventListener("click", (e) => {
+    if (!running || target.style.display !== "block") return;
+
+    const rt = performance.now() - shownAt;
+    rts.push(rt);
+    hits++;
+    hitsEl.textContent = String(hits);
+
+    if (currentSide !== "none"){
+      sideHits[currentSide]++;
+    }
+
+    // clear current timers and advance
+    if (showTimer) clearTimeout(showTimer);
+    showTimer = null;
+
+    hideTarget();
+    advanceRound();
+  });
+
+  startBtn.addEventListener("click", startTest);
+  resetBtn.addEventListener("click", resetState);
+
+  // Init
+  resetState();
+</script>
+
+</body>
+</html>
