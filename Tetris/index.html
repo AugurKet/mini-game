@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tetris Deluxe — Modes</title>
+
+<style>
+:root{
+  --bg:#0b1220; --panel:#0f1b33; --text:#e8efff; --muted:#9fb3d8;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh;
+  background:
+    radial-gradient(900px 500px at 20% 0%, rgba(47,109,255,.18), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(0,212,255,.12), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  display:flex; justify-content:center; align-items:center;
+  padding:16px;
+}
+.wrap{
+  width:min(1020px,100%);
+  display:grid; grid-template-columns: 1fr 320px; gap:16px;
+  align-items:start;
+}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+
+.panel{
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+h2{margin:0 0 8px;font-size:16px}
+.small{font-size:12px;color:var(--muted); line-height:1.45}
+kbd{background:rgba(255,255,255,.08); padding:2px 6px; border-radius:8px; border:1px solid rgba(255,255,255,.10)}
+.row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+select, button{
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color:var(--text);
+  padding:10px 12px;
+  font-weight:800;
+}
+button{cursor:pointer}
+button.primary{
+  background: linear-gradient(180deg, rgba(47,109,255,.95), rgba(47,109,255,.60));
+  border-color: rgba(47,109,255,.8);
+}
+button.danger{
+  background: linear-gradient(180deg, rgba(251,113,133,.90), rgba(251,113,133,.55));
+  border-color: rgba(251,113,133,.8);
+}
+.canvasWrap{position:relative}
+canvas{display:block;border-radius:14px;background:#0c162b;border:1px solid rgba(255,255,255,.08)}
+.statgrid{
+  display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+  margin-top:8px;
+}
+.stat{
+  background: rgba(12,22,43,.55);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius: 14px;
+  padding:10px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.stat .k{color:var(--muted); font-size:12px}
+.stat .v{font-weight:900; font-size:18px}
+
+.controls{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+}
+.controls button{padding:14px}
+
+.overlay{
+  position:absolute; inset:0;
+  display:none;
+  align-items:center; justify-content:center;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  border-radius:14px;
+}
+.modal{
+  width:min(420px, calc(100% - 24px));
+  background: linear-gradient(180deg, rgba(15,27,51,.96), rgba(10,18,34,.96));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  padding: 14px;
+}
+.modal h3{margin:0 0 6px; font-size:18px}
+.modal p{margin:8px 0; color:var(--muted); font-size:13px; line-height:1.45}
+.modal .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px}
+.modal .actions{display:flex; gap:10px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap}
+.pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:12px;
+  color:rgba(232,239,255,.9);
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <!-- GAME -->
+  <div class="panel">
+    <div class="row" style="justify-content:space-between; margin-bottom:10px;">
+      <div class="row">
+        <span class="pill" id="status">Ready</span>
+        <span class="pill" id="modeTag">Mode: Marathon</span>
+      </div>
+      <div class="row">
+        <label class="small" for="modeSel">Mode</label>
+        <select id="modeSel" aria-label="Mode">
+          <option value="marathon">Marathon (endless)</option>
+          <option value="sprint">Sprint (40 lines)</option>
+          <option value="ultra">Ultra (2:00)</option>
+        </select>
+        <button class="primary" id="btnStart">▶ Start</button>
+        <button id="btnPause">⏸ Pause</button>
+        <button class="danger" id="btnReset">🔄 Reset</button>
+      </div>
+    </div>
+
+    <div class="canvasWrap">
+      <canvas id="game" width="360" height="720" aria-label="Tetris board"></canvas>
+
+      <div class="overlay" id="overlay">
+        <div class="modal" role="dialog" aria-modal="true">
+          <h3 id="overTitle">Done</h3>
+          <p id="overText">Summary</p>
+          <div class="grid">
+            <div class="stat"><div class="k">Score</div><div class="v" id="overScore">0</div></div>
+            <div class="stat"><div class="k">Time</div><div class="v" id="overTime">—</div></div>
+            <div class="stat"><div class="k">Lines</div><div class="v" id="overLines">0</div></div>
+            <div class="stat"><div class="k">Best (mode)</div><div class="v" id="overBest">0</div></div>
+          </div>
+          <div class="actions">
+            <button id="btnCloseOver">Close</button>
+            <button class="primary" id="btnRestartOver">Restart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDE -->
+  <div class="panel">
+    <h2>Stats</h2>
+    <div class="statgrid">
+      <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
+      <div class="stat"><div class="k">Lines</div><div class="v" id="lines">0</div></div>
+      <div class="stat"><div class="k">Level</div><div class="v" id="level">1</div></div>
+      <div class="stat"><div class="k">Timer</div><div class="v" id="timer">—</div></div>
+      <div class="stat"><div class="k">Best (mode)</div><div class="v" id="best">0</div></div>
+      <div class="stat"><div class="k">Target</div><div class="v" id="target">—</div></div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <h2>Next</h2>
+    <canvas id="next" width="120" height="120"></canvas>
+
+    <div style="height:12px"></div>
+
+    <h2>Hold (<kbd>C</kbd>)</h2>
+    <canvas id="hold" width="120" height="120"></canvas>
+
+    <div style="height:12px"></div>
+
+    <h2>Controls</h2>
+    <div class="small">
+      <div><kbd>←</kbd><kbd>→</kbd> Move</div>
+      <div><kbd>↓</kbd> Soft drop</div>
+      <div><kbd>Space</kbd> Hard drop</div>
+      <div><kbd>Z</kbd>/<kbd>X</kbd> Rotate</div>
+      <div><kbd>C</kbd> Hold</div>
+      <div><kbd>P</kbd> Pause</div>
+      <div style="height:10px"></div>
+      Sprint: clear <b>40 lines</b> fastest.<br/>
+      Ultra: score max in <b>2:00</b>.
+    </div>
+
+    <div style="height:12px"></div>
+    <h2>Mobile</h2>
+    <div class="controls">
+      <button id="left">◀</button>
+      <button id="rotate">⟳</button>
+      <button id="right">▶</button>
+      <button id="down">▼</button>
+      <button id="drop">⤓</button>
+      <button id="holdBtn">HOLD</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  // ---- Config ----
+  const COLS=10, ROWS=20, SIZE=36;
+
+  // Movement tuning (DAS/ARR)
+  const DAS_MS = 140;   // delay before repeating
+  const ARR_MS = 38;    // repeat rate once repeating
+
+  // Ultra timer
+  const ULTRA_MS = 120000;
+
+  // Sprint target
+  const SPRINT_LINES = 40;
+
+  // ---- DOM ----
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const nextC = document.getElementById("next");
+  const nctx = nextC.getContext("2d");
+  const holdC = document.getElementById("hold");
+  const hctx = holdC.getContext("2d");
+
+  const statusEl = document.getElementById("status");
+  const modeTag = document.getElementById("modeTag");
+  const modeSel = document.getElementById("modeSel");
+
+  const scoreEl = document.getElementById("score");
+  const linesEl = document.getElementById("lines");
+  const levelEl = document.getElementById("level");
+  const timerEl = document.getElementById("timer");
+  const bestEl  = document.getElementById("best");
+  const targetEl= document.getElementById("target");
+
+  const btnStart = document.getElementById("btnStart");
+  const btnPause = document.getElementById("btnPause");
+  const btnReset = document.getElementById("btnReset");
+
+  const overlay = document.getElementById("overlay");
+  const overTitle = document.getElementById("overTitle");
+  const overText  = document.getElementById("overText");
+  const overScore = document.getElementById("overScore");
+  const overLines = document.getElementById("overLines");
+  const overTime  = document.getElementById("overTime");
+  const overBest  = document.getElementById("overBest");
+  const btnCloseOver = document.getElementById("btnCloseOver");
+  const btnRestartOver = document.getElementById("btnRestartOver");
+
+  // Mobile buttons
+  const btnL = document.getElementById("left");
+  const btnR = document.getElementById("right");
+  const btnD = document.getElementById("down");
+  const btnDrop = document.getElementById("drop");
+  const btnRot = document.getElementById("rotate");
+  const btnHold = document.getElementById("holdBtn");
+
+  // ---- Pieces ----
+  const SHAPES={
+    I:[[1,1,1,1]],
+    J:[[1,0,0],[1,1,1]],
+    L:[[0,0,1],[1,1,1]],
+    O:[[1,1],[1,1]],
+    S:[[0,1,1],[1,1,0]],
+    T:[[0,1,0],[1,1,1]],
+    Z:[[1,1,0],[0,1,1]]
+  };
+  const COLORS={
+    I:"#60a5fa", J:"#a78bfa", L:"#fb923c", O:"#fbbf24",
+    S:"#34d399", T:"#f472b6", Z:"#fb7185",
+    G:"rgba(255,255,255,.14)", grid:"rgba(255,255,255,.07)", bg:"#0c162b"
+  };
+
+  // ---- Mode state ----
+  let mode = "marathon"; // marathon | sprint | ultra
+  function bestKey(){ return `tetris_best_${mode}_v1`; }
+  function getBest(){ return Number(localStorage.getItem(bestKey())||"0"); }
+  function setBest(v){ localStorage.setItem(bestKey(), String(v)); }
+
+  // ---- Game state ----
+  let board;
+  let bag=[], piece=null, next=null, hold=null, canHold=true;
+
+  let running=false, paused=false, gameEnded=false;
+
+  let score=0, lines=0, level=1, dropMs=800;
+  let last=0, acc=0;
+
+  // Timer tracking (Sprint/Ultra)
+  let modeStarted=false;
+  let modeStartAt=0;     // performance.now
+  let modeElapsedMs=0;   // computed
+  let ultraRemainingMs=ULTRA_MS;
+
+  // Clear flash animation
+  let flashRows=[];      // array of row indices to flash
+  let flashUntil=0;      // performance.now until
+
+  // Input repeat
+  let leftHeld=false, rightHeld=false;
+  let leftHeldAt=0, rightHeldAt=0;
+  let leftLastRepeat=0, rightLastRepeat=0;
+
+  // ---- Utils ----
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  function fmtTime(ms){
+    if(ms == null) return "—";
+    ms = Math.max(0, ms);
+    const totalSec = Math.floor(ms/1000);
+    const m = Math.floor(totalSec/60);
+    const s = totalSec%60;
+    const cs = Math.floor((ms%1000)/10);
+    // show mm:ss.cc
+    return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(cs).padStart(2,"0")}`;
+  }
+
+  function setStatus(text){ statusEl.textContent = text; }
+  function setModeUI(){
+    const name = mode === "marathon" ? "Marathon" : (mode === "sprint" ? "Sprint" : "Ultra");
+    modeTag.textContent = `Mode: ${name}`;
+
+    if(mode === "marathon"){
+      targetEl.textContent = "Endless";
+      timerEl.textContent = "—";
+    } else if(mode === "sprint"){
+      targetEl.textContent = `${SPRINT_LINES} lines`;
+      timerEl.textContent = "00:00.00";
+    } else {
+      targetEl.textContent = "2:00";
+      timerEl.textContent = fmtTime(ULTRA_MS);
+    }
+
+    bestEl.textContent = getBest().toLocaleString();
+  }
+
+  function emptyBoard(){
+    return Array.from({length:ROWS}, ()=>Array(COLS).fill(""));
+  }
+  function newBag(){
+    bag = Object.keys(SHAPES).sort(()=>Math.random()-0.5);
+  }
+  function getFromBag(){
+    if(!bag.length) newBag();
+    return bag.pop();
+  }
+
+  function rotateCW(m){ return m[0].map((_,i)=>m.map(r=>r[i]).reverse()); }
+  function rotateCCW(m){ let x=m; for(let i=0;i<3;i++) x=rotateCW(x); return x; }
+
+  function collide(p, dx, dy, mat=p.mat){
+    for(let y=0;y<mat.length;y++){
+      for(let x=0;x<mat[y].length;x++){
+        if(!mat[y][x]) continue;
+        const nx = p.x + x + dx;
+        const ny = p.y + y + dy;
+        if(nx<0 || nx>=COLS) return true;
+        if(ny>=ROWS) return true;
+        if(ny>=0 && board[ny][nx]) return true;
+      }
+    }
+    return false;
+  }
+
+  function spawn(){
+    if(!next) next = getFromBag();
+    piece = { type: next, mat: SHAPES[next], x: 3, y: -1 };
+    next = getFromBag();
+    canHold = true;
+
+    // Start mode timer when first piece spawns (Sprint/Ultra)
+    if(!modeStarted && (mode === "sprint" || mode === "ultra")){
+      modeStarted = true;
+      modeStartAt = performance.now();
+    }
+
+    if(collide(piece,0,0)){
+      endGame("Game Over", "Stack reached the top.");
+    }
+  }
+
+  function lockPiece(){
+    const {type, mat, x, y} = piece;
+    for(let yy=0; yy<mat.length; yy++){
+      for(let xx=0; xx<mat[yy].length; xx++){
+        if(!mat[yy][xx]) continue;
+        const by = y + yy;
+        const bx = x + xx;
+        if(by>=0 && by<ROWS && bx>=0 && bx<COLS){
+          board[by][bx] = type;
+        }
+      }
+    }
+    clearLines();
+    spawn();
+  }
+
+  function clearLines(){
+    const full = [];
+    for(let r=ROWS-1; r>=0; r--){
+      if(board[r].every(v=>v !== "")) full.push(r);
+    }
+    if(!full.length) return;
+
+    // flash animation
+    flashRows = full.slice();
+    flashUntil = performance.now() + 120;
+
+    // remove rows
+    for(const r of full){
+      board.splice(r,1);
+      board.unshift(Array(COLS).fill(""));
+    }
+
+    const cleared = full.length;
+    const table = [0,100,300,500,800];
+    score += table[cleared] * level;
+    lines += cleared;
+
+    // Marathon & Sprint share level speed based on lines
+    level = 1 + Math.floor(lines / 10);
+    dropMs = Math.max(120, 800 - (level-1)*60);
+
+    // Sprint win condition
+    if(mode === "sprint" && lines >= SPRINT_LINES){
+      const elapsed = modeElapsedMsNow();
+      endGame("Sprint Complete!", `You cleared ${SPRINT_LINES} lines.`);
+      // ensure overlay shows final time
+      modeElapsedMs = elapsed;
+    }
+  }
+
+  function modeElapsedMsNow(){
+    if(!modeStarted) return 0;
+    const now = performance.now();
+    return Math.max(0, now - modeStartAt);
+  }
+
+  function updateModeTimer(){
+    if(mode === "marathon"){
+      timerEl.textContent = "—";
+      return;
+    }
+
+    if(!modeStarted){
+      timerEl.textContent = (mode === "sprint") ? "00:00.00" : fmtTime(ULTRA_MS);
+      return;
+    }
+
+    const elapsed = modeElapsedMsNow();
+    if(mode === "sprint"){
+      timerEl.textContent = fmtTime(elapsed);
+    } else if(mode === "ultra"){
+      ultraRemainingMs = clamp(ULTRA_MS - elapsed, 0, ULTRA_MS);
+      timerEl.textContent = fmtTime(ultraRemainingMs);
+      if(ultraRemainingMs <= 0){
+        modeElapsedMs = ULTRA_MS;
+        endGame("Ultra Complete!", "Time is up (2:00).");
+      }
+    }
+  }
+
+  function hardDrop(){
+    if(!running || paused || gameEnded) return;
+    let d=0;
+    while(!collide(piece,0,d+1)) d++;
+    piece.y += d;
+    score += Math.min(20, d);
+    lockPiece();
+  }
+
+  function softDrop(){
+    if(!running || paused || gameEnded) return;
+    if(!collide(piece,0,1)){
+      piece.y += 1;
+      score += 1;
+    } else {
+      lockPiece();
+    }
+  }
+
+  function move(dx){
+    if(!running || paused || gameEnded) return;
+    if(!collide(piece,dx,0)){
+      piece.x += dx;
+    }
+  }
+
+  function rotate(dir){
+    if(!running || paused || gameEnded) return;
+    const mat = (dir === "cw") ? rotateCW(piece.mat) : rotateCCW(piece.mat);
+    const kicks = [0, -1, 1, -2, 2];
+    for(const k of kicks){
+      if(!collide(piece, k, 0, mat)){
+        piece.mat = mat;
+        piece.x += k;
+        return;
+      }
+    }
+  }
+
+  function holdPiece(){
+    if(!running || paused || gameEnded) return;
+    if(!canHold) return;
+
+    const cur = piece.type;
+    if(!hold){
+      hold = cur;
+      piece.type = next;
+      piece.mat = SHAPES[piece.type];
+      next = getFromBag();
+    } else {
+      piece.type = hold;
+      piece.mat = SHAPES[piece.type];
+      hold = cur;
+    }
+    piece.x = 3; piece.y = -1;
+    canHold = false;
+    if(collide(piece,0,0)){
+      endGame("Game Over", "Hold swap caused collision.");
+    }
+  }
+
+  function ghostY(){
+    let d=0;
+    while(!collide(piece,0,d+1)) d++;
+    return piece.y + d;
+  }
+
+  // ---- Drawing ----
+  function drawBlock(x,y,color){
+    const px = x*SIZE, py=y*SIZE;
+    ctx.fillStyle = color;
+    ctx.fillRect(px+1, py+1, SIZE-2, SIZE-2);
+    ctx.fillStyle = "rgba(255,255,255,.10)";
+    ctx.fillRect(px+3, py+3, SIZE-6, 6);
+  }
+
+  function drawMat(mat, x0, y0, color){
+    for(let y=0;y<mat.length;y++){
+      for(let x=0;x<mat[y].length;x++){
+        if(!mat[y][x]) continue;
+        const gx = x0 + x;
+        const gy = y0 + y;
+        if(gy < 0) continue;
+        drawBlock(gx,gy,color);
+      }
+    }
+  }
+
+  function drawMini(ctx2, type){
+    ctx2.clearRect(0,0,120,120);
+    if(!type) return;
+    const mat = SHAPES[type];
+    const cell = 24;
+    // center it
+    const w = mat[0].length, h = mat.length;
+    const offX = Math.floor((5 - w)/2) * cell;
+    const offY = Math.floor((5 - h)/2) * cell;
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        if(!mat[y][x]) continue;
+        ctx2.fillStyle = COLORS[type];
+        ctx2.fillRect(24+offX + x*cell, 24+offY + y*cell, cell-2, cell-2);
+      }
+    }
+  }
+
+  function draw(){
+    // bg
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = COLORS.bg;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // grid
+    ctx.strokeStyle = COLORS.grid;
+    ctx.lineWidth = 1;
+    for(let x=0;x<=COLS;x++){
+      ctx.beginPath(); ctx.moveTo(x*SIZE,0); ctx.lineTo(x*SIZE,ROWS*SIZE); ctx.stroke();
+    }
+    for(let y=0;y<=ROWS;y++){
+      ctx.beginPath(); ctx.moveTo(0,y*SIZE); ctx.lineTo(COLS*SIZE,y*SIZE); ctx.stroke();
+    }
+
+    // flash effect for cleared rows
+    const now = performance.now();
+    const flashing = now < flashUntil;
+
+    // fixed blocks
+    for(let r=0;r<ROWS;r++){
+      const isFlashRow = flashing && flashRows.includes(r);
+      for(let c=0;c<COLS;c++){
+        const t = board[r][c];
+        if(t){
+          drawBlock(c,r, isFlashRow ? "rgba(255,255,255,.8)" : COLORS[t]);
+        } else if(isFlashRow){
+          drawBlock(c,r, "rgba(255,255,255,.25)");
+        }
+      }
+    }
+
+    // active piece + ghost
+    if(piece){
+      drawMat(piece.mat, piece.x, ghostY(), COLORS.G);
+      drawMat(piece.mat, piece.x, piece.y, COLORS[piece.type]);
+    }
+
+    // minis
+    drawMini(nctx, next);
+    drawMini(hctx, hold);
+  }
+
+  function updateUI(){
+    scoreEl.textContent = score.toLocaleString();
+    linesEl.textContent = lines;
+    levelEl.textContent = level;
+    updateModeTimer();
+
+    const currentBest = getBest();
+    const bestVal = Math.max(currentBest, score);
+    bestEl.textContent = bestVal.toLocaleString();
+    if(score > currentBest) setBest(score);
+
+    if(mode === "sprint"){
+      targetEl.textContent = `${Math.min(lines,SPRINT_LINES)}/${SPRINT_LINES}`;
+    } else if(mode === "ultra"){
+      targetEl.textContent = "2:00";
+    } else {
+      targetEl.textContent = "Endless";
+    }
+  }
+
+  // ---- Mode end overlay ----
+  function showOverlay(title, text){
+    overlay.style.display = "flex";
+    overTitle.textContent = title;
+    overText.textContent = text;
+    overScore.textContent = score.toLocaleString();
+    overLines.textContent = String(lines);
+
+    let timeText = "—";
+    if(mode === "sprint"){
+      timeText = fmtTime(modeElapsedMs || modeElapsedMsNow());
+    } else if(mode === "ultra"){
+      timeText = fmtTime(modeElapsedMs || ULTRA_MS);
+    }
+    overTime.textContent = timeText;
+
+    overBest.textContent = getBest().toLocaleString();
+  }
+
+  function hideOverlay(){
+    overlay.style.display = "none";
+  }
+
+  function endGame(title, text){
+    if(gameEnded) return;
+    gameEnded = true;
+    running = false;
+    paused = false;
+    setStatus("Ended");
+    // Update best one last time
+    const currentBest = getBest();
+    if(score > currentBest) setBest(score);
+    updateUI();
+    draw();
+    showOverlay(title, text);
+  }
+
+  // ---- Loop ----
+  function loop(t){
+    if(!running) return;
+    if(paused || gameEnded){
+      last = t;
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    const dt = t - last;
+    last = t;
+    acc += dt;
+
+    // handle left/right repeat (DAS/ARR)
+    if(leftHeld && !rightHeld){
+      const heldFor = t - leftHeldAt;
+      if(heldFor >= DAS_MS && (t - leftLastRepeat) >= ARR_MS){
+        move(-1);
+        leftLastRepeat = t;
+      }
+    } else if(rightHeld && !leftHeld){
+      const heldFor = t - rightHeldAt;
+      if(heldFor >= DAS_MS && (t - rightLastRepeat) >= ARR_MS){
+        move(1);
+        rightLastRepeat = t;
+      }
+    }
+
+    while(acc >= dropMs){
+      acc -= dropMs;
+      if(piece){
+        if(!collide(piece,0,1)){
+          piece.y += 1;
+        } else {
+          lockPiece();
+        }
+      }
+    }
+
+    updateUI();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ---- Start/Reset/Pause ----
+  function resetGame(){
+    board = emptyBoard();
+    bag = [];
+    piece = null; next = null; hold = null;
+    canHold = true;
+
+    score = 0; lines = 0; level = 1; dropMs = 800;
+    acc = 0; last = performance.now();
+
+    modeStarted = false;
+    modeStartAt = 0;
+    modeElapsedMs = 0;
+    ultraRemainingMs = ULTRA_MS;
+
+    flashRows = [];
+    flashUntil = 0;
+
+    leftHeld = rightHeld = false;
+
+    running = false;
+    paused = false;
+    gameEnded = false;
+
+    setStatus("Ready");
+    hideOverlay();
+    setModeUI();
+    updateUI();
+    draw();
+  }
+
+  function startGame(){
+    if(running || gameEnded) return;
+    running = true;
+    paused = false;
+    gameEnded = false;
+    setStatus("Playing");
+    hideOverlay();
+
+    // If no piece yet (fresh reset), spawn
+    if(!piece) spawn();
+
+    last = performance.now();
+    acc = 0;
+    requestAnimationFrame(loop);
+  }
+
+  function togglePause(){
+    if(!running) return;
+    paused = !paused;
+    setStatus(paused ? "Paused" : "Playing");
+  }
+
+  // ---- Keyboard ----
+  window.addEventListener("keydown", (e) => {
+    if(overlay.style.display === "flex"){
+      if(e.key === "Escape") hideOverlay();
+      return;
+    }
+    const k = e.key;
+
+    if(k === "p" || k === "P"){ togglePause(); return; }
+    if(!running) return;
+    if(paused) return;
+
+    if(k === "ArrowLeft"){
+      e.preventDefault();
+      move(-1);
+      leftHeld = true; leftHeldAt = performance.now(); leftLastRepeat = leftHeldAt;
+    } else if(k === "ArrowRight"){
+      e.preventDefault();
+      move(1);
+      rightHeld = true; rightHeldAt = performance.now(); rightLastRepeat = rightHeldAt;
+    } else if(k === "ArrowDown"){
+      e.preventDefault(); softDrop();
+    } else if(k === " "){
+      e.preventDefault(); hardDrop();
+    } else if(k === "z" || k === "Z"){
+      rotate("ccw");
+    } else if(k === "x" || k === "X"){
+      rotate("cw");
+    } else if(k === "c" || k === "C"){
+      holdPiece();
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if(e.key === "ArrowLeft") leftHeld = false;
+    if(e.key === "ArrowRight") rightHeld = false;
+  });
+
+  // ---- Mobile (tap) ----
+  btnL.addEventListener("click", ()=>move(-1));
+  btnR.addEventListener("click", ()=>move(1));
+  btnD.addEventListener("click", ()=>softDrop());
+  btnDrop.addEventListener("click", ()=>hardDrop());
+  btnRot.addEventListener("click", ()=>rotate("cw"));
+  btnHold.addEventListener("click", ()=>holdPiece());
+
+  // ---- Buttons ----
+  btnStart.addEventListener("click", () => {
+    if(!running){
+      // if fresh state (no piece), start triggers spawn
+      startGame();
+    }
+  });
+  btnPause.addEventListener("click", togglePause);
+  btnReset.addEventListener("click", resetGame);
+
+  btnCloseOver.addEventListener("click", hideOverlay);
+  btnRestartOver.addEventListener("click", () => {
+    resetGame();
+    startGame();
+  });
+  overlay.addEventListener("click", (e) => {
+    if(e.target === overlay) hideOverlay();
+  });
+
+  // ---- Mode change ----
+  modeSel.addEventListener("change", () => {
+    mode = modeSel.value;
+    resetGame(); // safest: new mode starts fresh
+  });
+
+  // ---- Init ----
+  mode = modeSel.value;
+  resetGame();
+
+})();
+</script>
+</body>
+</html>
