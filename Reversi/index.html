@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reversi (Othello) vs AI — Easy / Intermediate / Advanced</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f1b33; --text:#e8efff; --muted:#9fb3d8;
+    --border:rgba(255,255,255,.10);
+    --green:#0c5a3a; --green2:#0a4a31;
+    --black:#111827; --white:#f3f4f6;
+    --accent:#2f6dff; --good:#2dd4bf;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; padding:16px;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:var(--text);
+    background:
+      radial-gradient(900px 500px at 20% 0%, rgba(47,109,255,.18), transparent 60%),
+      radial-gradient(900px 500px at 80% 10%, rgba(0,212,255,.12), transparent 55%),
+      var(--bg);
+    display:flex; justify-content:center; align-items:center;
+  }
+  .wrap{
+    width:min(1100px,100%);
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:14px;
+    align-items:start;
+  }
+  @media (max-width: 920px){ .wrap{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    overflow:hidden;
+  }
+  .hd{
+    padding:14px;
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .hd .t{font-weight:900}
+  .hd .s{color:var(--muted); font-size:12px}
+
+  .body{ padding:14px; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  label.small{ font-size:12px; color:var(--muted); }
+  select, button{
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color:var(--text);
+    padding:10px 12px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  button.primary{
+    background: linear-gradient(180deg, rgba(47,109,255,.95), rgba(47,109,255,.60));
+    border-color: rgba(47,109,255,.8);
+  }
+  button.good{
+    background: linear-gradient(180deg, rgba(45,212,191,.95), rgba(45,212,191,.55));
+    border-color: rgba(45,212,191,.8);
+    color:#061317;
+  }
+
+  .board{
+    width:min(560px, 100%);
+    aspect-ratio: 1 / 1;
+    margin:auto;
+    background: linear-gradient(180deg, rgba(12,90,58,.95), rgba(10,74,49,.95));
+    border:1px solid rgba(255,255,255,.10);
+    border-radius: 16px;
+    display:grid;
+    grid-template-columns: repeat(8, 1fr);
+    overflow:hidden;
+    touch-action: manipulation;
+  }
+  .cell{
+    position:relative;
+    border:1px solid rgba(255,255,255,.10);
+    display:flex; align-items:center; justify-content:center;
+    user-select:none;
+  }
+  .cell:hover{ background: rgba(255,255,255,.04); }
+  .disc{
+    width:74%;
+    height:74%;
+    border-radius:999px;
+    box-shadow: inset 0 8px 16px rgba(255,255,255,.08), 0 10px 20px rgba(0,0,0,.35);
+    transform: scale(0.96);
+    transition: transform .12s ease;
+  }
+  .disc.black{ background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.20), transparent 55%), #0b1220; }
+  .disc.white{ background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.70), transparent 55%), #f3f4f6; }
+  .hintDot{
+    position:absolute;
+    width:14%;
+    height:14%;
+    border-radius:999px;
+    background: rgba(45,212,191,.70);
+    box-shadow: 0 0 0 3px rgba(45,212,191,.22);
+  }
+
+  .stats{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  .stat{
+    background: rgba(12,22,43,.55);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:10px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .stat .k{ color:var(--muted); font-size:12px; }
+  .stat .v{ font-weight:900; font-size:18px; }
+
+  .log{
+    margin-top:10px;
+    background: rgba(12,22,43,.55);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:10px;
+    color: rgba(232,239,255,.92);
+    min-height: 64px;
+  }
+  .log .k{ color:var(--muted); font-size:12px; margin-bottom:6px; }
+  .smallText{ color:var(--muted); font-size:12px; line-height:1.45; }
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    font-size:12px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <section class="panel">
+      <div class="hd">
+        <div class="t">Reversi vs AI</div>
+        <div class="s"><span class="pill" id="turnPill">Turn: Black</span></div>
+      </div>
+      <div class="body">
+        <div id="board" class="board" aria-label="Reversi board"></div>
+
+        <div class="stats">
+          <div class="stat"><div class="k">Black</div><div class="v" id="blackCount">2</div></div>
+          <div class="stat"><div class="k">White</div><div class="v" id="whiteCount">2</div></div>
+          <div class="stat"><div class="k">Legal moves</div><div class="v" id="legalCount">4</div></div>
+          <div class="stat"><div class="k">AI Level</div><div class="v" id="diffLabel">Intermediate</div></div>
+        </div>
+
+        <div class="log" role="status" aria-live="polite">
+          <div class="k">Status</div>
+          <div id="log">Tap a green dot to place a disc. Black (you) starts.</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="hd">
+        <div class="t">Controls</div>
+        <div class="s">Fast + strong AI</div>
+      </div>
+      <div class="body">
+        <div class="row">
+          <label class="small" for="diff">AI</label>
+          <select id="diff">
+            <option value="easy">Easy</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="advanced">Advanced (Pro Fast)</option>
+          </select>
+          <button class="primary" id="btnNew">New Game</button>
+          <button id="btnHint">Hide Hints</button>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="row">
+          <label class="small" for="youColor">You play</label>
+          <select id="youColor">
+            <option value="B" selected>Black (first)</option>
+            <option value="W">White (second)</option>
+          </select>
+          <button class="good" id="btnApply">Apply</button>
+        </div>
+
+        <div style="height:10px"></div>
+        <div class="smallText">
+          Rules: Place a disc that brackets opponent discs in any of 8 directions, then flip them.
+          If you have no legal moves, you pass. Game ends when both pass (or board is full).
+          <br><br>
+          Tip: Corners are powerful. Advanced AI uses time-limited iterative deepening + caching, so it stays responsive on mobile.
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+<script>
+(() => {
+  // Pieces: "B", "W", "" (empty)
+  const N = 8;
+  const DIRS = [
+    [-1,-1], [0,-1], [1,-1],
+    [-1, 0],         [1, 0],
+    [-1, 1], [0, 1], [1, 1],
+  ];
+
+  const boardEl = document.getElementById("board");
+  const logEl = document.getElementById("log");
+  const turnPill = document.getElementById("turnPill");
+
+  const blackCountEl = document.getElementById("blackCount");
+  const whiteCountEl = document.getElementById("whiteCount");
+  const legalCountEl = document.getElementById("legalCount");
+  const diffLabel = document.getElementById("diffLabel");
+
+  const diffSel = document.getElementById("diff");
+  const btnNew = document.getElementById("btnNew");
+  const btnHint = document.getElementById("btnHint");
+  const youColorSel = document.getElementById("youColor");
+  const btnApply = document.getElementById("btnApply");
+
+  let showHints = true;
+
+  // Game state
+  let B = makeBoard();
+  let turn = "B";          // side to move
+  let human = "B";         // human side
+  let ai = "W";            // ai side
+  let difficulty = "intermediate";
+  let busyAI = false;
+
+  function makeBoard(){
+    return Array.from({length:N}, ()=>Array(N).fill(""));
+  }
+
+  function initBoard(){
+    B = makeBoard();
+    // Standard start
+    B[3][3] = "W"; B[4][4] = "W";
+    B[3][4] = "B"; B[4][3] = "B";
+    turn = "B";
+    busyAI = false;
+  }
+
+  function inBounds(x,y){ return x>=0 && x<N && y>=0 && y<N; }
+  function other(p){ return p === "B" ? "W" : "B"; }
+
+  function cloneBoard(b){
+    return b.map(row => row.slice());
+  }
+
+  function discsToFlip(b, x, y, player){
+    if(b[y][x] !== "") return [];
+    const opp = other(player);
+    const flips = [];
+
+    for(const [dx,dy] of DIRS){
+      let cx = x + dx, cy = y + dy;
+      const line = [];
+      while(inBounds(cx,cy) && b[cy][cx] === opp){
+        line.push([cx,cy]);
+        cx += dx; cy += dy;
+      }
+      if(line.length && inBounds(cx,cy) && b[cy][cx] === player){
+        flips.push(...line);
+      }
+    }
+    return flips;
+  }
+
+  function legalMoves(b, player){
+    const moves = [];
+    for(let y=0;y<N;y++){
+      for(let x=0;x<N;x++){
+        const flips = discsToFlip(b,x,y,player);
+        if(flips.length) moves.push({x,y,flips});
+      }
+    }
+    return moves;
+  }
+
+  function applyMove(b, move, player){
+    const nb = cloneBoard(b);
+    nb[move.y][move.x] = player;
+    for(const [fx,fy] of move.flips){
+      nb[fy][fx] = player;
+    }
+    return nb;
+  }
+
+  function countPieces(b){
+    let bc=0,wc=0,ec=0;
+    for(let y=0;y<N;y++){
+      for(let x=0;x<N;x++){
+        if(b[y][x] === "B") bc++;
+        else if(b[y][x] === "W") wc++;
+        else ec++;
+      }
+    }
+    return {bc,wc,ec};
+  }
+
+  function isTerminal(b){
+    // terminal if no moves for both
+    return legalMoves(b,"B").length === 0 && legalMoves(b,"W").length === 0;
+  }
+
+  // ----------------------------
+  // AI (Easy / Intermediate / Advanced fast+strong)
+  // ----------------------------
+
+  // EASY: Greedy + corner preference + slight randomness
+  function greedyAI(b, player){
+    const moves = legalMoves(b, player);
+    if(!moves.length) return null;
+
+    const scored = moves.map(m => {
+      let v = m.flips.length;
+
+      // corner bonus
+      if ((m.x===0 && m.y===0) || (m.x===7 && m.y===0) || (m.x===0 && m.y===7) || (m.x===7 && m.y===7)) {
+        v += 1000;
+      }
+
+      // discourage X squares (diagonal adjacent to corner)
+      const isX = (m.x===1 && m.y===1) || (m.x===6 && m.y===1) || (m.x===1 && m.y===6) || (m.x===6 && m.y===6);
+      if(isX) v -= 60;
+
+      return {m, v};
+    }).sort((a,b)=>b.v-a.v);
+
+    // 15% chance pick among top 3
+    const pickTop = Math.min(3, scored.length);
+    if(Math.random() < 0.15 && pickTop > 1){
+      return scored[Math.floor(Math.random()*pickTop)].m;
+    }
+    return scored[0].m;
+  }
+
+  const CORNERS = [[0,0],[7,0],[0,7],[7,7]];
+
+  function frontierCount(b, player){
+    let f = 0;
+    for(let y=0;y<N;y++){
+      for(let x=0;x<N;x++){
+        if(b[y][x] !== player) continue;
+        for(const [dx,dy] of DIRS){
+          const nx=x+dx, ny=y+dy;
+          if(inBounds(nx,ny) && b[ny][nx] === ""){
+            f++;
+            break;
+          }
+        }
+      }
+    }
+    return f;
+  }
+
+  function cornerAdjacencyPenalty(b, player){
+    // occupying X/C squares when corner is empty is risky
+    let p = 0;
+    const opp = other(player);
+
+    const corners = [
+      {cx:0, cy:0, xs:[{x:1,y:1}], cs:[{x:1,y:0},{x:0,y:1}]},
+      {cx:7, cy:0, xs:[{x:6,y:1}], cs:[{x:6,y:0},{x:7,y:1}]},
+      {cx:0, cy:7, xs:[{x:1,y:6}], cs:[{x:1,y:7},{x:0,y:6}]},
+      {cx:7, cy:7, xs:[{x:6,y:6}], cs:[{x:6,y:7},{x:7,y:6}]},
+    ];
+
+    for(const c of corners){
+      const corner = b[c.cy][c.cx];
+      if(corner !== "") continue;
+      for(const s of c.xs){
+        if(b[s.y][s.x] === player) p += 18;
+        if(b[s.y][s.x] === opp) p -= 18;
+      }
+      for(const s of c.cs){
+        if(b[s.y][s.x] === player) p += 8;
+        if(b[s.y][s.x] === opp) p -= 8;
+      }
+    }
+    return p;
+  }
+
+  function scoreBoard(b, aiPlayer){
+    const opp = other(aiPlayer);
+    const {bc,wc,ec} = countPieces(b);
+    const myCount = aiPlayer === "B" ? bc : wc;
+    const opCount = aiPlayer === "B" ? wc : bc;
+
+    const myMoves = legalMoves(b, aiPlayer).length;
+    const opMoves = legalMoves(b, opp).length;
+
+    let myCorners=0, opCorners=0;
+    for(const [x,y] of CORNERS){
+      if(b[y][x] === aiPlayer) myCorners++;
+      else if(b[y][x] === opp) opCorners++;
+    }
+
+    const filled = 64 - ec;
+    const phase = filled / 64;
+
+    const mobilityScore = 10 * (myMoves - opMoves);
+    const cornerScore   = 140 * (myCorners - opCorners);
+
+    const myFront = frontierCount(b, aiPlayer);
+    const opFront = frontierCount(b, opp);
+    const frontierScore = -4 * (myFront - opFront);
+
+    const riskScore = -1 * cornerAdjacencyPenalty(b, aiPlayer);
+
+    const discScore = (myCount - opCount) * (phase > 0.75 ? 6 : 1);
+
+    return cornerScore + mobilityScore + frontierScore + riskScore + discScore;
+  }
+
+  function boardKey(b, playerToMove){
+    let s = playerToMove + "|";
+    for(let y=0;y<N;y++){
+      for(let x=0;x<N;x++){
+        const v = b[y][x];
+        s += (v === "" ? "." : v);
+      }
+    }
+    return s;
+  }
+
+  function orderMoves(moves){
+    return moves.slice().sort((a,b)=>{
+      const aCorner = (a.x===0&&a.y===0)||(a.x===7&&a.y===0)||(a.x===0&&a.y===7)||(a.x===7&&a.y===7);
+      const bCorner = (b.x===0&&b.y===0)||(b.x===7&&b.y===0)||(b.x===0&&b.y===7)||(b.x===7&&b.y===7);
+      if(aCorner && !bCorner) return -1;
+      if(!aCorner && bCorner) return 1;
+      return b.flips.length - a.flips.length;
+    });
+  }
+
+  function alphaBetaTimed(b, playerToMove, depth, alpha, beta, maximizingForAI, deadline, tt){
+    if(performance.now() > deadline){
+      return {timedOut:true, score: 0};
+    }
+    if(depth === 0 || isTerminal(b)){
+      return {timedOut:false, score: scoreBoard(b, ai)};
+    }
+
+    const key = boardKey(b, playerToMove);
+    const cached = tt.get(key);
+    if(cached && cached.depth >= depth){
+      return {timedOut:false, score: cached.score, move: cached.move};
+    }
+
+    let moves = legalMoves(b, playerToMove);
+
+    if(moves.length === 0){
+      return alphaBetaTimed(b, other(playerToMove), depth-1, alpha, beta, !maximizingForAI, deadline, tt);
+    }
+
+    moves = orderMoves(moves);
+
+    let bestMove = null;
+
+    if(maximizingForAI){
+      let bestScore = -Infinity;
+      for(const m of moves){
+        const nb = applyMove(b, m, playerToMove);
+        const res = alphaBetaTimed(nb, other(playerToMove), depth-1, alpha, beta, false, deadline, tt);
+        if(res.timedOut) return res;
+        if(res.score > bestScore){
+          bestScore = res.score;
+          bestMove = m;
+        }
+        alpha = Math.max(alpha, bestScore);
+        if(beta <= alpha) break;
+      }
+      tt.set(key, {depth, score: bestScore, move: bestMove});
+      return {timedOut:false, score: bestScore, move: bestMove};
+    } else {
+      let bestScore = Infinity;
+      for(const m of moves){
+        const nb = applyMove(b, m, playerToMove);
+        const res = alphaBetaTimed(nb, other(playerToMove), depth-1, alpha, beta, true, deadline, tt);
+        if(res.timedOut) return res;
+        if(res.score < bestScore){
+          bestScore = res.score;
+          bestMove = m;
+        }
+        beta = Math.min(beta, bestScore);
+        if(beta <= alpha) break;
+      }
+      tt.set(key, {depth, score: bestScore, move: bestMove});
+      return {timedOut:false, score: bestScore, move: bestMove};
+    }
+  }
+
+  function isMobile(){
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+
+  function chooseAIMove(b){
+    const moves = legalMoves(b, ai);
+    if(!moves.length) return null;
+
+    if(difficulty === "easy"){
+      return greedyAI(b, ai);
+    }
+
+    if(difficulty === "intermediate"){
+      const depth = isMobile() ? 4 : 5;
+      const tt = new Map();
+      const res = alphaBetaTimed(b, ai, depth, -Infinity, Infinity, true, performance.now() + 999999, tt);
+      return res.move || moves[0];
+    }
+
+    // ADVANCED (fast+strong): iterative deepening with time budget + caching
+    const budgetMs = isMobile() ? 220 : 520;
+    const deadline = performance.now() + budgetMs;
+    const tt = new Map();
+
+    let bestMove = moves[0];
+    const baseline = greedyAI(b, ai);
+    if(baseline) bestMove = baseline;
+
+    for(let depth=2; depth<=9; depth++){
+      const res = alphaBetaTimed(b, ai, depth, -Infinity, Infinity, true, deadline, tt);
+      if(res.timedOut) break;
+      if(res.move) bestMove = res.move;
+    }
+    return bestMove;
+  }
+
+  // ----------------------------
+  // Rendering + game flow
+  // ----------------------------
+  function setLog(msg){
+    logEl.textContent = msg;
+  }
+
+  function render(){
+    boardEl.innerHTML = "";
+
+    const moves = legalMoves(B, turn);
+    const moveMap = new Map();
+    for(const m of moves){
+      moveMap.set(`${m.x},${m.y}`, m);
+    }
+
+    for(let y=0;y<N;y++){
+      for(let x=0;x<N;x++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+
+        const v = B[y][x];
+        if(v){
+          const d = document.createElement("div");
+          d.className = "disc " + (v === "B" ? "black" : "white");
+          cell.appendChild(d);
+        } else if(showHints && moveMap.has(`${x},${y}`) && !busyAI && turn === human){
+          const dot = document.createElement("div");
+          dot.className = "hintDot";
+          cell.appendChild(dot);
+        }
+
+        cell.addEventListener("click", () => {
+          if(busyAI) return;
+          if(turn !== human) return;
+
+          const key = `${x},${y}`;
+          const m = moveMap.get(key);
+          if(!m) return;
+
+          playMove(m, human);
+        });
+
+        boardEl.appendChild(cell);
+      }
+    }
+
+    const {bc,wc} = countPieces(B);
+    blackCountEl.textContent = bc;
+    whiteCountEl.textContent = wc;
+    legalCountEl.textContent = legalMoves(B, turn).length;
+
+    diffLabel.textContent =
+      (difficulty === "easy") ? "Easy" :
+      (difficulty === "advanced") ? "Advanced" :
+      "Intermediate";
+
+    turnPill.textContent = `Turn: ${turn === "B" ? "Black" : "White"}`;
+  }
+
+  function maybePassOrEnd(){
+    const moves = legalMoves(B, turn);
+    if(moves.length > 0) return false;
+
+    const opp = other(turn);
+    const oppMoves = legalMoves(B, opp);
+
+    if(oppMoves.length === 0){
+      const {bc,wc} = countPieces(B);
+      if(bc > wc) setLog(`Game over. Black wins ${bc}-${wc}.`);
+      else if(wc > bc) setLog(`Game over. White wins ${wc}-${bc}.`);
+      else setLog(`Game over. Draw ${bc}-${wc}.`);
+      busyAI = true; // freeze
+      render();
+      return true;
+    } else {
+      setLog(`${turn === "B" ? "Black" : "White"} has no moves — pass.`);
+      turn = opp;
+      render();
+      return true;
+    }
+  }
+
+  function playMove(move, player){
+    B = applyMove(B, move, player);
+    turn = other(player);
+    render();
+
+    maybePassOrEnd();
+
+    if(turn === ai && !busyAI){
+      doAITurn();
+    }
+  }
+
+  function doAITurn(){
+    if(turn !== ai) return;
+    busyAI = true;
+    setLog("AI is thinking…");
+    render();
+
+    // small delay so UI paints on mobile
+    setTimeout(() => {
+      const moves = legalMoves(B, ai);
+      if(moves.length === 0){
+        busyAI = false;
+        setLog("AI has no moves — pass.");
+        turn = human;
+        render();
+        maybePassOrEnd();
+        return;
+      }
+
+      const m = chooseAIMove(B);
+      if(!m){
+        busyAI = false;
+        turn = human;
+        render();
+        return;
+      }
+
+      B = applyMove(B, m, ai);
+      turn = human;
+      busyAI = false;
+
+      render();
+      maybePassOrEnd();
+
+      setLog(`AI played (${m.x+1}, ${m.y+1}). Your turn.`);
+    }, 120);
+  }
+
+  function newGame(){
+    difficulty = diffSel.value;
+    human = youColorSel.value;
+    ai = other(human);
+
+    initBoard();
+
+    setLog(`${human === "B" ? "Black" : "White"} = You. Tap a hinted square to play.`);
+    render();
+
+    if(turn === ai){
+      doAITurn();
+    }
+  }
+
+  // UI
+  btnNew.addEventListener("click", newGame);
+
+  btnHint.addEventListener("click", () => {
+    showHints = !showHints;
+    btnHint.textContent = showHints ? "Hide Hints" : "Show Hints";
+    render();
+  });
+
+  diffSel.addEventListener("change", () => {
+    difficulty = diffSel.value;
+    render();
+  });
+
+  btnApply.addEventListener("click", newGame);
+
+  // Start
+  newGame();
+})();
+</script>
+</body>
+</html>
