@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Reversi (Othello) vs AI — Easy / Intermediate / Advanced</title>
+<title>Reversi (Othello) — VS AI / 2 Players</title>
 <style>
   :root{
     --bg:#0b1220; --panel:#0f1b33; --text:#e8efff; --muted:#9fb3d8;
     --border:rgba(255,255,255,.10);
     --green:#0c5a3a; --green2:#0a4a31;
-    --black:#111827; --white:#f3f4f6;
-    --accent:#2f6dff; --good:#2dd4bf;
+    --accent:#2f6dff; --good:#2dd4bf; --warn:#fbbf24;
   }
   *{box-sizing:border-box}
   body{
@@ -26,7 +25,7 @@
   .wrap{
     width:min(1100px,100%);
     display:grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 340px;
     gap:14px;
     align-items:start;
   }
@@ -50,7 +49,7 @@
   .body{ padding:14px; }
   .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   label.small{ font-size:12px; color:var(--muted); }
-  select, button{
+  select, button, input[type="checkbox"]{
     border-radius:12px;
     border:1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.06);
@@ -68,7 +67,17 @@
     border-color: rgba(45,212,191,.8);
     color:#061317;
   }
+  button.warn{
+    background: linear-gradient(180deg, rgba(251,191,36,.95), rgba(251,191,36,.55));
+    border-color: rgba(251,191,36,.8);
+    color:#1b1300;
+  }
+  button:disabled, select:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+  }
 
+  .boardWrap{ position:relative; }
   .board{
     width:min(560px, 100%);
     aspect-ratio: 1 / 1;
@@ -142,6 +151,38 @@
     border:1px solid rgba(255,255,255,.08);
     font-size:12px;
   }
+
+  /* Modal */
+  .overlay{
+    position:absolute; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    padding: 12px;
+  }
+  .modal{
+    width:min(460px, 100%);
+    background: linear-gradient(180deg, rgba(15,27,51,.96), rgba(10,18,34,.96));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
+    padding: 14px;
+  }
+  .modal h3{ margin:0 0 8px; font-size:18px; }
+  .modal p{ margin:8px 0; color:var(--muted); font-size:13px; line-height:1.45; }
+  .modal .actions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:12px; }
+  .checkrow{
+    display:flex; gap:10px; align-items:center; margin-top:10px;
+    padding:10px; border-radius:14px;
+    border:1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.04);
+  }
+  .checkrow input[type="checkbox"]{
+    width:18px; height:18px;
+    padding:0;
+    background: rgba(255,255,255,.06);
+  }
 </style>
 </head>
 <body>
@@ -149,22 +190,45 @@
 
     <section class="panel">
       <div class="hd">
-        <div class="t">Reversi vs AI</div>
+        <div class="t">Reversi</div>
         <div class="s"><span class="pill" id="turnPill">Turn: Black</span></div>
       </div>
+
       <div class="body">
-        <div id="board" class="board" aria-label="Reversi board"></div>
+        <div class="boardWrap">
+          <div id="board" class="board" aria-label="Reversi board"></div>
+
+          <!-- PASS MODAL OVERLAY -->
+          <div class="overlay" id="passOverlay">
+            <div class="modal" role="dialog" aria-modal="true">
+              <h3 id="passTitle">No legal moves</h3>
+              <p id="passText">Black has no legal moves and must pass.</p>
+
+              <div class="checkrow">
+                <input type="checkbox" id="autoPassChk"/>
+                <label for="autoPassChk" class="smallText" style="cursor:pointer; margin:0;">
+                  Auto-pass next time (skip this popup until you can move again)
+                </label>
+              </div>
+
+              <div class="actions">
+                <button id="passClose">Close</button>
+                <button class="warn" id="passBtn">Pass</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="stats">
           <div class="stat"><div class="k">Black</div><div class="v" id="blackCount">2</div></div>
           <div class="stat"><div class="k">White</div><div class="v" id="whiteCount">2</div></div>
           <div class="stat"><div class="k">Legal moves</div><div class="v" id="legalCount">4</div></div>
-          <div class="stat"><div class="k">AI Level</div><div class="v" id="diffLabel">Intermediate</div></div>
+          <div class="stat"><div class="k">Mode</div><div class="v" id="modeLabel">VS AI</div></div>
         </div>
 
         <div class="log" role="status" aria-live="polite">
           <div class="k">Status</div>
-          <div id="log">Tap a green dot to place a disc. Black (you) starts.</div>
+          <div id="log">Tap a green dot to place a disc. Black starts.</div>
         </div>
       </div>
     </section>
@@ -172,15 +236,15 @@
     <aside class="panel">
       <div class="hd">
         <div class="t">Controls</div>
-        <div class="s">Fast + strong AI</div>
+        <div class="s">AI or 2 Players</div>
       </div>
+
       <div class="body">
         <div class="row">
-          <label class="small" for="diff">AI</label>
-          <select id="diff">
-            <option value="easy">Easy</option>
-            <option value="intermediate" selected>Intermediate</option>
-            <option value="advanced">Advanced (Pro Fast)</option>
+          <label class="small" for="modeSel">Game</label>
+          <select id="modeSel">
+            <option value="ai" selected>VS AI</option>
+            <option value="2p">2 Players (Hotseat)</option>
           </select>
           <button class="primary" id="btnNew">New Game</button>
           <button id="btnHint">Hide Hints</button>
@@ -188,7 +252,18 @@
 
         <div style="height:10px"></div>
 
-        <div class="row">
+        <div class="row" id="aiRow1">
+          <label class="small" for="diff">AI</label>
+          <select id="diff">
+            <option value="easy">Easy</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="advanced">Advanced (Pro Fast)</option>
+          </select>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="row" id="aiRow2">
           <label class="small" for="youColor">You play</label>
           <select id="youColor">
             <option value="B" selected>Black (first)</option>
@@ -200,9 +275,9 @@
         <div style="height:10px"></div>
         <div class="smallText">
           Rules: Place a disc that brackets opponent discs in any of 8 directions, then flip them.
-          If you have no legal moves, you pass. Game ends when both pass (or board is full).
+          If you have no legal moves, you must pass. Game ends when both pass (or board is full).
           <br><br>
-          Tip: Corners are powerful. Advanced AI uses time-limited iterative deepening + caching, so it stays responsive on mobile.
+          Advanced AI uses time-limited iterative deepening + caching, so it stays responsive on mobile.
         </div>
       </div>
     </aside>
@@ -219,6 +294,7 @@
     [-1, 1], [0, 1], [1, 1],
   ];
 
+  // DOM
   const boardEl = document.getElementById("board");
   const logEl = document.getElementById("log");
   const turnPill = document.getElementById("turnPill");
@@ -226,43 +302,56 @@
   const blackCountEl = document.getElementById("blackCount");
   const whiteCountEl = document.getElementById("whiteCount");
   const legalCountEl = document.getElementById("legalCount");
-  const diffLabel = document.getElementById("diffLabel");
+  const modeLabelEl = document.getElementById("modeLabel");
 
+  const modeSel = document.getElementById("modeSel");
   const diffSel = document.getElementById("diff");
+  const youColorSel = document.getElementById("youColor");
+
   const btnNew = document.getElementById("btnNew");
   const btnHint = document.getElementById("btnHint");
-  const youColorSel = document.getElementById("youColor");
   const btnApply = document.getElementById("btnApply");
+
+  const aiRow1 = document.getElementById("aiRow1");
+  const aiRow2 = document.getElementById("aiRow2");
+
+  // Pass modal
+  const passOverlay = document.getElementById("passOverlay");
+  const passTitle = document.getElementById("passTitle");
+  const passText = document.getElementById("passText");
+  const autoPassChk = document.getElementById("autoPassChk");
+  const passBtn = document.getElementById("passBtn");
+  const passClose = document.getElementById("passClose");
 
   let showHints = true;
 
   // Game state
   let B = makeBoard();
-  let turn = "B";          // side to move
-  let human = "B";         // human side
-  let ai = "W";            // ai side
+  let turn = "B";              // side to move
+
+  // Mode state
+  let gameMode = "ai";         // "ai" | "2p"
+  let human = "B";             // in VS AI: human side
+  let ai = "W";                // in VS AI: ai side
   let difficulty = "intermediate";
   let busyAI = false;
 
-  function makeBoard(){
-    return Array.from({length:N}, ()=>Array(N).fill(""));
-  }
+  // Auto-pass per side (reset each new game)
+  let autoPass = { B:false, W:false };
 
+  function makeBoard(){ return Array.from({length:N}, ()=>Array(N).fill("")); }
   function initBoard(){
     B = makeBoard();
-    // Standard start
     B[3][3] = "W"; B[4][4] = "W";
     B[3][4] = "B"; B[4][3] = "B";
     turn = "B";
     busyAI = false;
+    autoPass = { B:false, W:false };
   }
 
   function inBounds(x,y){ return x>=0 && x<N && y>=0 && y<N; }
   function other(p){ return p === "B" ? "W" : "B"; }
-
-  function cloneBoard(b){
-    return b.map(row => row.slice());
-  }
+  function cloneBoard(b){ return b.map(row => row.slice()); }
 
   function discsToFlip(b, x, y, player){
     if(b[y][x] !== "") return [];
@@ -316,15 +405,12 @@
   }
 
   function isTerminal(b){
-    // terminal if no moves for both
     return legalMoves(b,"B").length === 0 && legalMoves(b,"W").length === 0;
   }
 
   // ----------------------------
   // AI (Easy / Intermediate / Advanced fast+strong)
   // ----------------------------
-
-  // EASY: Greedy + corner preference + slight randomness
   function greedyAI(b, player){
     const moves = legalMoves(b, player);
     if(!moves.length) return null;
@@ -372,7 +458,6 @@
   }
 
   function cornerAdjacencyPenalty(b, player){
-    // occupying X/C squares when corner is empty is risky
     let p = 0;
     const opp = other(player);
 
@@ -545,48 +630,144 @@
   }
 
   // ----------------------------
-  // Rendering + game flow
+  // UI helpers
   // ----------------------------
-  function setLog(msg){
-    logEl.textContent = msg;
+  function setLog(msg){ logEl.textContent = msg; }
+
+  function setModeUI(){
+    gameMode = modeSel.value;
+    const isAI = gameMode === "ai";
+
+    aiRow1.style.display = isAI ? "" : "none";
+    aiRow2.style.display = isAI ? "" : "none";
+
+    modeLabelEl.textContent = isAI ? "VS AI" : "2 Players";
+
+    // keep values but prevent confusion
+    diffSel.disabled = !isAI;
+    youColorSel.disabled = !isAI;
+    btnApply.disabled = !isAI;
   }
 
+  // ----------------------------
+  // Pass modal logic
+  // ----------------------------
+  function hidePassModal(){
+    passOverlay.style.display = "none";
+  }
+
+  function showPassModal(player){
+    const name = player === "B" ? "Black" : "White";
+    passTitle.textContent = "No legal moves";
+    passText.textContent = `${name} has no legal moves and must pass.`;
+    autoPassChk.checked = autoPass[player];
+    passOverlay.style.display = "flex";
+  }
+
+  function doPass(playerWhoPassed, viaAuto=false){
+    const name = playerWhoPassed === "B" ? "Black" : "White";
+    turn = other(playerWhoPassed);
+
+    if(viaAuto) setLog(`${name} has no moves — auto-pass.`);
+    else setLog(`${name} has no moves — passed.`);
+
+    render();
+    // after passing, we must handle the next turn too (could also have no moves)
+    handleTurnStart();
+  }
+
+  // ----------------------------
+  // Turn handling (pass/end/AI)
+  // ----------------------------
+  function handleTurnStart(){
+    // If terminal -> end game
+    const myMoves = legalMoves(B, turn);
+    if(myMoves.length > 0){
+      // If we previously enabled auto-pass for a side, and now they CAN move again, keep it enabled
+      // (per your requirement: "until player able to move" — we interpret it as "auto-pass while no moves")
+      // We'll auto-pass only when no moves; otherwise nothing special.
+      // Trigger AI if needed.
+      if(gameMode === "ai" && turn === ai){
+        doAITurn();
+      }
+      return;
+    }
+
+    // No moves for current player -> check if opponent also no moves (end game)
+    const opp = other(turn);
+    const oppMoves = legalMoves(B, opp);
+    if(oppMoves.length === 0){
+      const {bc,wc} = countPieces(B);
+      if(bc > wc) setLog(`Game over. Black wins ${bc}-${wc}.`);
+      else if(wc > bc) setLog(`Game over. White wins ${wc}-${bc}.`);
+      else setLog(`Game over. Draw ${bc}-${wc}.`);
+      busyAI = true; // freeze clicks
+      render();
+      return;
+    }
+
+    // Otherwise must pass
+    if(autoPass[turn]){
+      // auto pass immediately
+      const passingPlayer = turn;
+      doPass(passingPlayer, true);
+      return;
+    }
+
+    // show modal so player knows what happened
+    showPassModal(turn);
+  }
+
+  // ----------------------------
+  // Rendering + move flow
+  // ----------------------------
   function render(){
     boardEl.innerHTML = "";
 
     const moves = legalMoves(B, turn);
-    const moveMap = new Map();
-    for(const m of moves){
-      moveMap.set(`${m.x},${m.y}`, m);
-    }
+    const moveMap = new Map(moves.map(m => [`${m.x},${m.y}`, m]));
 
     for(let y=0;y<N;y++){
       for(let x=0;x<N;x++){
         const cell = document.createElement("div");
         cell.className = "cell";
-        cell.dataset.x = x;
-        cell.dataset.y = y;
 
         const v = B[y][x];
         if(v){
           const d = document.createElement("div");
           d.className = "disc " + (v === "B" ? "black" : "white");
           cell.appendChild(d);
-        } else if(showHints && moveMap.has(`${x},${y}`) && !busyAI && turn === human){
-          const dot = document.createElement("div");
-          dot.className = "hintDot";
-          cell.appendChild(dot);
+        } else if(showHints && moveMap.has(`${x},${y}`) && !busyAI){
+          // In VS AI: show hints only for human turn
+          const canShow =
+            (gameMode === "2p") ? true :
+            (turn === human);
+
+          if(canShow){
+            const dot = document.createElement("div");
+            dot.className = "hintDot";
+            cell.appendChild(dot);
+          }
         }
 
         cell.addEventListener("click", () => {
           if(busyAI) return;
-          if(turn !== human) return;
 
-          const key = `${x},${y}`;
-          const m = moveMap.get(key);
+          // In VS AI, block clicks when it's AI's turn
+          if(gameMode === "ai" && turn !== human) return;
+
+          // If pass modal open, ignore board
+          if(passOverlay.style.display === "flex") return;
+
+          const m = moveMap.get(`${x},${y}`);
           if(!m) return;
 
-          playMove(m, human);
+          // play move
+          const player = turn;
+          B = applyMove(B, m, player);
+          turn = other(player);
+          render();
+          handleTurnStart();
         });
 
         boardEl.appendChild(cell);
@@ -596,74 +777,33 @@
     const {bc,wc} = countPieces(B);
     blackCountEl.textContent = bc;
     whiteCountEl.textContent = wc;
-    legalCountEl.textContent = legalMoves(B, turn).length;
-
-    diffLabel.textContent =
-      (difficulty === "easy") ? "Easy" :
-      (difficulty === "advanced") ? "Advanced" :
-      "Intermediate";
-
+    legalCountEl.textContent = String(legalMoves(B, turn).length);
     turnPill.textContent = `Turn: ${turn === "B" ? "Black" : "White"}`;
   }
 
-  function maybePassOrEnd(){
-    const moves = legalMoves(B, turn);
-    if(moves.length > 0) return false;
-
-    const opp = other(turn);
-    const oppMoves = legalMoves(B, opp);
-
-    if(oppMoves.length === 0){
-      const {bc,wc} = countPieces(B);
-      if(bc > wc) setLog(`Game over. Black wins ${bc}-${wc}.`);
-      else if(wc > bc) setLog(`Game over. White wins ${wc}-${bc}.`);
-      else setLog(`Game over. Draw ${bc}-${wc}.`);
-      busyAI = true; // freeze
-      render();
-      return true;
-    } else {
-      setLog(`${turn === "B" ? "Black" : "White"} has no moves — pass.`);
-      turn = opp;
-      render();
-      return true;
-    }
-  }
-
-  function playMove(move, player){
-    B = applyMove(B, move, player);
-    turn = other(player);
-    render();
-
-    maybePassOrEnd();
-
-    if(turn === ai && !busyAI){
-      doAITurn();
-    }
-  }
-
   function doAITurn(){
+    if(gameMode !== "ai") return;
     if(turn !== ai) return;
+
     busyAI = true;
     setLog("AI is thinking…");
     render();
 
-    // small delay so UI paints on mobile
     setTimeout(() => {
       const moves = legalMoves(B, ai);
+
+      // AI also could have no moves
       if(moves.length === 0){
         busyAI = false;
-        setLog("AI has no moves — pass.");
-        turn = human;
-        render();
-        maybePassOrEnd();
+        // Trigger pass handling for AI turn
+        handleTurnStart();
         return;
       }
 
       const m = chooseAIMove(B);
       if(!m){
         busyAI = false;
-        turn = human;
-        render();
+        handleTurnStart();
         return;
       }
 
@@ -672,28 +812,41 @@
       busyAI = false;
 
       render();
-      maybePassOrEnd();
-
       setLog(`AI played (${m.x+1}, ${m.y+1}). Your turn.`);
+      handleTurnStart();
     }, 120);
   }
 
   function newGame(){
+    setModeUI();
+
     difficulty = diffSel.value;
-    human = youColorSel.value;
-    ai = other(human);
+
+    if(gameMode === "ai"){
+      human = youColorSel.value;
+      ai = other(human);
+    } else {
+      // 2P hotseat
+      human = "B";
+      ai = "W"; // unused
+    }
 
     initBoard();
+    hidePassModal();
 
-    setLog(`${human === "B" ? "Black" : "White"} = You. Tap a hinted square to play.`);
-    render();
-
-    if(turn === ai){
-      doAITurn();
+    if(gameMode === "ai"){
+      setLog(`${human === "B" ? "Black" : "White"} = You. Tap a hinted square to play.`);
+    } else {
+      setLog(`2 Players mode. Black starts. Pass popup will appear if no moves.`);
     }
+
+    render();
+    handleTurnStart(); // if AI starts (human chose White), this triggers AI
   }
 
-  // UI
+  // ----------------------------
+  // Controls
+  // ----------------------------
   btnNew.addEventListener("click", newGame);
 
   btnHint.addEventListener("click", () => {
@@ -704,10 +857,33 @@
 
   diffSel.addEventListener("change", () => {
     difficulty = diffSel.value;
-    render();
   });
 
   btnApply.addEventListener("click", newGame);
+  modeSel.addEventListener("change", newGame);
+
+  // Pass modal actions
+  passBtn.addEventListener("click", () => {
+    // Save auto-pass choice for the player who is currently stuck
+    autoPass[turn] = autoPassChk.checked;
+    hidePassModal();
+    doPass(turn, false);
+  });
+  passClose.addEventListener("click", () => {
+    // Don't pass yet; just close. (Player can reopen by trying to click board, but board clicks are blocked while modal is open)
+    // Keeping this button because you asked "player can opt" and some users want to read first.
+    // If closed, we'll still require passing; so reopen immediately to avoid confusion.
+    hidePassModal();
+    // Re-open after a beat so it feels intentional
+    setTimeout(() => showPassModal(turn), 80);
+  });
+  passOverlay.addEventListener("click", (e) => {
+    if(e.target === passOverlay){
+      // same behavior as Close
+      hidePassModal();
+      setTimeout(() => showPassModal(turn), 80);
+    }
+  });
 
   // Start
   newGame();
@@ -715,3 +891,4 @@
 </script>
 </body>
 </html>
+
