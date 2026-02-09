@@ -1,22 +1,67 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Geo Quiz</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Geo Quiz — Guess the Flag</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🌍</div>
+        <div>
+          <h1>Geo Quiz</h1>
+          <p class="subtitle">Guess the country by the flag</p>
+        </div>
+      </div>
 
-  <h1>Geo Quiz</h1>
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Score</div>
+          <div class="value" id="score">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Question</div>
+          <div class="value"><span id="qIndex">1</span>/<span id="qTotal">10</span></div>
+        </div>
+      </div>
+    </header>
 
-  <img id="flag" src="" alt="Flag">
+    <main class="card">
+      <section class="question">
+        <h2 id="prompt">Which country is this flag?</h2>
 
-  <div id="answers">
-    <button>A</button>
-    <button>B</button>
-    <button>C</button>
-    <button>D</button>
+        <div class="flagWrap">
+          <img id="flagImg" class="flag" src="" alt="Country flag" />
+        </div>
+
+        <div id="choices" class="choices" aria-label="Answer choices">
+          <!-- buttons injected by script.js -->
+        </div>
+
+        <div class="feedbackRow">
+          <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+
+          <div class="actions">
+            <button id="nextBtn" class="btn" disabled>Next</button>
+            <button id="restartBtn" class="btn btnGhost" title="Start over">Restart</button>
+          </div>
+        </div>
+
+        <p class="hint">
+          Tip: Put your flag images in <code>flags/</code> and match the filenames in <code>script.js</code>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Made for GitHub Pages</span>
+    </footer>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
