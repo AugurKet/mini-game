@@ -3,28 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Geo Quiz — Guess the Flag</title>
+  <title>Geo Quiz — Timed Flag Rush</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <div class="logo">🌍</div>
+        <div class="logo">⏱️</div>
         <div>
-          <h1>Geo Quiz</h1>
-          <p class="subtitle">Guess the country by the flag</p>
+          <h1>Flag Rush</h1>
+          <p class="subtitle">15 seconds — how many can you get?</p>
         </div>
       </div>
 
       <div class="stats">
         <div class="stat">
-          <div class="label">Score</div>
+          <div class="label">Time</div>
+          <div class="value"><span id="timeLeft">15</span>s</div>
+        </div>
+        <div class="stat">
+          <div class="label">Correct</div>
           <div class="value" id="score">0</div>
         </div>
         <div class="stat">
-          <div class="label">Question</div>
-          <div class="value"><span id="qIndex">1</span>/<span id="qTotal">10</span></div>
+          <div class="label">Attempts</div>
+          <div class="value" id="attempts">0</div>
         </div>
       </div>
     </header>
@@ -42,16 +46,19 @@
         </div>
 
         <div class="feedbackRow">
-          <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+          <div id="feedback" class="feedback muted" role="status" aria-live="polite">
+            Tap an answer to start playing.
+          </div>
 
           <div class="actions">
-            <button id="nextBtn" class="btn" disabled>Next</button>
-            <button id="restartBtn" class="btn btnGhost" title="Start over">Restart</button>
+            <button id="startBtn" class="btn">Start</button>
+            <button id="restartBtn" class="btn btnGhost" title="Restart">Restart</button>
           </div>
         </div>
 
         <p class="hint">
-          Tip: Put your flag images in <code>flags/</code> and match the filenames in <code>script.js</code>.
+          Upload flags into <code>flags/</code>. Filenames must match <code>script.js</code>
+          (example: <code>newzealand.png</code>).
         </p>
       </section>
     </main>
@@ -64,4 +71,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
