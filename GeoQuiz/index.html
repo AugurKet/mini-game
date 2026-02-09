@@ -30,6 +30,10 @@
           <div class="label">Attempts</div>
           <div class="value" id="attempts">0</div>
         </div>
+        <div class="stat">
+          <div class="label">Best</div>
+          <div class="value" id="bestScore">0</div>
+        </div>
       </div>
     </header>
 
@@ -41,24 +45,21 @@
           <img id="flagImg" class="flag" src="" alt="Country flag" />
         </div>
 
-        <div id="choices" class="choices" aria-label="Answer choices">
-          <!-- buttons injected by script.js -->
-        </div>
+        <div id="choices" class="choices" aria-label="Answer choices"></div>
 
         <div class="feedbackRow">
           <div id="feedback" class="feedback muted" role="status" aria-live="polite">
-            Tap an answer to start playing.
+            Tap Start to begin.
           </div>
 
           <div class="actions">
             <button id="startBtn" class="btn">Start</button>
-            <button id="restartBtn" class="btn btnGhost" title="Restart">Restart</button>
+            <button id="restartBtn" class="btn btnGhost">Restart</button>
           </div>
         </div>
 
         <p class="hint">
-          Upload flags into <code>flags/</code>. Filenames must match <code>script.js</code>
-          (example: <code>newzealand.png</code>).
+          Upload flags into <code>flags/</code>. Filenames must match <code>script.js</code>.
         </p>
       </section>
     </main>
@@ -66,6 +67,18 @@
     <footer class="footer">
       <span>Made for GitHub Pages</span>
     </footer>
+  </div>
+
+  <!-- RESULT MODAL -->
+  <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modalCard">
+      <h3 id="resultTitle">Time’s Up!</h3>
+      <p id="resultText" class="modalText"></p>
+      <div class="modalActions">
+        <button id="playAgainBtn" class="btn">Play Again</button>
+        <button id="closeModalBtn" class="btn btnGhost">Close</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
