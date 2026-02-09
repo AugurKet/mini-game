@@ -1,7 +1,7 @@
 /* Flag Rush — Timed (15s), auto-next
    Naming style: lowercase, no spaces/hyphens (e.g. newzealand.png)
 */
-alert("JS loaded!");
+
 const TIME_LIMIT_SECONDS = 15;
 
 // Keep this list synced with your /flags/ filenames
@@ -28,6 +28,7 @@ const COUNTRIES = [
   { name: "South Africa", flag: "flags/southafrica.png" },
 ];
 
+// ====== ELEMENTS ======
 const scoreEl = document.getElementById("score");
 const attemptsEl = document.getElementById("attempts");
 const timeLeftEl = document.getElementById("timeLeft");
@@ -37,6 +38,14 @@ const feedbackEl = document.getElementById("feedback");
 const startBtn = document.getElementById("startBtn");
 const restartBtn = document.getElementById("restartBtn");
 
+// ====== SAFETY: SHOW ERRORS ON SCREEN ======
+window.addEventListener("error", (e) => {
+  const msg = e?.message || "Unknown error";
+  feedbackEl.textContent = `JS Error: ${msg}`;
+  feedbackEl.className = "feedback bad";
+});
+
+// ====== STATE ======
 let score = 0;
 let attempts = 0;
 let current = null; // { correctCountry, options: [name...] }
@@ -46,6 +55,7 @@ let timerId = null;
 let gameActive = false;
 let timeLeft = TIME_LIMIT_SECONDS;
 
+// ====== UTIL ======
 function randInt(max){ return Math.floor(Math.random() * max); }
 
 function shuffle(arr){
@@ -89,6 +99,7 @@ function buildQuestion(){
   return { correctCountry, options };
 }
 
+// ====== GAME RENDER ======
 function renderQuestion(){
   locked = false;
   clearChoices();
@@ -103,8 +114,16 @@ function renderQuestion(){
     btn.className = "choiceBtn";
     btn.type = "button";
     btn.textContent = name;
-    btn.disabled = !gameActive;
+
+    // Enable choices even before start; if not started, first tap will start game.
+    btn.disabled = false;
+
     btn.addEventListener("click", () => handleChoice(btn, name));
+    btn.addEventListener("touchstart", (ev) => {
+      ev.preventDefault(); // helps iOS tap responsiveness
+      handleChoice(btn, name);
+    }, { passive: false });
+
     choicesEl.appendChild(btn);
   });
 }
@@ -122,7 +141,52 @@ function highlightCorrect(){
   });
 }
 
+function startGame(){
+  if (gameActive) return;
+
+  if (COUNTRIES.length < 4){
+    setFeedback("Please add at least 4 countries in script.js.", "bad");
+    return;
+  }
+
+  score = 0;
+  attempts = 0;
+  timeLeft = TIME_LIMIT_SECONDS;
+  gameActive = true;
+  locked = false;
+
+  startBtn.disabled = true;
+  setFeedback("Go!", "muted");
+  updateHUD();
+
+  if (timerId) window.clearInterval(timerId);
+  timerId = window.setInterval(() => {
+    timeLeft -= 1;
+    updateHUD();
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+
+function endGame(){
+  gameActive = false;
+  locked = true;
+  startBtn.disabled = false;
+
+  if (timerId){
+    window.clearInterval(timerId);
+    timerId = null;
+  }
+
+  lockButtons();
+
+  const accuracy = attempts === 0 ? 0 : Math.round((score / attempts) * 100);
+  setFeedback(`Time! ✅ ${score} correct / ${attempts} attempts (${accuracy}% accuracy)`, "muted");
+}
+
 function handleChoice(btn, chosen){
+  // Auto-start if player taps an answer before pressing Start
+  if (!gameActive) startGame();
+
   if (!gameActive || locked) return;
   locked = true;
 
@@ -149,78 +213,43 @@ function handleChoice(btn, chosen){
     if (!gameActive) return;
     setFeedback("Go!", "muted");
     renderQuestion();
-  }, 350);
-}
-
-function startGame(){
-  if (COUNTRIES.length < 4){
-    setFeedback("Please add at least 4 countries in script.js.", "bad");
-    return;
-  }
-
-  score = 0;
-  attempts = 0;
-  timeLeft = TIME_LIMIT_SECONDS;
-  gameActive = true;
-  startBtn.disabled = true;
-
-  setFeedback("Go!", "muted");
-  updateHUD();
-  renderQuestion();
-
-  if (timerId) window.clearInterval(timerId);
-  timerId = window.setInterval(() => {
-    timeLeft -= 1;
-    updateHUD();
-
-    if (timeLeft <= 0){
-      endGame();
-    }
-  }, 1000);
-}
-
-function endGame(){
-  gameActive = false;
-  locked = true;
-  startBtn.disabled = false;
-
-  if (timerId){
-    window.clearInterval(timerId);
-    timerId = null;
-  }
-
-  lockButtons();
-
-  const accuracy = attempts === 0 ? 0 : Math.round((score / attempts) * 100);
-  setFeedback(`Time! ✅ ${score} correct / ${attempts} attempts (${accuracy}% accuracy)`, "muted");
+  }, 280);
 }
 
 function restartGame(){
-  // Restart immediately (auto start)
   if (timerId){
     window.clearInterval(timerId);
     timerId = null;
   }
   gameActive = false;
   locked = false;
-  startBtn.disabled = false;
 
   score = 0;
   attempts = 0;
   timeLeft = TIME_LIMIT_SECONDS;
   updateHUD();
 
-  setFeedback("Tap Start to begin.", "muted");
-  renderQuestion(); // shows a flag but buttons disabled until start
+  startBtn.disabled = false;
+  setFeedback("Tap Start or tap any answer to begin.", "muted");
+  renderQuestion();
 }
 
+// Start button: support iOS tap
 startBtn.addEventListener("click", startGame);
+startBtn.addEventListener("touchstart", (ev) => {
+  ev.preventDefault();
+  startGame();
+}, { passive: false });
+
 restartBtn.addEventListener("click", restartGame);
+restartBtn.addEventListener("touchstart", (ev) => {
+  ev.preventDefault();
+  restartGame();
+}, { passive: false });
 
 // init
 (function init(){
   updateHUD();
-  setFeedback("Tap Start to begin.", "muted");
+  setFeedback("Tap Start or tap any answer to begin.", "muted");
   renderQuestion();
 })();
-
