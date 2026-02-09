@@ -1,7 +1,7 @@
 /* Flag Rush — Timed (15s), auto-next
    Naming style: lowercase, no spaces/hyphens (e.g. newzealand.png)
 */
-
+alert("JS loaded!");
 const TIME_LIMIT_SECONDS = 15;
 
 // Keep this list synced with your /flags/ filenames
