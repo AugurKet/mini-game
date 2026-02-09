@@ -1,0 +1,223 @@
+:root{
+  --bg: #0b1220;
+  --card: #121a2b;
+  --text: #e6edf7;
+  --muted: #9bb0d0;
+  --border: rgba(255,255,255,.12);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --good: #22c55e;
+  --bad: #ef4444;
+  --btn: rgba(255,255,255,.10);
+  --btnHover: rgba(255,255,255,.16);
+}
+
+*{ box-sizing: border-box; }
+html, body { height: 100%; }
+body{
+  margin: 0;
+  font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(900px 600px at 15% 10%, rgba(79,70,229,.25), transparent 60%),
+              radial-gradient(900px 600px at 85% 20%, rgba(16,185,129,.18), transparent 60%),
+              var(--bg);
+  color: var(--text);
+}
+
+.app{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(18,26,43,.65);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+}
+
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo{
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+}
+h1{
+  font-size: 18px;
+  margin: 0;
+  line-height: 1.1;
+}
+.subtitle{
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stats{
+  display: flex;
+  gap: 10px;
+}
+.stat{
+  min-width: 92px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,.05);
+  text-align: center;
+}
+.stat .label{
+  font-size: 11px;
+  color: var(--muted);
+}
+.stat .value{
+  margin-top: 4px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.card{
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(18,26,43,.7);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.question h2{
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.flagWrap{
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,.03);
+}
+
+.flag{
+  width: min(520px, 100%);
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.06);
+}
+
+.choices{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.choiceBtn{
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--btn);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform .06s ease, background .12s ease;
+  text-align: center;
+}
+.choiceBtn:hover{ background: var(--btnHover); }
+.choiceBtn:active{ transform: translateY(1px); }
+
+.choiceBtn.correct{
+  border-color: rgba(34,197,94,.55);
+  background: rgba(34,197,94,.18);
+}
+.choiceBtn.wrong{
+  border-color: rgba(239,68,68,.55);
+  background: rgba(239,68,68,.16);
+}
+
+.feedbackRow{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.feedback{
+  min-height: 22px;
+  font-weight: 650;
+}
+.feedback.good{ color: var(--good); }
+.feedback.bad{ color: var(--bad); }
+.feedback.muted{ color: var(--muted); font-weight: 600; }
+
+.actions{
+  display: flex;
+  gap: 10px;
+}
+.btn{
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn:hover{ background: rgba(255,255,255,.12); }
+.btn:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.btnGhost{
+  background: transparent;
+}
+
+.hint{
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+code{
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+}
+
+.footer{
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 10px 0 2px;
+}
+
+@media (max-width: 640px){
+  .choices{ grid-template-columns: 1fr; }
+  .stat{ min-width: 84px; }
+}
