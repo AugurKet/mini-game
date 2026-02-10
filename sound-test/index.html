@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sound Test — Hearing Range</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🔊</div>
+        <div>
+          <h1>Sound Test</h1>
+          <p class="subtitle">High → Low sweep. Tap Stop when you can’t hear it.</p>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Current</div>
+          <div class="value"><span id="freqNow">—</span> Hz</div>
+        </div>
+        <div class="stat">
+          <div class="label">Result</div>
+          <div class="value"><span id="freqResult">—</span> Hz</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="card">
+      <div class="panel">
+        <div class="row">
+          <label class="lab">Output</label>
+          <select id="waveType">
+            <option value="sine" selected>Sine (smooth)</option>
+            <option value="triangle">Triangle</option>
+            <option value="square">Square (harsh)</option>
+            <option value="sawtooth">Sawtooth</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="lab">Start Frequency</label>
+          <input id="startFreq" type="number" min="1000" max="20000" value="16000">
+          <span class="unit">Hz</span>
+        </div>
+
+        <div class="row">
+          <label class="lab">End Frequency</label>
+          <input id="endFreq" type="number" min="20" max="15000" value="2000">
+          <span class="unit">Hz</span>
+        </div>
+
+        <div class="row">
+          <label class="lab">Duration</label>
+          <input id="duration" type="number" min="3" max="30" value="12">
+          <span class="unit">sec</span>
+        </div>
+
+        <div class="row">
+          <label class="lab">Volume</label>
+          <input id="volume" type="range" min="0" max="100" value="20">
+          <span class="unit"><span id="volLabel">20</span>%</span>
+        </div>
+
+        <div class="actions">
+          <button id="startBtn" class="btn btnGreen">Start</button>
+          <button id="stopBtn" class="btn" disabled>Stop</button>
+          <button id="resetBtn" class="btn btnGhost">Reset</button>
+        </div>
+
+        <div id="msg" class="msg">
+          Tip: Use headphones at a comfortable volume. Don’t blast loud audio.
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        This is not a medical device. Results vary by speaker/headphones and environment.
+      </div>
+    </main>
+
+    <footer class="footer">Made for GitHub Pages</footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
