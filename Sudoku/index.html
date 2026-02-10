@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sudoku (Unique) — Notes • Timer • Mistakes</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#0f1b33; --text:#e8efff; --muted:#9fb3d8; --border:rgba(255,255,255,.10);
+    --cell: rgba(255,255,255,.06);
+    --cell2: rgba(255,255,255,.10);
+    --accent: rgba(47,109,255,.95);
+    --bad: rgba(251,113,133,.95);
+    --good: rgba(45,212,191,.95);
+    --hi: rgba(47,109,255,.10);
+    --hi2: rgba(47,109,255,.16);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; padding:16px;
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    color:var(--text);
+    background:
+      radial-gradient(900px 500px at 20% 0%, rgba(47,109,255,.18), transparent 60%),
+      radial-gradient(900px 500px at 80% 10%, rgba(0,212,255,.12), transparent 55%),
+      var(--bg);
+    display:flex; justify-content:center; align-items:center;
+  }
+  .wrap{ width:min(1200px,100%); display:grid; grid-template-columns: 1fr 380px; gap:14px; align-items:start; }
+  @media(max-width:980px){ .wrap{grid-template-columns:1fr} }
+
+  .panel{
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    overflow:hidden;
+  }
+  .hd{ padding:14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+  .hd .t{font-weight:900}
+  .hd .s{color:var(--muted); font-size:12px}
+  .body{ padding:14px; }
+  .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .row.tight{ gap:8px; }
+  label.small{ font-size:12px; color:var(--muted); }
+
+  select, button{
+    border-radius:12px; border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.06);
+    color:var(--text);
+    padding:10px 12px;
+    font-weight:900;
+    cursor:pointer;
+  }
+  button.primary{
+    background: linear-gradient(180deg, rgba(47,109,255,.95), rgba(47,109,255,.60));
+    border-color: rgba(47,109,255,.8);
+  }
+  button.good{
+    background: linear-gradient(180deg, rgba(45,212,191,.95), rgba(45,212,191,.55));
+    border-color: rgba(45,212,191,.8);
+    color:#061317;
+  }
+  button.warn{
+    background: linear-gradient(180deg, rgba(251,113,133,.95), rgba(251,113,133,.55));
+    border-color: rgba(251,113,133,.8);
+    color:#1b0b10;
+  }
+  button.toggleOn{
+    background: linear-gradient(180deg, rgba(45,212,191,.95), rgba(45,212,191,.55));
+    border-color: rgba(45,212,191,.8);
+    color:#061317;
+  }
+  button:disabled{opacity:.6; cursor:not-allowed}
+
+  .topstats{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:10px;
+    margin-top:10px;
+  }
+  .stat{
+    background: rgba(12,22,43,.55);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:10px;
+  }
+  .stat .k{ color:var(--muted); font-size:12px; }
+  .stat .v{ font-weight:900; font-size:18px; margin-top:6px; }
+
+  .grid{
+    width:min(620px, 100%);
+    margin:auto;
+    display:grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap:2px;
+    background: rgba(255,255,255,.12);
+    padding:2px;
+    border-radius: 14px;
+    touch-action: manipulation;
+  }
+  .cell{
+    aspect-ratio: 1 / 1;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--cell);
+    border-radius: 10px;
+    user-select:none;
+    position:relative;
+    overflow:hidden;
+  }
+  .cell.given{ background: var(--cell2); }
+  .cell.sel{ outline: 2px solid var(--accent); }
+  .cell.hi{ background: var(--hi); }
+  .cell.hi2{ background: var(--hi2); }
+  .cell.bad{ outline: 2px solid var(--bad); }
+  .cell.good{ outline: 2px solid var(--good); }
+
+  .val{
+    font-weight:1000;
+    font-size: clamp(18px, 4.2vw, 28px);
+    line-height:1;
+  }
+  .val.user{ color: rgba(232,239,255,.95); }
+  .val.givenVal{ color: rgba(232,239,255,.95); opacity:.95; }
+  .val.same{ color: rgba(47,109,255,.95); }
+
+  /* Notes (3x3 tiny grid) */
+  .notes{
+    position:absolute; inset:6px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap:2px;
+    font-size: clamp(8px, 1.6vw, 11px);
+    color: rgba(232,239,255,.65);
+    font-weight:800;
+    pointer-events:none;
+  }
+  .note{
+    display:flex; align-items:center; justify-content:center;
+    opacity:.92;
+  }
+  .note.off{ opacity:.10; }
+
+  /* thick separators after row 2/5 and col 2/5 */
+  .cell[data-br="1"]{ margin-right:6px; }
+  .cell[data-bd="1"]{ margin-bottom:6px; }
+
+  .msg{
+    margin-top:10px;
+    background: rgba(12,22,43,.55);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:14px;
+    padding:10px;
+    min-height: 62px;
+  }
+  .msg .k{ color:var(--muted); font-size:12px; margin-bottom:6px; }
+  .small{ color:var(--muted); font-size:12px; line-height:1.45; }
+  kbd{background:rgba(255,255,255,.08); padding:2px 6px; border-radius:8px; border:1px solid rgba(255,255,255,.10)}
+  .pill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    font-size:12px;
+    color: rgba(232,239,255,.9);
+  }
+
+  .pad{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:8px;
+    margin-top:12px;
+  }
+  .pad button{ padding:14px 0; }
+
+  /* Light modal for generation */
+  .overlay{
+    position:fixed; inset:0;
+    display:none;
+    align-items:center; justify-content:center;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(8px);
+    padding:16px;
+    z-index:9999;
+  }
+  .modal{
+    width:min(520px, 100%);
+    background: linear-gradient(180deg, rgba(15,27,51,.96), rgba(10,18,34,.96));
+    border:1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
+    padding: 14px;
+  }
+  .modal h3{ margin:0 0 8px; font-size:18px; }
+  .modal p{ margin:8px 0; color:var(--muted); font-size:13px; line-height:1.45; }
+  .bar{
+    height:10px; border-radius:999px;
+    background: rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.10);
+    overflow:hidden;
+    margin-top:10px;
+  }
+  .bar > div{
+    height:100%;
+    width:20%;
+    background: linear-gradient(90deg, rgba(47,109,255,.95), rgba(45,212,191,.85));
+    animation: ind 1.1s infinite ease-in-out;
+  }
+  @keyframes ind{
+    0%{ transform: translateX(-100%); }
+    100%{ transform: translateX(500%); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="panel">
+    <div class="hd">
+      <div class="t">Sudoku</div>
+      <div class="s">
+        <span class="pill" id="modePill">Mode: Values</span>
+      </div>
+    </div>
+
+    <div class="body">
+      <div id="grid" class="grid" aria-label="Sudoku grid"></div>
+
+      <div class="topstats">
+        <div class="stat"><div class="k">Timer</div><div class="v" id="timer">00:00</div></div>
+        <div class="stat"><div class="k">Mistakes</div><div class="v" id="mistakes">0</div></div>
+        <div class="stat"><div class="k">Difficulty</div><div class="v" id="diffLabel">Medium</div></div>
+      </div>
+
+      <div class="msg" role="status" aria-live="polite">
+        <div class="k">Status</div>
+        <div id="log">Generating unique puzzle…</div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="hd">
+      <div class="t">Actions</div>
+      <div class="s">Unique • Notes • Timer</div>
+    </div>
+    <div class="body">
+      <div class="row">
+        <label class="small" for="diff">Difficulty</label>
+        <select id="diff">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button class="primary" id="newBtn">New (Unique)</button>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="row tight">
+        <button id="notesBtn">Notes</button>
+        <button id="clearBtn">Clear</button>
+        <button id="checkBtn">Check</button>
+        <button class="good" id="hintBtn">Hint</button>
+        <button class="warn" id="solveBtn">Solve</button>
+      </div>
+
+      <div class="pad" id="pad">
+        <button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button><button data-n="4">4</button><button data-n="5">5</button>
+        <button data-n="6">6</button><button data-n="7">7</button><button data-n="8">8</button><button data-n="9">9</button><button data-n="0">⌫</button>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="small">
+        Desktop: select cell, type <kbd>1</kbd>–<kbd>9</kbd>, <kbd>Backspace</kbd> clears. Arrow keys move selection.<br>
+        Notes mode: number toggles pencil mark.<br>
+        Mistake: wrong number increases counter and is NOT placed.
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- GENERATING MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>Generating a unique puzzle…</h3>
+    <p>This checks uniqueness while removing clues. Hard puzzles can take a bit longer.</p>
+    <div class="bar"><div></div></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ----------------------------
+  // DOM
+  // ----------------------------
+  const gridEl = document.getElementById("grid");
+  const logEl = document.getElementById("log");
+  const diffSel = document.getElementById("diff");
+  const diffLabelEl = document.getElementById("diffLabel");
+  const newBtn = document.getElementById("newBtn");
+  const notesBtn = document.getElementById("notesBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const checkBtn = document.getElementById("checkBtn");
+  const hintBtn = document.getElementById("hintBtn");
+  const solveBtn = document.getElementById("solveBtn");
+  const pad = document.getElementById("pad");
+  const timerEl = document.getElementById("timer");
+  const mistakesEl = document.getElementById("mistakes");
+  const modePill = document.getElementById("modePill");
+  const overlay = document.getElementById("overlay");
+
+  // ----------------------------
+  // State
+  // ----------------------------
+  // board arrays are length 81 (0 means empty)
+  let puzzle = Array(81).fill(0);     // given puzzle
+  let solution = Array(81).fill(0);   // full solution
+  let user = Array(81).fill(0);       // current entries
+  let given = Array(81).fill(false);  // fixed cells
+
+  // notes: Array<Set<number>> for each cell
+  let notes = Array.from({length:81}, () => new Set());
+
+  let sel = -1;
+  let notesMode = false;
+
+  let mistakes = 0;
+
+  // timer
+  let startTs = 0;
+  let timerId = null;
+  let running = false;
+
+  // ----------------------------
+  // Utilities
+  // ----------------------------
+  const idx = (r,c)=> r*9+c;
+  const rc  = (i)=> [Math.floor(i/9), i%9];
+  const boxIndex = (r,c)=> Math.floor(r/3)*3 + Math.floor(c/3);
+  const ALL = 0x3FE; // bits 1..9 set
+
+  function setLog(msg){ logEl.textContent = msg; }
+  function showOverlay(on){ overlay.style.display = on ? "flex" : "none"; }
+
+  function shuffle(a){
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function popcount(x){
+    let c=0;
+    while(x){ x &= (x-1); c++; }
+    return c;
+  }
+
+  function bitToNum(bit){
+    // bit is power of two (1<<n)
+    return Math.log2(bit) | 0;
+  }
+
+  function formatTime(seconds){
+    const m = Math.floor(seconds/60);
+    const s = seconds%60;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+
+  function setNotesMode(on){
+    notesMode = on;
+    notesBtn.className = on ? "toggleOn" : "";
+    modePill.textContent = on ? "Mode: Notes" : "Mode: Values";
+  }
+
+  // ----------------------------
+  // Timer
+  // ----------------------------
+  function startTimer(){
+    stopTimer();
+    startTs = Date.now();
+    running = true;
+    timerEl.textContent = "00:00";
+    timerId = setInterval(() => {
+      if(!running) return;
+      const sec = Math.floor((Date.now() - startTs)/1000);
+      timerEl.textContent = formatTime(sec);
+    }, 250);
+  }
+
+  function stopTimer(){
+    running = false;
+    if(timerId){ clearInterval(timerId); timerId = null; }
+  }
+
+  // ----------------------------
+  // Constraint masks
+  // ----------------------------
+  function buildMasks(board){
+    const rowMask = Array(9).fill(0);
+    const colMask = Array(9).fill(0);
+    const boxMask = Array(9).fill(0);
+
+    for(let i=0;i<81;i++){
+      const v = board[i];
+      if(!v) continue;
+      const [r,c] = rc(i);
+      const b = boxIndex(r,c);
+      const bit = 1<<v;
+      rowMask[r] |= bit;
+      colMask[c] |= bit;
+      boxMask[b] |= bit;
+    }
+    return {rowMask,colMask,boxMask};
+  }
+
+  function candidatesMask(i, rowMask, colMask, boxMask, board){
+    if(board[i] !== 0) return 0;
+    const [r,c] = rc(i);
+    const b = boxIndex(r,c);
+    const used = rowMask[r] | colMask[c] | boxMask[b];
+    return ALL & ~used;
+  }
+
+  function findMRVCell(board, rowMask, colMask, boxMask){
+    let bestI = -1;
+    let bestMask = 0;
+    let bestCount = 10;
+
+    for(let i=0;i<81;i++){
+      if(board[i] !== 0) continue;
+      const m = candidatesMask(i,rowMask,colMask,boxMask,board);
+      const cnt = popcount(m);
+      if(cnt === 0) return {i:-1, mask:0, dead:true};
+      if(cnt < bestCount){
+        bestCount = cnt;
+        bestI = i;
+        bestMask = m;
+        if(cnt === 1) break;
+      }
+    }
+    return {i:bestI, mask:bestMask, dead:false};
+  }
+
+  // ----------------------------
+  // Solve (one solution)
+  // ----------------------------
+  function solveOne(board){
+    const b = board.slice();
+    const {rowMask,colMask,boxMask} = buildMasks(b);
+
+    function dfs(){
+      const {i, mask, dead} = findMRVCell(b,rowMask,colMask,boxMask);
+      if(dead) return false;
+      if(i === -1) return true; // solved
+
+      // iterate candidates in random order
+      const bits = [];
+      for(let bit=1; bit<=512; bit<<=1){
+        if(mask & bit) bits.push(bit);
+      }
+      shuffle(bits);
+
+      const [r,c] = rc(i);
+      const box = boxIndex(r,c);
+
+      for(const bit of bits){
+        const v = bitToNum(bit);
+        b[i] = v;
+        rowMask[r] |= bit; colMask[c] |= bit; boxMask[box] |= bit;
+
+        if(dfs()) return true;
+
+        rowMask[r] ^= bit; colMask[c] ^= bit; boxMask[box] ^= bit;
+        b[i] = 0;
+      }
+      return false;
+    }
+
+    return dfs() ? b : null;
+  }
+
+  // ----------------------------
+  // Count solutions up to limit (for uniqueness)
+  // ----------------------------
+  function countSolutions(board, limit=2){
+    const b = board.slice();
+    const {rowMask,colMask,boxMask} = buildMasks(b);
+    let count = 0;
+
+    function dfs(){
+      if(count >= limit) return;
+
+      const {i, mask, dead} = findMRVCell(b,rowMask,colMask,boxMask);
+      if(dead) return;
+      if(i === -1){
+        count++;
+        return;
+      }
+
+      // deterministic-ish order for stability (but still fine)
+      const bits = [];
+      for(let bit=1; bit<=512; bit<<=1){
+        if(mask & bit) bits.push(bit);
+      }
+
+      const [r,c] = rc(i);
+      const box = boxIndex(r,c);
+
+      for(const bit of bits){
+        const v = bitToNum(bit);
+        b[i] = v;
+        rowMask[r] |= bit; colMask[c] |= bit; boxMask[box] |= bit;
+
+        dfs();
+        if(count >= limit) return;
+
+        rowMask[r] ^= bit; colMask[c] ^= bit; boxMask[box] ^= bit;
+        b[i] = 0;
+      }
+    }
+
+    dfs();
+    return count;
+  }
+
+  // ----------------------------
+  // Generate full solution + carve unique puzzle
+  // ----------------------------
+  function generateUnique(diff){
+    // Step 1: generate a complete solution
+    const empty = Array(81).fill(0);
+    const solved = solveOne(empty);
+    if(!solved) throw new Error("Failed to generate solution");
+    solution = solved;
+
+    // Step 2: carve cells while preserving uniqueness
+    // clue targets (rough)
+    const targetClues =
+      (diff === "easy") ? 40 :
+      (diff === "hard") ? 26 :
+      32;
+
+    let puz = solved.slice();
+    const order = shuffle([...Array(81).keys()]);
+
+    let clues = 81;
+
+    for(const i of order){
+      if(clues <= targetClues) break;
+
+      const backup = puz[i];
+      puz[i] = 0;
+
+      // must remain uniquely solvable
+      const solCount = countSolutions(puz, 2);
+      if(solCount !== 1){
+        puz[i] = backup; // revert
+      } else {
+        clues--;
+      }
+    }
+
+    puzzle = puz;
+    user = puz.slice();
+    given = puz.map(v => v !== 0);
+    notes = Array.from({length:81}, () => new Set());
+    sel = -1;
+    mistakes = 0;
+    mistakesEl.textContent = "0";
+
+    diffLabelEl.textContent =
+      diff === "easy" ? "Easy" :
+      diff === "hard" ? "Hard" : "Medium";
+
+    return true;
+  }
+
+  // ----------------------------
+  // Rendering
+  // ----------------------------
+  function isSameGroup(a, b){
+    if(a<0 || b<0) return false;
+    const [ra,ca] = rc(a);
+    const [rb,cb] = rc(b);
+    if(ra === rb) return true;
+    if(ca === cb) return true;
+    return boxIndex(ra,ca) === boxIndex(rb,cb);
+  }
+
+  function render(){
+    gridEl.innerHTML = "";
+
+    const selVal = (sel>=0) ? user[sel] : 0;
+
+    for(let i=0;i<81;i++){
+      const [r,c] = rc(i);
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.i = i;
+
+      if(r===2 || r===5) cell.dataset.bd = "1";
+      if(c===2 || c===5) cell.dataset.br = "1";
+
+      const v = user[i];
+
+      // highlights
+      if(sel === i) cell.classList.add("sel");
+      else if(isSameGroup(sel, i)) cell.classList.add("hi");
+      if(selVal && v === selVal && i !== sel) cell.classList.add("hi2");
+
+      if(given[i]) cell.classList.add("given");
+
+      // content: value or notes
+      if(v !== 0){
+        const span = document.createElement("div");
+        span.className = "val " + (given[i] ? "givenVal" : "user");
+        if(selVal && v === selVal && i !== sel) span.classList.add("same");
+        span.textContent = v;
+        cell.appendChild(span);
+      } else {
+        const ns = notes[i];
+        const wrap = document.createElement("div");
+        wrap.className = "notes";
+        for(let d=1; d<=9; d++){
+          const n = document.createElement("div");
+          n.className = "note " + (ns.has(d) ? "" : "off");
+          n.textContent = d;
+          wrap.appendChild(n);
+        }
+        cell.appendChild(wrap);
+      }
+
+      cell.addEventListener("click", () => {
+        sel = i;
+        render();
+      });
+
+      gridEl.appendChild(cell);
+    }
+  }
+
+  function flashCell(i, cls){
+    requestAnimationFrame(() => {
+      const el = gridEl.querySelector(`.cell[data-i="${i}"]`);
+      if(!el) return;
+      el.classList.add(cls);
+      setTimeout(()=> el.classList.remove(cls), 260);
+    });
+  }
+
+  // ----------------------------
+  // Gameplay
+  // ----------------------------
+  function isCompleteCorrect(){
+    for(let i=0;i<81;i++){
+      if(user[i] === 0) return false;
+      if(user[i] !== solution[i]) return false;
+    }
+    return true;
+  }
+
+  function placeValue(i, v){
+    if(i < 0){ setLog("Select a cell first."); return; }
+    if(given[i]){ setLog("That cell is fixed."); flashCell(i,"bad"); return; }
+
+    if(v === 0){
+      user[i] = 0;
+      notes[i].clear();
+      setLog("Cleared cell.");
+      render();
+      return;
+    }
+
+    // Notes mode toggles pencil marks
+    if(notesMode){
+      if(user[i] !== 0) return;
+      if(notes[i].has(v)) notes[i].delete(v);
+      else notes[i].add(v);
+      setLog("Note toggled.");
+      render();
+      return;
+    }
+
+    // Value mode: wrong value counts as mistake and is NOT placed
+    if(v !== solution[i]){
+      mistakes++;
+      mistakesEl.textContent = String(mistakes);
+      setLog(`Wrong number. Mistakes: ${mistakes}`);
+      flashCell(i,"bad");
+      return;
+    }
+
+    user[i] = v;
+    notes[i].clear();
+    setLog("Placed.");
+    flashCell(i,"good");
+    render();
+
+    if(isCompleteCorrect()){
+      stopTimer();
+      setLog(`🎉 Completed! Time: ${timerEl.textContent}. Mistakes: ${mistakes}`);
+    }
+  }
+
+  function clearCell(){
+    if(sel<0){ setLog("Select a cell first."); return; }
+    placeValue(sel, 0);
+  }
+
+  function check(){
+    // checks current filled cells (doesn't add mistakes)
+    let wrong=0, filled=0;
+    for(let i=0;i<81;i++){
+      if(user[i] !== 0){
+        filled++;
+        if(user[i] !== solution[i]) wrong++;
+      }
+    }
+    if(filled === 81 && wrong === 0){
+      setLog("✅ Perfect! Puzzle solved.");
+    } else if(wrong === 0){
+      setLog(`✅ No mistakes so far. Filled ${filled}/81.`);
+    } else {
+      setLog(`⚠️ ${wrong} incorrect cell(s) currently filled.`);
+    }
+  }
+
+  function hint(){
+    // fill one empty cell (or wrong cell) correctly
+    const candidates = [];
+    for(let i=0;i<81;i++){
+      if(given[i]) continue;
+      if(user[i] === 0 || user[i] !== solution[i]) candidates.push(i);
+    }
+    if(!candidates.length){ setLog("No hint needed."); return; }
+    const i = candidates[Math.floor(Math.random()*candidates.length)];
+    user[i] = solution[i];
+    notes[i].clear();
+    sel = i;
+    setLog("Hint applied.");
+    render();
+    flashCell(i,"good");
+
+    if(isCompleteCorrect()){
+      stopTimer();
+      setLog(`🎉 Completed! Time: ${timerEl.textContent}. Mistakes: ${mistakes}`);
+    }
+  }
+
+  function solveAll(){
+    user = solution.slice();
+    notes = Array.from({length:81}, () => new Set());
+    setLog("Solved.");
+    render();
+    stopTimer();
+  }
+
+  // ----------------------------
+  // Input
+  // ----------------------------
+  window.addEventListener("keydown", (e) => {
+    if(sel < 0) return;
+
+    const k = e.key;
+
+    // arrows move selection
+    if(k === "ArrowLeft"){ e.preventDefault(); sel = (sel%9===0) ? sel : sel-1; render(); return; }
+    if(k === "ArrowRight"){ e.preventDefault(); sel = (sel%9===8) ? sel : sel+1; render(); return; }
+    if(k === "ArrowUp"){ e.preventDefault(); sel = (sel<9) ? sel : sel-9; render(); return; }
+    if(k === "ArrowDown"){ e.preventDefault(); sel = (sel>=72) ? sel : sel+9; render(); return; }
+
+    // toggle notes with N
+    if(k === "n" || k === "N"){
+      setNotesMode(!notesMode);
+      return;
+    }
+
+    if(k >= "1" && k <= "9"){
+      placeValue(sel, Number(k));
+      return;
+    }
+    if(k === "Backspace" || k === "Delete" || k === "0"){
+      clearCell();
+      return;
+    }
+  });
+
+  pad.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if(!btn) return;
+    const n = Number(btn.dataset.n);
+    if(n === 0) clearCell();
+    else placeValue(sel, n);
+  });
+
+  // ----------------------------
+  // New game
+  // ----------------------------
+  async function newGame(){
+    const diff = diffSel.value;
+
+    // UI
+    setNotesMode(false);
+    setLog("Generating unique puzzle…");
+    showOverlay(true);
+
+    // Let UI paint before heavy work
+    await new Promise(r => setTimeout(r, 30));
+
+    try{
+      generateUnique(diff);
+      render();
+      setLog("New unique puzzle ready. Good luck!");
+      startTimer();
+    } catch (err){
+      console.error(err);
+      setLog("Failed to generate puzzle. Please try again.");
+    } finally {
+      showOverlay(false);
+    }
+  }
+
+  // ----------------------------
+  // Buttons
+  // ----------------------------
+  newBtn.addEventListener("click", newGame);
+  notesBtn.addEventListener("click", () => setNotesMode(!notesMode));
+  clearBtn.addEventListener("click", clearCell);
+  checkBtn.addEventListener("click", check);
+  hintBtn.addEventListener("click", hint);
+  solveBtn.addEventListener("click", solveAll);
+
+  // Init
+  newGame();
+})();
+</script>
+</body>
+</html>
