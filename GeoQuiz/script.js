@@ -269,15 +269,18 @@ function handleChoice(btn, chosen){
   const correctName = current.correctCountry.name;
   const ok = chosen === correctName;
 
-  if (ok){
-    score += 1;
-    btn.classList.add("correct");
-    setFeedback("Correct ✅", "good");
-  } else {
-    btn.classList.add("wrong");
-    setFeedback(`Wrong ❌  ${correctName}`, "bad");
-    highlightCorrect();
-  }
+ if (ok){
+  score += 1;
+  btn.classList.add("correct");
+  setFeedback("Correct ✅", "good");
+} else {
+  btn.classList.add("wrong");
+  highlightCorrect();
+  setFeedback(`Wrong ❌  ${correctName}`, "bad");
+
+  // popup message
+  alert("Wrong! Correct answer: " + correctName);
+}
 
   updateHUD();
   lockButtons();
