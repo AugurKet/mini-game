@@ -190,6 +190,17 @@ h1{
   font-weight: 800;
   cursor: pointer;
 }
+/* Start button highlight */
+#startBtn{
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  color: white;
+  font-weight: 900;
+}
+
+#startBtn:hover{
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
 .btn:hover{ background: rgba(255,255,255,.12); }
 .btn:disabled{ opacity: .45; cursor: not-allowed; }
 .btnGhost{ background: transparent; }
