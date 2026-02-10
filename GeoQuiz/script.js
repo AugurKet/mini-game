@@ -1,6 +1,6 @@
 /* Flag Rush — Timed (15s), auto-next, STOP on time, popup results, store best score */
 
-const TIME_LIMIT_SECONDS = 15;
+const TIME_LIMIT_SECONDS = 60;
 const BEST_KEY = "flagrush_best_correct";
 
 const COUNTRIES = [
