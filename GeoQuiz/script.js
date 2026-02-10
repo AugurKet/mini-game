@@ -13,7 +13,7 @@ const COUNTRIES = [
   { name: "Australia", flag: "flags/australia.png" },
   { name: "New Zealand", flag: "flags/newzealand.png" },
   { name: "United Kingdom", flag: "flags/unitedkingdom.png" },
-  { name: "United States", flag: "flags/unitedstates.png" },
+  { name: "United States", flag: "flags/usa.png" },
   { name: "France", flag: "flags/france.png" },
   { name: "Germany", flag: "flags/germany.png" },
   { name: "Italy", flag: "flags/italy.png" },
