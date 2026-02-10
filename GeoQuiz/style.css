@@ -268,7 +268,17 @@ code{
   justify-content: flex-end;
   flex-wrap: wrap;
 }
+/* Force green Start button */
+#startBtn{
+  background: #22c55e !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 900;
+}
 
+#startBtn:hover{
+  background: #16a34a !important;
+}
 /* better mobile tapping */
 button, .choiceBtn, .btn{
   touch-action: manipulation;
