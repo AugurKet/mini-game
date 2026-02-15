@@ -1,194 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mini Games & Vision Demos</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-  :root{
-    --bg:#0f172a;
-    --panel:#020617;
-    --card:#0b1224;
-    --ink:#e5e7eb;
-    --muted:#94a3b8;
-    --line:#1f2a44;
-    --btn:#2563eb;
-  }
-
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:Arial, sans-serif;
-    min-height:100vh;
-  }
-
-  header{
-    padding:24px 16px 10px;
-    text-align:center;
-  }
-
-  header h1{
-    margin:0 0 6px;
-    font-size:26px;
-  }
-
-  header p{
-    margin:0;
-    color:var(--muted);
-    font-size:14px;
-  }
-
-  .container{
-    max-width:900px;
-    margin:0 auto;
-    padding:20px 16px 40px;
-  }
-
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-    gap:16px;
-  }
-
-  .card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  .card h3{
-    margin:0;
-    font-size:18px;
-  }
-
-  .card p{
-    margin:0;
-    font-size:13px;
-    color:var(--muted);
-    line-height:1.4;
-    flex:1;
-  }
-
-  .card a{
-    text-decoration:none;
-    background:var(--btn);
-    color:white;
-    padding:10px;
-    border-radius:10px;
-    text-align:center;
-    font-size:14px;
-    font-weight:bold;
-  }
-
-  footer{
-    text-align:center;
-    color:var(--muted);
-    font-size:12px;
-    padding-top:20px;
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Games</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>Mini Games</h1>
+        <p class="sub">Choose a game below. (Updated list)</p>
+      </div>
+      <div class="pill" id="countPill">Loading…</div>
+    </header>
 
-<header>
-  <h1>Mini Games & Vision Demos</h1>
-  <p>Interactive experiments • Built with HTML, CSS & JavaScript</p>
-</header>
+    <main>
+      <section class="grid" id="grid">
+        <!-- Cards injected by JS -->
+      </section>
+    </main>
 
-<div class="container">
-  <div class="grid">
-
-    <div class="card">
-      <h3>🎯 Click the Box</h3>
-      <p>
-        A fast reaction mini-game. Click the box as quickly as possible
-        before time runs out.
-      </p>
-      <a href="click/">Play</a>
-    </div>
-
-    <div class="card">
-      <h3>🧠 Memory Flip</h3>
-      <p>
-        A memory matching game with difficulty levels,
-        timer, move counter and best score tracking.
-      </p>
-      <a href="memory/">Play</a>
-    </div>
-
-    <div class="card">
-      <h3>👁️ Vision Test</h3>
-      <p>
-        Find the odd-colored tile as levels increase.
-        Tests color discrimination and contrast sensitivity.
-      </p>
-      <a href="vision/">Start Test</a>
-    </div>
-
-    <div class="card">
-      <h3>🌀 Astigmatism Dial</h3>
-      <p>
-        Dial-style visual distortion screening
-        combined with a short questionnaire.
-      </p>
-      <a href="astigmatism/">Open</a>
-    </div>
-
-    <div class="card">
-      <h3>👀 Peripheral Attention Test</h3>
-      <p>
-        Keep your eyes on the center while detecting
-        targets at the edges.
-      </p>
-      <a href="peripheral/">Start Test</a>
-    </div>
-
-    <!-- NEW GAMES BELOW -->
-
-    <div class="card">
-      <h3>🎡 Wheel of Fortune</h3>
-      <p>
-        Spin the wheel and test your luck.
-        A fun word-guessing style game inspired by the classic show.
-      </p>
-      <a href="wheels/">Play</a>
-    </div>
-
-    <div class="card">
-      <h3>🧱 Tetris (PC Only)</h3>
-      <p>
-        Classic falling-block puzzle.
-        Best played on desktop with keyboard controls.
-      </p>
-      <a href="Tetris/">Play</a>
-    </div>
-
-    <div class="card">
-      <h3>⚫ Reversi</h3>
-      <p>
-        Strategic board game against AI.
-        Flip your opponent’s discs and control the board.
-      </p>
-      <a href="Reversi/">Play</a>
-    </div>
-
+    <footer class="foot">
+      <small>© <span id="year"></span> • Hosted on GitHub Pages</small>
+    </footer>
   </div>
 
-  <footer>
-    <p>
-      ⚠️ These tools are for demonstration and screening purposes only.<br>
-      Results may vary by device and environment.
-    </p>
-  </footer>
-</div>
+  <script>
+    // Folder list based on your screenshot (EXCLUDING personalitytest1 and vision1)
+    const GAMES = [
+      { name: "2048", path: "./2048/" },
+      { name: "GeoQuiz", path: "./GeoQuiz/" },
+      { name: "Reversi", path: "./Reversi/" },
+      { name: "Sudoku", path: "./Sudoku/" },
+      { name: "Tetris", path: "./Tetris/" },
+      { name: "True Or Dare", path: "./TrueOrDare/" },
+      { name: "Astigmatism", path: "./astigmatism/" },
+      { name: "Click", path: "./click/" },
+      { name: "Memory", path: "./memory/" },
+      { name: "Peripheral", path: "./peripheral/" },
+      { name: "Reversi MP", path: "./reversi-mp/" },
+      { name: "Sound Test", path: "./sound-test/" },
+      { name: "Vision", path: "./vision/" },
+      { name: "Wheels", path: "./wheels/" }
+    ];
 
+    const grid = document.getElementById("grid");
+    const countPill = document.getElementById("countPill");
+
+    function makeCard({ name, path }) {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = path;
+
+      const icon = document.createElement("div");
+      icon.className = "icon";
+      icon.textContent = name.trim().slice(0, 1).toUpperCase();
+
+      const title = document.createElement("div");
+      title.className = "title";
+      title.textContent = name;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = path.replace("./", "");
+
+      const arrow = document.createElement("div");
+      arrow.className = "arrow";
+      arrow.textContent = "→";
+
+      a.appendChild(icon);
+      a.appendChild(title);
+      a.appendChild(meta);
+      a.appendChild(arrow);
+
+      return a;
+    }
+
+    // render
+    grid.innerHTML = "";
+    GAMES.forEach(g => grid.appendChild(makeCard(g)));
+    countPill.textContent = `${GAMES.length} games`;
+
+    // year
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
-
