@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mini Games</title>
+  <meta name="description" content="Collection of mini games built with HTML, CSS and JavaScript." />
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -14,13 +15,11 @@
         <h1>Mini Games</h1>
         <p class="sub">Choose a game below. (Updated list)</p>
       </div>
-      <div class="pill" id="countPill">Loading…</div>
+      <div class="pill" id="countPill">0 games</div>
     </header>
 
     <main>
-      <section class="grid" id="grid">
-        <!-- Cards injected by JS -->
-      </section>
+      <section class="grid" id="grid"></section>
     </main>
 
     <footer class="foot">
@@ -29,7 +28,9 @@
   </div>
 
   <script>
-    // Folder list based on your screenshot (EXCLUDING personalitytest1 and vision1)
+    /* =========================
+       Game list (folders)
+       ========================= */
     const GAMES = [
       { name: "2048", path: "./2048/" },
       { name: "GeoQuiz", path: "./GeoQuiz/" },
@@ -47,17 +48,40 @@
       { name: "Wheels", path: "./wheels/" }
     ];
 
+    /* =========================
+       Icon mapping (emoji)
+       ========================= */
+    const ICON_MAP = {
+      "2048": "🧩",
+      "GeoQuiz": "🗺️",
+      "Reversi": "⚫️⚪️",
+      "Sudoku": "🔢",
+      "Tetris": "🧱",
+      "True Or Dare": "🎲",
+      "Astigmatism": "👁️",
+      "Click": "🖱️",
+      "Memory": "🧠",
+      "Peripheral": "👀",
+      "Reversi MP": "🤝",
+      "Sound Test": "🔊",
+      "Vision": "👓",
+      "Wheels": "🎡"
+    };
+
     const grid = document.getElementById("grid");
     const countPill = document.getElementById("countPill");
 
-    function makeCard({ name, path }) {
-      const a = document.createElement("a");
-      a.className = "card";
-      a.href = path;
+    /* =========================
+       Card builder
+       ========================= */
+    function createCard({ name, path }) {
+      const card = document.createElement("a");
+      card.className = "card";
+      card.href = path;
 
       const icon = document.createElement("div");
       icon.className = "icon";
-      icon.textContent = name.trim().slice(0, 1).toUpperCase();
+      icon.textContent = ICON_MAP[name] || "🎮";
 
       const title = document.createElement("div");
       title.className = "title";
@@ -71,21 +95,23 @@
       arrow.className = "arrow";
       arrow.textContent = "→";
 
-      a.appendChild(icon);
-      a.appendChild(title);
-      a.appendChild(meta);
-      a.appendChild(arrow);
+      card.appendChild(icon);
+      card.appendChild(title);
+      card.appendChild(meta);
+      card.appendChild(arrow);
 
-      return a;
+      return card;
     }
 
-    // render
+    /* =========================
+       Render
+       ========================= */
     grid.innerHTML = "";
-    GAMES.forEach(g => grid.appendChild(makeCard(g)));
+    GAMES.forEach(game => grid.appendChild(createCard(game)));
     countPill.textContent = `${GAMES.length} games`;
 
-    // year
-    document.getElementById("year").textContent = new Date().getFullYear();
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
   </script>
 </body>
 </html>
