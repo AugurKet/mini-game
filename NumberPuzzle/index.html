@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旋转数迷 · 菱形数字环</title>
+    <style>
+        body {
+            background: #2b3e4f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 16px;
+        }
+        .game-wrapper {
+            background: #f5efe6;
+            border-radius: 40px;
+            padding: 24px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 24px;
+            background: white;
+            box-shadow: inset 0 0 0 1px #ccc;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            touch-action: none;
+        }
+        .info-panel {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #1e2b36;
+            font-weight: 600;
+        }
+        button {
+            background: #ffb347;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1e2b36;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b16300;
+            transition: 0.1s ease;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .status {
+            background: #d9e2e8;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="info-panel">
+        <span class="status" id="gameStatus">⚪ 继续努力</span>
+        <button id="resetBtn">重新开始</button>
+    </div>
+</div>
+<script>
+(function() {
+    // ----- 可调整的数据区域（根据你的图片修改）-----
+    // 圆圈初始数字（你提供的24个，但这里只用前21个，可自行调整顺序或数量）
+    const circleNumbers = [
+        207, 30, 300, 1416, 71, 1000, 489, 10, 5, 219, 342, 605, 424, 89, 566, 403, 506, 22, 103, 186, 175, 33, 25, 215
+    ]; // 前21个有效，后面三个未用
+
+    // 菱形下方的答案数字（9个，需要根据你的图片填写，这里先随便设一些）
+    // 你可以改成实际答案，例如从上面数字中选，或按规则设定
+    const diamondAnswers = [
+        500, 800, 1200, 600, 900, 1500, 700, 1100, 1300
+    ]; // 索引0~8对应9个菱形（顺序见下文）
+
+    // ----- 固定配置：菱形布局（行数及每行个数）-----
+    const rows = [1, 2, 3, 2, 1]; // 第一排1个，第二排2个，第三排3个，第四排2个，第五排1个
+    const diamondCount = rows.reduce((a, b) => a + b, 0); // 9
+
+    // 生成菱形中心坐标 (r, c) 其中 r 为行索引（0~4），c 为该行内的列索引（从0开始）
+    // 为了对称，让每行的中心在水平方向上居中。例如第0行只有1个，放在c=2；第1行2个，放在c=1,2；等等
+    // 我们手动定义每个菱形的 (r, c) 如下：
+    const diamondPositions = [];
+    // 第0行
+    diamondPositions.push({r:0, c:2});
+    // 第1行
+    diamondPositions.push({r:1, c:1});
+    diamondPositions.push({r:1, c:2});
+    // 第2行
+    diamondPositions.push({r:2, c:0});
+    diamondPositions.push({r:2, c:1});
+    diamondPositions.push({r:2, c:2});
+    // 第3行
+    diamondPositions.push({r:3, c:1});
+    diamondPositions.push({r:3, c:2});
+    // 第4行
+    diamondPositions.push({r:4, c:2});
+
+    // 验证数量
+    console.assert(diamondPositions.length === 9, '菱形数量错误');
+
+    // ----- 构建所有圆圈（顶点）-----
+    // 每个菱形的四个顶点为：上 (r-1, c), 下 (r+1, c), 左 (r, c-1), 右 (r, c+1)
+    // 收集所有不重复的顶点坐标，并给每个顶点一个唯一id
+    const vertexMap = new Map(); // 键 "r,c" -> 索引
+    const vertexCoords = [];     // 每个顶点坐标 {r, c}
+    // 遍历所有菱形，添加其四个邻居
+    diamondPositions.forEach(d => {
+        const neighbors = [
+            {r: d.r-1, c: d.c}, // 上
+            {r: d.r+1, c: d.c}, // 下
+            {r: d.r, c: d.c-1}, // 左
+            {r: d.r, c: d.c+1}  // 右
+        ];
+        neighbors.forEach(n => {
+            const key = n.r + ',' + n.c;
+            if (!vertexMap.has(key)) {
+                vertexMap.set(key, vertexCoords.length);
+                vertexCoords.push({r: n.r, c: n.c});
+            }
+        });
+    });
+
+    const vertexCount = vertexCoords.length;
+    console.log('顶点数量:', vertexCount); // 应为21
+
+    // 给每个顶点分配初始数字（从circleNumbers取前vertexCount个）
+    // 如果circleNumbers不足，则补0；如果多，则只取前vertexCount个
+    const vertexNumbers = new Array(vertexCount);
+    for (let i = 0; i < vertexCount; i++) {
+        vertexNumbers[i] = (i < circleNumbers.length) ? circleNumbers[i] : 0;
+    }
+
+    // ----- 建立每个菱形到其四个顶点的映射（存储顶点索引）-----
+    // 每个菱形的四个顶点顺序：上、右、下、左（顺时针方向）
+    const diamondVertices = diamondPositions.map(d => {
+        // 获取四个方向的顶点索引
+        const up = vertexMap.get((d.r-1) + ',' + d.c);
+        const down = vertexMap.get((d.r+1) + ',' + d.c);
+        const left = vertexMap.get(d.r + ',' + (d.c-1));
+        const right = vertexMap.get(d.r + ',' + (d.c+1));
+        // 顺序：上、右、下、左（顺时针）
+        return [up, right, down, left];
+    });
+
+    // ----- 初始化菱形数据-----
+    // 每个菱形：上面数字（动态），下面答案（固定）
+    let diamonds = diamondPositions.map((pos, idx) => {
+        return {
+            r: pos.r,
+            c: pos.c,
+            answer: diamondAnswers[idx], // 从数组取答案
+            vertices: diamondVertices[idx] // 四个顶点索引
+        };
+    });
+
+    // 计算每个菱形的当前上面数字（四个顶点数字之和）
+    function computeTopNumber(diamond) {
+        let sum = 0;
+        diamond.vertices.forEach(vIdx => {
+            sum += vertexNumbers[vIdx];
+        });
+        return sum;
+    }
+
+    // 初始化每个菱形的上面数字
+    diamonds.forEach(d => {
+        d.top = computeTopNumber(d);
+    });
+
+    // ----- 辅助函数：顺时针旋转四个顶点数字（上->右->下->左->上）
+    function rotateClockwise(vertexIndices) {
+        if (vertexIndices.length !== 4) return;
+        const [up, right, down, left] = vertexIndices;
+        const temp = vertexNumbers[up];
+        vertexNumbers[up] = vertexNumbers[left];   // 左->上
+        vertexNumbers[left] = vertexNumbers[down]; // 下->左
+        vertexNumbers[down] = vertexNumbers[right];// 右->下
+        vertexNumbers[right] = temp;                // 上->右
+    }
+
+    // ----- 画布绘制-----
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('gameStatus');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // 坐标转换：将 (r, c) 网格坐标转换为画布像素坐标
+    // 为了美观，设置偏移量和间距
+    const offsetX = 300;
+    const offsetY = 200;
+    const spacing = 60; // 网格间距
+
+    function getPixel(r, c) {
+        return {
+            x: c * spacing + offsetX,
+            y: r * spacing + offsetY
+        };
+    }
+
+    // 绘制所有内容
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. 绘制所有菱形连线（灰色虚线），并填充内部
+        diamonds.forEach(d => {
+            const vertices = d.vertices.map(vIdx => vertexCoords[vIdx]);
+            if (vertices.length === 4) {
+                // 获取四个顶点的像素坐标
+                const points = vertices.map(v => getPixel(v.r, v.c));
+                // 绘制菱形边框
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y); // 上
+                ctx.lineTo(points[1].x, points[1].y); // 右
+                ctx.lineTo(points[2].x, points[2].y); // 下
+                ctx.lineTo(points[3].x, points[3].y); // 左
+                ctx.closePath();
+                ctx.strokeStyle = '#aaa';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                // 填充颜色：如果上下相等则绿色，否则浅红
+                ctx.fillStyle = (d.top === d.answer) ? 'rgba(144, 238, 144, 0.3)' : 'rgba(255, 200, 200, 0.2)';
+                ctx.fill();
+            }
+        });
+
+        // 2. 绘制所有圆圈（顶点）
+        vertexCoords.forEach((v, idx) => {
+            const {x, y} = getPixel(v.r, v.c);
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fill();
+            ctx.strokeStyle = '#2b5797';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // 圆圈内数字
+            ctx.font = 'bold 16px "Courier New", monospace';
+            ctx.fillStyle = '#1e2b36';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(vertexNumbers[idx], x, y);
+        });
+
+        // 3. 绘制菱形内的上下两个数字
+        diamonds.forEach(d => {
+            // 菱形中心可以取四个顶点的平均，或者直接用 (r,c) 转换？但我们的 (r,c) 是菱形中心坐标，可以直接用
+            // 注意菱形中心坐标 (d.r, d.c) 也是网格点，但可能不是整数？实际上我们的 d.r, d.c 就是整数，所以可以映射
+            const center = getPixel(d.r, d.c);
+            // 上面数字（动态）
+            ctx.font = 'bold 22px "Segoe UI"';
+            ctx.fillStyle = '#2c3e50';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(d.top, center.x, center.y - 10);
+            // 下面数字（答案）
+            ctx.font = 'bold 22px "Segoe UI"';
+            ctx.fillStyle = '#8e44ad';
+            ctx.textBaseline = 'top';
+            ctx.fillText(d.answer, center.x, center.y + 10);
+        });
+
+        // 4. 标记中间菱形（第三行第二个）——加个外框
+        const middleDiamond = diamonds.find(d => d.r === 2 && d.c === 1);
+        if (middleDiamond) {
+            const center = getPixel(middleDiamond.r, middleDiamond.c);
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 30, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#e67e22';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]); // 恢复实线
+        }
+
+        // 更新状态
+        const allGreen = diamonds.every(d => d.top === d.answer);
+        statusEl.innerText = allGreen ? '✅ 胜利！所有菱形变绿！' : '⚪ 继续努力';
+    }
+
+    // ----- 鼠标点击检测：找到点击的菱形-----
+    function getClickedDiamond(px, py) {
+        // 遍历所有菱形，计算点击点到菱形中心的距离（因为菱形是旋转的，用中心距离粗略判断）
+        // 为了精确，可以用多边形包含，但简单起见，我们使用中心距离阈值
+        const threshold = 30; // 像素
+        for (let d of diamonds) {
+            const center = getPixel(d.r, d.c);
+            const dist = Math.hypot(px - center.x, py - center.y);
+            if (dist < threshold) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    // 点击处理
+    function handleCanvasClick(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            e.preventDefault();
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        const canvasX = (clientX - rect.left) * scaleX;
+        const canvasY = (clientY - rect.top) * scaleY;
+
+        const clickedDiamond = getClickedDiamond(canvasX, canvasY);
+        if (clickedDiamond) {
+            // 只允许点击中间那个菱形（r=2, c=1）
+            if (clickedDiamond.r === 2 && clickedDiamond.c === 1) {
+                // 顺时针旋转该菱形的四个顶点
+                rotateClockwise(clickedDiamond.vertices);
+                // 重新计算所有菱形的上面数字
+                diamonds.forEach(d => {
+                    d.top = computeTopNumber(d);
+                });
+                draw();
+            } else {
+                // 可以提示只能点中间，或者忽略
+                alert('请点击中间那个菱形（带虚线圆环的）');
+            }
+        }
+    }
+
+    // 重置游戏（恢复初始数字）
+    function resetGame() {
+        // 重新设置顶点数字为初始值
+        for (let i = 0; i < vertexCount; i++) {
+            vertexNumbers[i] = (i < circleNumbers.length) ? circleNumbers[i] : 0;
+        }
+        // 重新计算菱形上面数字
+        diamonds.forEach(d => {
+            d.top = computeTopNumber(d);
+        });
+        draw();
+    }
+
+    // 注册事件
+    canvas.addEventListener('mousedown', handleCanvasClick);
+    canvas.addEventListener('touchstart', handleCanvasClick, { passive: false });
+
+    resetBtn.addEventListener('click', resetGame);
+
+    // 初始绘制
+    draw();
+
+})();
+</script>
+</body>
+</html>
