@@ -31,7 +31,7 @@ setupCanvas();
 //////////////////////////////////////////////////////
 
 const GRID = 4;        // 4x4 顶点 → 9个旋转方块
-const SPACING = 85;   // 控制松紧（可调）
+const SPACING = 110;   // 控制松紧（可调）
 
 const vertexCoords = [];
 
@@ -53,7 +53,7 @@ for(let r=0;r<GRID;r++){
 function getPixel(v){
     return {
         x: canvas.width/2/(window.devicePixelRatio||1) + v.x,
-        y: canvas.height/2/(window.devicePixelRatio||1) - 140 + v.y
+        y: canvas.height/2/(window.devicePixelRatio||1) - 180 + v.y
     };
 }
 
@@ -148,7 +148,7 @@ function resetGame(){
 // 绘制
 //////////////////////////////////////////////////////
 
-const circleRadius = 18;
+const circleRadius = 14;
 
 function draw(){
 
