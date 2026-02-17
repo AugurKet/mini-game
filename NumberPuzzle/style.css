@@ -45,12 +45,12 @@ canvas{
     background:white;
     box-shadow: inset 0 0 0 1px #ccc;
 
-    width:900px;
-    max-width:95vw;
+    width:100%;
+    height:auto;
+    
+    max-width:900px;
 
     /* ⭐ 高度自适应 */
-    height:auto;
-
     touch-action:none;
 }
 
