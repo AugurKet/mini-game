@@ -1,37 +1,29 @@
 const board = document.getElementById("board");
-const timerEl = document.getElementById("timer");
-const movesEl = document.getElementById("moves");
 
 let circles = [];
 let diamonds = [];
 
-let moves = 0;
-let timer = 0;
-let interval;
-
-/* ========= 坐标生成 ========= */
+/* ===== 创建17个圆圈 ===== */
 
 const positions = [
-    [180,0],
+[180,10],
 
-    [120,70],[240,70],
+[120,80],[240,80],
 
-    [60,140],[180,140],[300,140],
+[60,150],[180,150],[300,150],
 
-    [0,210],[120,210],[240,210],[360,210],
+[0,220],[120,220],[240,220],[360,220],
 
-    [60,280],[180,280],[300,280],
+[60,290],[180,290],[300,290],
 
-    [120,350],[240,350],
+[120,360],[240,360],
 
-    [180,420]
+[180,430]
 ];
 
-/* ===== 建立圆圈 ===== */
+positions.forEach(pos=>{
 
-positions.forEach((pos,i)=>{
-
-    const el = document.createElement("div");
+    const el=document.createElement("div");
     el.className="circle";
 
     const value = rand();
@@ -42,17 +34,12 @@ positions.forEach((pos,i)=>{
 
     board.appendChild(el);
 
-    circles.push({
-        el,
-        value
-    });
-
+    circles.push({el,value});
 });
 
-/* ===== 菱形结构 ===== */
-/* 每个菱形引用四个circle index */
+/* ===== 每个菱形绑定4个圆圈 ===== */
 
-const diamondMap = [
+const diamondMap=[
 
 [0,1,3,4],
 
@@ -70,18 +57,18 @@ const diamondMap = [
 
 ];
 
-/* 菱形坐标 */
+/* ===== 菱形位置 ===== */
 
-const diamondPos = [
-[165,45],
+const diamondPos=[
+[165,55],
 
-[225,115],[105,115],
+[225,125],[105,125],
 
-[285,185],[165,185],[45,185],
+[285,195],[165,195],[45,195],
 
-[225,255],[105,255],
+[225,265],[105,265],
 
-[165,325]
+[165,335]
 ];
 
 /* ===== 创建菱形 ===== */
@@ -95,9 +82,9 @@ diamondMap.forEach((map,i)=>{
     el.style.top=diamondPos[i][1]+"px";
 
     const top=document.createElement("div");
-    top.className="top";
-
     const bottom=document.createElement("div");
+
+    top.className="top";
     bottom.className="bottom";
 
     el.appendChild(top);
@@ -112,45 +99,36 @@ diamondMap.forEach((map,i)=>{
         map,
         answer:0
     });
-
 });
 
-/* ===== 初始化答案（保证可解）===== */
+/* ===== 初始化答案 ===== */
 
 diamonds.forEach(d=>{
     d.answer = sum(d.map);
 });
 
-/* 打乱局面 */
+/* ===== 打乱 ===== */
 
-for(let i=0;i<30;i++){
+for(let i=0;i<40;i++){
     rotate(randInt(0,8),false);
 }
 
+/* ⭐⭐ VERY IMPORTANT */
 update();
 
-/* ===== 点击旋转 ===== */
+/* ===== 点击 ===== */
 
 diamonds.forEach((d,i)=>{
 
     d.el.onclick=()=>{
-
-        if(!interval){
-            interval=setInterval(()=>{
-                timer++;
-                timerEl.innerText=timer;
-            },1000);
-        }
-
         rotate(i,true);
         update();
-        checkWin();
     }
 });
 
-/* ===== 旋转逻辑 ===== */
+/* ===== 旋转 ===== */
 
-function rotate(index,countMove){
+function rotate(index){
 
     const map = diamonds[index].map;
 
@@ -162,25 +140,20 @@ function rotate(index,countMove){
     circles[map[0]].value = temp;
 
     map.forEach(i=>{
-        circles[i].el.innerText=circles[i].value;
+        circles[i].el.innerText = circles[i].value;
     });
-
-    if(countMove){
-        moves++;
-        movesEl.innerText=moves;
-    }
 }
 
-/* ===== 更新显示 ===== */
+/* ===== 更新数字 ===== */
 
 function update(){
 
     diamonds.forEach(d=>{
 
-        const s = sum(d.map);
+        const s=sum(d.map);
 
-        d.top.innerText = s;
-        d.bottom.innerText = d.answer;
+        d.top.innerText=s;
+        d.bottom.innerText=d.answer;
 
         if(s===d.answer){
             d.el.classList.add("correct");
@@ -188,24 +161,6 @@ function update(){
             d.el.classList.remove("correct");
         }
     });
-}
-
-/* ===== 胜利检测 ===== */
-
-function checkWin(){
-
-    const win = diamonds.every(d=>
-        sum(d.map)===d.answer
-    );
-
-    if(win){
-
-        clearInterval(interval);
-
-        setTimeout(()=>{
-            alert(`完成！\n时间:${timer}s\n步数:${moves}`);
-        },200);
-    }
 }
 
 /* ===== 工具 ===== */
