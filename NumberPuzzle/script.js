@@ -1,268 +1,223 @@
-(() => {
+const board = document.getElementById("board");
+const timerEl = document.getElementById("timer");
+const movesEl = document.getElementById("moves");
 
-//////////////////////////////////////////////////////
-// Canvas 高清（Retina）
-//////////////////////////////////////////////////////
+let circles = [];
+let diamonds = [];
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const statusEl = document.getElementById('gameStatus');
-const resetBtn = document.getElementById('resetBtn');
+let moves = 0;
+let timer = 0;
+let interval;
 
-function setupCanvas(){
-    const ratio = window.devicePixelRatio || 1;
+/* ========= 坐标生成 ========= */
 
-    const w = 900;
-    const h = 700;
+const positions = [
+    [180,0],
 
-    canvas.width = w * ratio;
-    canvas.height = h * ratio;
+    [120,70],[240,70],
 
-    canvas.style.width = w + "px";
-    canvas.style.height = h + "px";
+    [60,140],[180,140],[300,140],
 
-    ctx.setTransform(ratio,0,0,ratio,0,0);
-}
+    [0,210],[120,210],[240,210],[360,210],
 
-setupCanvas();
+    [60,280],[180,280],[300,280],
 
-//////////////////////////////////////////////////////
-// ⭐⭐⭐ 真 · 旋转方格布局
-//////////////////////////////////////////////////////
+    [120,350],[240,350],
 
-const GRID = 4;        // 4x4 顶点 → 9个旋转方块
-const SPACING = 110;   // 控制松紧（可调）
+    [180,420]
+];
 
-const vertexCoords = [];
+/* ===== 建立圆圈 ===== */
 
-// 生成旋转45°的网格
-for(let r=0;r<GRID;r++){
-    for(let c=0;c<GRID;c++){
+positions.forEach((pos,i)=>{
 
-        vertexCoords.push({
-            x:(c-r)*SPACING,
-            y:(c+r)*SPACING
-        });
-    }
-}
+    const el = document.createElement("div");
+    el.className="circle";
 
-//////////////////////////////////////////////////////
-// 居中函数
-//////////////////////////////////////////////////////
+    const value = rand();
+    el.innerText=value;
 
-function getPixel(v){
-    return {
-        x: canvas.width/2/(window.devicePixelRatio||1) + v.x,
-        y: canvas.height/2/(window.devicePixelRatio||1) - 180 + v.y
-    };
-}
+    el.style.left=pos[0]+"px";
+    el.style.top=pos[1]+"px";
 
-//////////////////////////////////////////////////////
-// 构建9个可旋转方块
-//////////////////////////////////////////////////////
+    board.appendChild(el);
 
-const diamonds=[];
-
-for(let r=0;r<GRID-1;r++){
-    for(let c=0;c<GRID-1;c++){
-
-        const i = r*GRID + c;
-
-        diamonds.push({
-            vertices:[
-                i,           // 上左
-                i+1,         // 上右
-                i+GRID+1,    // 下右
-                i+GRID       // 下左
-            ],
-            answer:0,
-            top:0
-        });
-    }
-}
-
-//////////////////////////////////////////////////////
-// 数字系统
-//////////////////////////////////////////////////////
-
-let vertexNumbers = new Array(vertexCoords.length);
-
-function rotateClockwise(v){
-
-    const temp = vertexNumbers[v[0]];
-
-    vertexNumbers[v[0]] = vertexNumbers[v[3]];
-    vertexNumbers[v[3]] = vertexNumbers[v[2]];
-    vertexNumbers[v[2]] = vertexNumbers[v[1]];
-    vertexNumbers[v[1]] = temp;
-}
-
-function computeTop(v){
-    return v.reduce((s,i)=>s+vertexNumbers[i],0);
-}
-
-function updateAll(){
-    diamonds.forEach(d=>{
-        d.top = computeTop(d.vertices);
-    });
-}
-
-//////////////////////////////////////////////////////
-// ⭐ 打乱（保证有解）
-//////////////////////////////////////////////////////
-
-function shuffle(steps=30){
-    for(let i=0;i<steps;i++){
-        const r = Math.floor(Math.random()*diamonds.length);
-        rotateClockwise(diamonds[r].vertices);
-    }
-}
-
-//////////////////////////////////////////////////////
-// 重开
-//////////////////////////////////////////////////////
-
-function resetGame(){
-
-    // 生成数字
-    for(let i=0;i<vertexNumbers.length;i++){
-        vertexNumbers[i] = Math.floor(Math.random()*40)+10;
-    }
-
-    // 先计算答案
-    updateAll();
-
-    diamonds.forEach(d=>{
-        d.answer = d.top;
+    circles.push({
+        el,
+        value
     });
 
-    // 再打乱
-    shuffle(35);
+});
 
-    updateAll();
+/* ===== 菱形结构 ===== */
+/* 每个菱形引用四个circle index */
 
-    draw();
-}
+const diamondMap = [
 
-//////////////////////////////////////////////////////
-// 绘制
-//////////////////////////////////////////////////////
+[0,1,3,4],
 
-const circleRadius = 14;
+[1,2,4,5],
+[3,4,6,7],
 
-function draw(){
+[4,5,7,8],
+[6,7,9,10],
+[7,8,10,11],
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+[9,10,12,13],
+[10,11,13,14],
 
-    // ===== 方块 =====
-    diamonds.forEach(d=>{
+[12,13,15,16]
 
-        const pts = d.vertices.map(i=>getPixel(vertexCoords[i]));
+];
 
-        ctx.beginPath();
-        ctx.moveTo(pts[0].x,pts[0].y);
-        ctx.lineTo(pts[1].x,pts[1].y);
-        ctx.lineTo(pts[2].x,pts[2].y);
-        ctx.lineTo(pts[3].x,pts[3].y);
-        ctx.closePath();
+/* 菱形坐标 */
 
-        ctx.fillStyle = d.top===d.answer
-            ? 'rgba(140,230,160,.8)'
-            : 'rgba(255,120,120,.75)';
+const diamondPos = [
+[165,45],
 
-        ctx.fill();
+[225,115],[105,115],
 
-        ctx.strokeStyle="#555";
-        ctx.lineWidth=2;
-        ctx.stroke();
+[285,185],[165,185],[45,185],
 
-        // 上数字
-        const centerX = (pts[0].x+pts[2].x)/2;
-        const centerY = (pts[0].y+pts[2].y)/2;
+[225,255],[105,255],
 
-        ctx.fillStyle="#2c3e50";
-        ctx.font="bold 20px Segoe UI";
-        ctx.textAlign="center";
-        ctx.textBaseline="bottom";
-        ctx.fillText(d.top,centerX,centerY-6);
+[165,325]
+];
 
-        ctx.fillStyle="#6c2bd9";
-        ctx.textBaseline="top";
-        ctx.fillText(d.answer,centerX,centerY+6);
+/* ===== 创建菱形 ===== */
+
+diamondMap.forEach((map,i)=>{
+
+    const el=document.createElement("div");
+    el.className="diamond";
+
+    el.style.left=diamondPos[i][0]+"px";
+    el.style.top=diamondPos[i][1]+"px";
+
+    const top=document.createElement("div");
+    top.className="top";
+
+    const bottom=document.createElement("div");
+    bottom.className="bottom";
+
+    el.appendChild(top);
+    el.appendChild(bottom);
+
+    board.appendChild(el);
+
+    diamonds.push({
+        el,
+        top,
+        bottom,
+        map,
+        answer:0
     });
 
-    // ===== 圆点 =====
-    vertexCoords.forEach((v,i)=>{
+});
 
-        const p=getPixel(v);
+/* ===== 初始化答案（保证可解）===== */
 
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,circleRadius,0,Math.PI*2);
+diamonds.forEach(d=>{
+    d.answer = sum(d.map);
+});
 
-        ctx.fillStyle="#f4f4f4";
-        ctx.fill();
+/* 打乱局面 */
 
-        ctx.strokeStyle="#2b5797";
-        ctx.lineWidth=2;
-        ctx.stroke();
-
-        ctx.fillStyle="#1e2b36";
-        ctx.font="bold 14px monospace";
-        ctx.textAlign="center";
-        ctx.textBaseline="middle";
-        ctx.fillText(vertexNumbers[i],p.x,p.y);
-    });
-
-    // 胜利检测
-    const win = diamonds.every(d=>d.top===d.answer);
-
-    statusEl.innerText = win
-        ? "🎉 全部解锁！"
-        : "🔴 继续努力";
+for(let i=0;i<30;i++){
+    rotate(randInt(0,8),false);
 }
 
-//////////////////////////////////////////////////////
-// 点击检测（非常精准）
-//////////////////////////////////////////////////////
+update();
 
-canvas.addEventListener('mousedown',handleClick);
-canvas.addEventListener('touchstart',handleClick,{passive:false});
+/* ===== 点击旋转 ===== */
 
-function handleClick(e){
+diamonds.forEach((d,i)=>{
 
-    e.preventDefault();
+    d.el.onclick=()=>{
 
-    const rect=canvas.getBoundingClientRect();
-
-    const scaleX = canvas.width/rect.width;
-    const scaleY = canvas.height/rect.height;
-    const ratio = window.devicePixelRatio||1;
-
-    const cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-    const cy=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-
-    const x = cx*scaleX/ratio;
-    const y = cy*scaleY/ratio;
-
-    for(const d of diamonds){
-
-        const pts = d.vertices.map(i=>getPixel(vertexCoords[i]));
-
-        const centerX = (pts[0].x+pts[2].x)/2;
-        const centerY = (pts[0].y+pts[2].y)/2;
-
-        if(Math.hypot(x-centerX,y-centerY)<40){
-
-            rotateClockwise(d.vertices);
-            updateAll();
-            draw();
-            return;
+        if(!interval){
+            interval=setInterval(()=>{
+                timer++;
+                timerEl.innerText=timer;
+            },1000);
         }
+
+        rotate(i,true);
+        update();
+        checkWin();
+    }
+});
+
+/* ===== 旋转逻辑 ===== */
+
+function rotate(index,countMove){
+
+    const map = diamonds[index].map;
+
+    const temp = circles[map[3]].value;
+
+    circles[map[3]].value = circles[map[2]].value;
+    circles[map[2]].value = circles[map[1]].value;
+    circles[map[1]].value = circles[map[0]].value;
+    circles[map[0]].value = temp;
+
+    map.forEach(i=>{
+        circles[i].el.innerText=circles[i].value;
+    });
+
+    if(countMove){
+        moves++;
+        movesEl.innerText=moves;
     }
 }
 
-resetBtn.onclick=resetGame;
+/* ===== 更新显示 ===== */
 
-resetGame();
+function update(){
 
-})();
+    diamonds.forEach(d=>{
+
+        const s = sum(d.map);
+
+        d.top.innerText = s;
+        d.bottom.innerText = d.answer;
+
+        if(s===d.answer){
+            d.el.classList.add("correct");
+        }else{
+            d.el.classList.remove("correct");
+        }
+    });
+}
+
+/* ===== 胜利检测 ===== */
+
+function checkWin(){
+
+    const win = diamonds.every(d=>
+        sum(d.map)===d.answer
+    );
+
+    if(win){
+
+        clearInterval(interval);
+
+        setTimeout(()=>{
+            alert(`完成！\n时间:${timer}s\n步数:${moves}`);
+        },200);
+    }
+}
+
+/* ===== 工具 ===== */
+
+function sum(map){
+    return map.reduce((a,i)=>a+circles[i].value,0);
+}
+
+function rand(){
+    return Math.floor(Math.random()*40)+11;
+}
+
+function randInt(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+}
