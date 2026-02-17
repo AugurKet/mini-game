@@ -1,101 +1,116 @@
-/* ===== 全局修复 ===== */
-
-html, body{
-    margin:0;
-    padding:0;
-    min-height:100dvh;   /* ⭐ iOS 神级修复 */
-    overflow-y:auto;
-}
-
 body{
-    background:#2b3e4f;
+    margin:0;
+    height:100vh;
     display:flex;
-
-    /* ⭐ 不要再 vertical center */
     justify-content:center;
-    align-items:flex-start;
-
-    font-family:'Segoe UI',system-ui,sans-serif;
-
-    /* 给顶部一点空间，更像App */
-    padding:40px 16px;
-}
-
-
-/* ===== 主容器 ===== */
-
-.game-wrapper{
-    background:#f5efe6;
-    border-radius:40px;
-    padding:24px;
-    box-shadow:0 25px 40px rgba(0,0,0,.45);
-
-    /* ⭐ 防止贴边 */
-    width:100%;
-    max-width:1000px;
-}
-
-
-/* ===== Canvas ===== */
-
-canvas{
-    display:block;
-    margin:auto;
-    border-radius:24px;
-    background:white;
-    box-shadow: inset 0 0 0 1px #ccc;
-
-    width:100%;
-    height:auto;
-    
-    max-width:900px;
-
-    /* ⭐ 高度自适应 */
-    touch-action:none;
-}
-
-
-/* ===== 底部操作栏 ===== */
-
-.info-panel{
-    margin-top:20px;
-    display:flex;
-    justify-content:space-between;
     align-items:center;
-    gap:12px;
 
-    /* ⭐ 手机自动换行 */
-    flex-wrap:wrap;
+    background:
+    radial-gradient(circle at 30% 20%, #0f1b2b, #05070d);
+
+    font-family:system-ui;
+    color:white;
 }
 
-
-.status{
-    background:#d9e2e8;
-    padding:8px 20px;
-    border-radius:40px;
-    font-weight:700;
-    min-width:160px;
+/* 主容器 */
+.game{
     text-align:center;
 }
 
-
-/* ===== 按钮 ===== */
-
-button{
-    background:#ffb347;
-    border:none;
-    border-radius:40px;
-    padding:10px 28px;
-    font-size:1rem;
-    font-weight:bold;
-    cursor:pointer;
-    box-shadow:0 4px 0 #b16300;
-
-    /* ⭐ 防止手机按钮太小 */
-    min-height:44px;
+h1{
+    letter-spacing:4px;
+    margin-bottom:20px;
+    color:#7df9ff;
+    text-shadow:0 0 20px #00f0ff;
 }
 
-button:active{
-    transform:translateY(4px);
-    box-shadow:none;
+/* ===== 棋盘 ===== */
+
+#board{
+    position:relative;
+    width:420px;
+    height:420px;
+    margin:auto;
+}
+
+/* 圆圈 */
+.circle{
+    position:absolute;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#0a0f1c;
+
+    border:2px solid #00f0ff;
+
+    box-shadow:
+        0 0 12px #00f0ff,
+        inset 0 0 8px #00f0ff;
+
+    font-weight:bold;
+}
+
+/* 菱形 */
+.diamond{
+    position:absolute;
+    width:86px;
+    height:86px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    cursor:pointer;
+
+    clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+
+    background:#111;
+
+    border:2px solid #ff4df0;
+
+    box-shadow:
+        0 0 14px #ff4df0;
+
+    transition:.25s;
+}
+
+.diamond:hover{
+    transform:scale(1.05);
+}
+
+/* 解开时 */
+.diamond.correct{
+    border:2px solid #00ff9d;
+
+    box-shadow:
+        0 0 20px #00ff9d,
+        inset 0 0 15px #00ff9d;
+
+    background:#06291f;
+}
+
+/* 数字 */
+.top{
+    font-size:18px;
+    color:#7df9ff;
+}
+
+.bottom{
+    font-size:16px;
+    opacity:.7;
+}
+
+/* HUD */
+.hud{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    font-weight:bold;
 }
