@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>旋转数迷</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>旋转数迷</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="game-wrapper">
-    <canvas id="gameCanvas"></canvas>
+<div class="game">
 
-    <div class="info-panel">
-        <span class="status" id="gameStatus">🔴 继续努力</span>
-        <button id="resetBtn">新一局</button>
+    <h1>旋转数迷</h1>
+
+    <div id="board"></div>
+
+    <div class="hud">
+        <div>⏱ <span id="timer">0</span>s</div>
+        <div>Moves: <span id="moves">0</span></div>
     </div>
+
 </div>
 
 <script src="script.js"></script>
