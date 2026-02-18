@@ -1,99 +1,105 @@
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+margin:0;
+padding:0;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
 
 html,body{
-    height:100%;
-    background:#0f172a;
-    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-    color:white;
+height:100%;
+background:linear-gradient(135deg,#0f172a,#020617);
+font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+color:white;
 
-    overscroll-behavior:none;
+overscroll-behavior:none;
 }
 
 body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
-/* LOCK THE APP */
+/* LOCK APP — prevents iOS gestures */
 .app{
-    width:100%;
-    max-width:500px;
-    padding:20px;
-
-    touch-action:none;
+width:100%;
+max-width:520px;
+padding:18px;
+touch-action:none;
 }
 
-/* TOP */
+/* HEADER */
 
-.top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:14px;
 }
 
 h1{
-    font-size:48px;
-    font-weight:800;
+font-size:52px;
+font-weight:900;
+letter-spacing:2px;
 }
 
 .scores{
-    display:flex;
-    gap:10px;
+display:flex;
+gap:10px;
 }
 
-.box{
-    background:#1e293b;
-    padding:10px 14px;
-    border-radius:10px;
-    text-align:center;
+.score-box{
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(10px);
+padding:10px 14px;
+border-radius:14px;
+text-align:center;
 }
 
-.box span{
-    display:block;
-    font-size:20px;
-    font-weight:bold;
+.score-box span{
+display:block;
+font-weight:800;
+font-size:20px;
 }
 
 /* BOARD */
 
 #board{
-    width:100%;
-    aspect-ratio:1;
+width:100%;
+aspect-ratio:1;
+background:rgba(255,255,255,.04);
+border-radius:18px;
+padding:10px;
 
-    background:#020617;
-    border-radius:16px;
-    padding:10px;
-
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-
-    position:relative;
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
 }
 
-/* TILE */
+/* TILE — GPU acceleration */
 
 .tile{
-    border-radius:12px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+display:flex;
+justify-content:center;
+align-items:center;
 
-    font-weight:800;
-    font-size:28px;
+border-radius:12px;
+font-weight:900;
 
-    transition:all .15s ease;
+transform:translateZ(0);
+animation:pop .18s ease;
+
+font-size:clamp(20px,5vw,34px);
 }
 
-/* COLORS */
+@keyframes pop{
+0%{transform:scale(.4);}
+100%{transform:scale(1);}
+}
 
-.v2{background:#67e8f9;color:#022c22;}
+/* COLOR SYSTEM */
+
+.v2{background:#67e8f9;color:#042f2e;}
 .v4{background:#22d3ee;}
 .v8{background:#818cf8;}
 .v16{background:#a78bfa;}
@@ -102,46 +108,55 @@ h1{
 .v128{background:#f472b6;}
 .v256{background:#fb7185;}
 .v512{background:#f59e0b;}
-.v1024{background:#facc15;color:black;}
-.v2048{background:#4ade80;color:black;}
+.v1024{background:#fde047;color:black;}
+.v2048{
+background:#4ade80;
+color:black;
+box-shadow:0 0 20px #4ade80;
+}
 
 /* BUTTONS */
 
 .controls{
-    margin-top:15px;
-    display:flex;
-    gap:10px;
+margin-top:14px;
+display:flex;
+gap:10px;
 }
 
 button{
-    flex:1;
-    padding:12px;
-    border:none;
-    border-radius:10px;
-    background:#38bdf8;
-    color:black;
-    font-weight:bold;
+flex:1;
+padding:14px;
+border:none;
+border-radius:14px;
+font-weight:800;
+font-size:16px;
+background:#38bdf8;
+color:black;
 }
 
-/* MODAL */
+/* OVERLAY */
 
-#modal{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.75);
+#overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.75);
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
 .hidden{
-    display:none !important;
+display:none !important;
 }
 
-.modal-content{
-    background:#020617;
-    padding:30px;
-    border-radius:16px;
-    text-align:center;
+.card{
+background:#020617;
+padding:30px;
+border-radius:20px;
+text-align:center;
+}
+
+.card h2{
+margin-bottom:16px;
 }
