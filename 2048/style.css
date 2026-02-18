@@ -1,56 +1,147 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    height:100%;
+    background:#0f172a;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    color:white;
+
+    overscroll-behavior:none;
+}
+
 body{
-    font-family: Arial, sans-serif;
-    background:#faf8ef;
-    text-align:center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* LOCK THE APP */
+.app{
+    width:100%;
+    max-width:500px;
+    padding:20px;
+
+    touch-action:none;
+}
+
+/* TOP */
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
 }
 
 h1{
-    font-size:60px;
-    margin-bottom:10px;
+    font-size:48px;
+    font-weight:800;
 }
 
-.score-container{
-    font-size:24px;
-    margin-bottom:10px;
+.scores{
+    display:flex;
+    gap:10px;
 }
 
-#game-board{
-    width:420px;
-    height:420px;
-    background:#bbada0;
-    margin:0 auto;
+.box{
+    background:#1e293b;
+    padding:10px 14px;
     border-radius:10px;
+    text-align:center;
+}
+
+.box span{
+    display:block;
+    font-size:20px;
+    font-weight:bold;
+}
+
+/* BOARD */
+
+#board{
+    width:100%;
+    aspect-ratio:1;
+
+    background:#020617;
+    border-radius:16px;
+    padding:10px;
 
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    grid-gap:10px;
-    padding:10px;
+    gap:10px;
+
+    position:relative;
 }
 
-.tile{
-    width:90px;
-    height:90px;
-    border-radius:8px;
-    background:#cdc1b4;
+/* TILE */
 
+.tile{
+    border-radius:12px;
     display:flex;
     justify-content:center;
     align-items:center;
 
+    font-weight:800;
     font-size:28px;
+
+    transition:all .15s ease;
+}
+
+/* COLORS */
+
+.v2{background:#67e8f9;color:#022c22;}
+.v4{background:#22d3ee;}
+.v8{background:#818cf8;}
+.v16{background:#a78bfa;}
+.v32{background:#c084fc;}
+.v64{background:#e879f9;}
+.v128{background:#f472b6;}
+.v256{background:#fb7185;}
+.v512{background:#f59e0b;}
+.v1024{background:#facc15;color:black;}
+.v2048{background:#4ade80;color:black;}
+
+/* BUTTONS */
+
+.controls{
+    margin-top:15px;
+    display:flex;
+    gap:10px;
+}
+
+button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#38bdf8;
+    color:black;
     font-weight:bold;
 }
 
-/* Tile colors */
+/* MODAL */
 
-.tile[data-value="2"]{background:#eee4da;}
-.tile[data-value="4"]{background:#ede0c8;}
-.tile[data-value="8"]{background:#f2b179; color:white;}
-.tile[data-value="16"]{background:#f59563; color:white;}
-.tile[data-value="32"]{background:#f67c5f; color:white;}
-.tile[data-value="64"]{background:#f65e3b; color:white;}
-.tile[data-value="128"]{background:#edcf72;}
-.tile[data-value="256"]{background:#edcc61;}
-.tile[data-value="512"]{background:#edc850;}
-.tile[data-value="1024"]{background:#edc53f;}
-.tile[data-value="2048"]{background:#edc22e;}
+#modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.75);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.hidden{
+    display:none !important;
+}
+
+.modal-content{
+    background:#020617;
+    padding:30px;
+    border-radius:16px;
+    text-align:center;
+}
