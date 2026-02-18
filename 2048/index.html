@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -10,44 +11,48 @@ maximum-scale=1,
 user-scalable=no,
 viewport-fit=cover">
 
-<title>2048 Pro</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<title>2048 Ultra</title>
 
 <link rel="stylesheet" href="style.css">
-</head>
 
+</head>
 <body>
 
 <div class="app">
 
-    <div class="top">
-        <h1>2048</h1>
+<header>
+    <h1>2048</h1>
 
-        <div class="scores">
-            <div class="box">
-                Score
-                <span id="score">0</span>
-            </div>
+    <div class="scores">
+        <div class="score-box">
+            Score
+            <span id="score">0</span>
+        </div>
 
-            <div class="box">
-                Best
-                <span id="best">0</span>
-            </div>
+        <div class="score-box">
+            Best
+            <span id="best">0</span>
         </div>
     </div>
+</header>
 
-    <div id="board"></div>
+<div id="board"></div>
 
-    <div class="controls">
-        <button onclick="undo()">Undo</button>
-        <button onclick="restart()">Restart</button>
-    </div>
+<div class="controls">
+    <button onclick="undo()">Undo</button>
+    <button onclick="restart()">Restart</button>
+</div>
 
 </div>
 
-<div id="modal" class="hidden">
-    <div class="modal-content">
-        <h2 id="modal-text"></h2>
-        <button onclick="restart()">Play Again</button>
+<div id="overlay" class="hidden">
+    <div class="card">
+        <h2 id="message"></h2>
+        <button onclick="restart()">New Game</button>
+        <button onclick="continueGame()">Continue</button>
     </div>
 </div>
 
