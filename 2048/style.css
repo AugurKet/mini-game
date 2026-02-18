@@ -1,0 +1,56 @@
+body{
+    font-family: Arial, sans-serif;
+    background:#faf8ef;
+    text-align:center;
+}
+
+h1{
+    font-size:60px;
+    margin-bottom:10px;
+}
+
+.score-container{
+    font-size:24px;
+    margin-bottom:10px;
+}
+
+#game-board{
+    width:420px;
+    height:420px;
+    background:#bbada0;
+    margin:0 auto;
+    border-radius:10px;
+
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    grid-gap:10px;
+    padding:10px;
+}
+
+.tile{
+    width:90px;
+    height:90px;
+    border-radius:8px;
+    background:#cdc1b4;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* Tile colors */
+
+.tile[data-value="2"]{background:#eee4da;}
+.tile[data-value="4"]{background:#ede0c8;}
+.tile[data-value="8"]{background:#f2b179; color:white;}
+.tile[data-value="16"]{background:#f59563; color:white;}
+.tile[data-value="32"]{background:#f67c5f; color:white;}
+.tile[data-value="64"]{background:#f65e3b; color:white;}
+.tile[data-value="128"]{background:#edcf72;}
+.tile[data-value="256"]{background:#edcc61;}
+.tile[data-value="512"]{background:#edc850;}
+.tile[data-value="1024"]{background:#edc53f;}
+.tile[data-value="2048"]{background:#edc22e;}
