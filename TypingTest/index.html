@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>TypeFury · 60‑second challenge</title>
+  <title>TypeFury Pro · stats & sound</title>
   <style>
     * {
       margin: 0;
@@ -12,166 +12,167 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     body {
-      background: linear-gradient(145deg, #0b101a 0%, #18233a 100%);
+      background: linear-gradient(145deg, #0a101c 0%, #172237 100%);
       min-height: 100vh;
       display: flex;
--align-items: center;
+      align-items: center;
       justify-content: center;
       padding: 12px;
     }
     .game-card {
-      max-width: 1000px;
+      max-width: 1100px;
       width: 100%;
-      background: rgba(12, 22, 38, 0.92);
+      background: rgba(10, 20, 36, 0.95);
       backdrop-filter: blur(8px);
-      border-radius: 56px;
-      border: 2px solid #3a61a0;
-      box-shadow: 0 30px 50px -15px #000000, 0 0 0 1px #6883c0 inset;
-      padding: 28px 24px 32px;
+      border-radius: 60px;
+      border: 2px solid #3e68b0;
+      box-shadow: 0 30px 50px -15px #000, 0 0 0 1px #708ac8 inset;
+      padding: 30px 28px 35px;
     }
     h1 {
       text-align: center;
-      font-size: 48px;
+      font-size: 52px;
       font-weight: 800;
-      background: linear-gradient(135deg, #ffe170, #ffad5c);
+      background: linear-gradient(135deg, #ffdb7c, #ffb347);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: 1px;
-      filter: drop-shadow(0 4px 6px #00000080);
-      margin-bottom: 6px;
+      filter: drop-shadow(0 4px 6px #000000b0);
+      margin-bottom: 4px;
     }
-    .subhead {
+    .sub {
       text-align: center;
-      color: #b3ceff;
+      color: #b5d0ff;
       font-size: 18px;
-      margin-bottom: 24px;
-    }
-    .timer-panel {
-      display: flex;
-      justify-content: center;
-      align-items: baseline;
-      gap: 30px;
-      background: #0c203b;
-      border-radius: 100px;
-      padding: 16px 35px;
       margin-bottom: 20px;
-      border: 1px solid #4e76b0;
     }
-    .timer {
+    .top-dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      background: #0f2645;
+      border-radius: 100px;
+      padding: 12px 28px;
+      margin-bottom: 20px;
+      border: 1px solid #557dc0;
+    }
+    .timer-block {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 10px;
     }
-    .timer .label {
-      color: #adc8f5;
-      font-size: 22px;
-      font-weight: 500;
-      text-transform: uppercase;
+    .timer-label {
+      color: #b3d0ff;
+      font-size: 24px;
     }
-    .timer .value {
+    .timer-value {
       color: #ffe484;
       font-size: 58px;
       font-weight: 800;
-      line-height: 1;
       font-family: monospace;
     }
-    .stats {
+    .live-stats {
       display: flex;
-      gap: 35px;
+      gap: 30px;
     }
-    .stat-item {
+    .live-stat {
       display: flex;
       align-items: baseline;
       gap: 6px;
     }
-    .stat-label {
-      color: #adc2e8;
-      font-size: 18px;
+    .live-stat .label {
+      color: #b7d0f0;
+      font-size: 20px;
     }
-    .stat-number {
+    .live-stat .number {
       color: #ffe484;
       font-size: 42px;
       font-weight: 800;
     }
-    .difficulty-row {
+    .difficulty-panel {
       display: flex;
       gap: 15px;
-      margin: 20px 0 25px;
+      margin: 15px 0 25px;
       flex-wrap: wrap;
       justify-content: center;
     }
     .difficulty-btn {
       border: none;
-      background: #213a5a;
-      padding: 16px 32px;
+      background: #253f63;
+      padding: 16px 34px;
       border-radius: 50px;
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
-      color: #cae0ff;
+      color: #d3e6ff;
       cursor: pointer;
-      box-shadow: 0 7px 0 #0f1d31;
+      box-shadow: 0 7px 0 #112439;
       transition: 0.06s linear;
-      border: 1px solid #5a7fb2;
-      flex: 0 1 auto;
-      min-width: 150px;
+      border: 1px solid #6182bb;
+      min-width: 180px;
     }
     .difficulty-btn.active {
       background: #2e7d32;
       color: white;
-      box-shadow: 0 4px 0 #1b4f1f;
+      box-shadow: 0 4px 0 #1e5622;
       transform: translateY(3px);
-      border-color: #a5d6a5;
+      border-color: #a5d6a7;
     }
-    .display-box {
-      background: #0a1d33;
+    .arena {
+      background: #0a1f39;
       border-radius: 50px;
-      padding: 40px 25px;
-      border: 3px solid #3d69a5;
-      margin: 20px 0 22px;
-      box-shadow: inset 0 5px 12px #00000080;
+      padding: 35px 25px;
+      border: 3px solid #3f6bb5;
+      margin: 15px 0 25px;
+      box-shadow: inset 0 5px 12px #000000b0;
     }
     .target-phrase {
       text-align: center;
-      font-size: clamp(28px, 7vw, 70px);
+      font-size: clamp(32px, 8vw, 72px);
       font-weight: 700;
       color: #ffe484;
       text-shadow: 0 5px 0 #826e38;
       word-break: break-word;
       line-height: 1.4;
       font-family: 'Fira Mono', 'Courier New', monospace;
+      transition: transform 0.08s;
+    }
+    .target-phrase.keypress-flash {
+      transform: scale(1.02);
+      color: #fff0b5;
     }
     .input-area {
       display: flex;
       gap: 15px;
-      background: #0f2642;
+      background: #102b4a;
       border-radius: 120px;
       padding: 8px 8px 8px 30px;
-      border: 2px solid #4e7bb8;
-      margin: 25px 0 15px;
+      border: 2px solid #5880c0;
+      margin: 30px 0 20px;
     }
     #userInput {
       flex: 1;
       background: transparent;
       border: none;
       color: white;
-      font-size: 34px;
+      font-size: 38px;
       font-weight: 500;
       outline: none;
       min-width: 0;
       font-family: 'Fira Mono', 'Courier New', monospace;
     }
     #userInput::placeholder {
-      color: #365882;
-      font-size: 26px;
+      color: #345e96;
+      font-size: 28px;
     }
     .submit-btn {
       background: #1f8b4c;
       border: none;
-      width: 85px;
-      height: 85px;
+      width: 95px;
+      height: 95px;
       border-radius: 50%;
       color: white;
-      font-size: 42px;
+      font-size: 46px;
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 7px 0 #0f4429;
@@ -183,148 +184,205 @@
     }
     .submit-btn:disabled {
       opacity: 0.4;
-      transform: none;
-      box-shadow: 0 4px 0 #0f4429;
       pointer-events: none;
     }
     .action-row {
       display: flex;
-      gap: 18px;
+      gap: 20px;
       margin: 10px 0 25px;
     }
     .action-btn {
       flex: 1;
-      background: #2b4a78;
+      background: #2b4f82;
       border: none;
       padding: 18px 0;
       border-radius: 60px;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
-      color: #d9ecff;
+      color: #e3f0ff;
       cursor: pointer;
-      box-shadow: 0 7px 0 #13263f;
+      box-shadow: 0 7px 0 #142b48;
       transition: 0.05s linear;
-      border: 1px solid #6f95d0;
+      border: 1px solid #779bd1;
     }
     .action-btn:active {
       transform: translateY(5px);
-      box-shadow: 0 2px 0 #13263f;
+      box-shadow: 0 2px 0 #142b48;
+    }
+    .stats-panel {
+      background: #0e2542;
+      border-radius: 40px;
+      padding: 22px 20px;
+      margin: 20px 0 15px;
+      border: 1px solid #4d71aa;
+    }
+    .stats-title {
+      color: #ffda7a;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .stat-card {
+      background: #1d3b60;
+      border-radius: 30px;
+      padding: 18px 10px;
+      text-align: center;
+      border: 1px solid #c3a156;
+    }
+    .stat-card .label {
+      color: #bfd8ff;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .stat-card .value {
+      color: #ffe484;
+      font-size: 42px;
+      font-weight: 800;
+    }
+    .stat-card.small .value {
+      font-size: 30px;
     }
     .history-box {
       background: #10263f;
       border-radius: 40px;
-      padding: 18px 20px;
-      border: 1px solid #48699c;
-      margin-top: 15px;
+      padding: 18px 22px;
+      border: 1px solid #4e73b0;
+      margin-top: 10px;
     }
     .history-title {
       color: #ffda7a;
-      font-size: 22px;
-      font-weight: 600;
+      font-size: 24px;
       margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     .history-items {
       display: flex;
       flex-wrap: wrap;
       gap: 12px 18px;
       justify-content: center;
-      min-height: 50px;
+      min-height: 60px;
     }
     .history-chip {
-      background: #1f3d62;
-      padding: 8px 24px;
+      background: #20426b;
+      padding: 10px 28px;
       border-radius: 40px;
       border: 1px solid #f5b457;
       color: #ffdfa5;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 600;
       font-family: monospace;
     }
-    .footer-message {
+    .footer {
       text-align: center;
-      color: #6f91bf;
-      margin-top: 16px;
-      font-size: 16px;
+      color: #6d90c2;
+      margin-top: 20px;
+      font-size: 17px;
     }
-    @media (max-width: 600px) {
-      .timer .value { font-size: 42px; }
-      .stat-number { font-size: 32px; }
-      .difficulty-btn { font-size: 18px; padding: 12px 18px; min-width: 120px; }
+    @media (max-width: 650px) {
+      .live-stat .number { font-size: 32px; }
+      .timer-value { font-size: 44px; }
     }
   </style>
 </head>
 <body>
 <div class="game-card">
-  <h1>⚡ TYPEFURY · 60s</h1>
-  <div class="subhead">one minute · test your typing speed</div>
+  <h1>⚡ TYPEFURY · ENHANCED</h1>
+  <div class="sub">sound · animation · full stats · english only</div>
 
-  <!-- Timer & real‑time stats -->
-  <div class="timer-panel">
-    <div class="timer">
-      <span class="label">⏳</span>
-      <span class="value" id="timerDisplay">60</span>
+  <!-- top bar with timer & live wpm/errors -->
+  <div class="top-dashboard">
+    <div class="timer-block">
+      <span class="timer-label">⏳</span>
+      <span class="timer-value" id="timerDisplay">60</span>
     </div>
-    <div class="stats">
-      <div class="stat-item">
-        <span class="stat-label">✓</span>
-        <span class="stat-number" id="scoreDisplay">0</span>
+    <div class="live-stats">
+      <div class="live-stat">
+        <span class="label">WPM</span>
+        <span class="number" id="liveWpm">0</span>
       </div>
-      <div class="stat-item">
-        <span class="stat-label">⌨️</span>
-        <span class="stat-number" id="wpmDisplay">0</span>
+      <div class="live-stat">
+        <span class="label">❌</span>
+        <span class="number" id="liveMistakes">0</span>
       </div>
     </div>
   </div>
 
-  <!-- Difficulty selector (exactly as requested) -->
-  <div class="difficulty-row">
+  <!-- difficulty selector (english only) -->
+  <div class="difficulty-panel">
     <button id="easyBtn" class="difficulty-btn active">🔰 EASY · words</button>
     <button id="mediumBtn" class="difficulty-btn">🔷 MEDIUM · phrases (UPPER)</button>
     <button id="hardBtn" class="difficulty-btn">🔶 HARD · mixed case & punct</button>
   </div>
 
-  <!-- challenge area -->
-  <div class="display-box">
+  <!-- main typing arena -->
+  <div class="arena">
     <div class="target-phrase" id="targetPhrase">——</div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="type here..." autofocus autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="submit-btn" id="submitBtn">↵</button>
+    </div>
+    <div class="action-row">
+      <button class="action-btn" id="resetBtn">⟲ NEW GAME</button>
+      <button class="action-btn" id="skipBtn">⏭ SKIP</button>
+    </div>
   </div>
 
-  <div class="input-area">
-    <input type="text" id="userInput" placeholder="type here..." autofocus autocomplete="off" autocapitalize="off" spellcheck="false">
-    <button class="submit-btn" id="submitBtn">↵</button>
+  <!-- detailed end‑game stats panel (visible after finish) -->
+  <div class="stats-panel" id="statsPanel" style="display: none;">
+    <div class="stats-title">📊 SESSION REPORT</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">FINAL WPM</div>
+        <div class="value" id="finalWpm">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">ACCURACY</div>
+        <div class="value" id="accuracyDisplay">100%</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">MISTAKES</div>
+        <div class="value" id="totalMistakes">0</div>
+      </div>
+      <div class="stat-card small">
+        <div class="label">FASTEST WORD</div>
+        <div class="value" id="fastestWord">---</div>
+      </div>
+      <div class="stat-card small">
+        <div class="label">SLOWEST WORD</div>
+        <div class="value" id="slowestWord">---</div>
+      </div>
+    </div>
   </div>
 
-  <div class="action-row">
-    <button class="action-btn" id="resetBtn">⟲ NEW GAME</button>
-    <button class="action-btn" id="skipBtn">⏭ SKIP</button>
-  </div>
-
-  <!-- last correct items (history) -->
+  <!-- last correct words history -->
   <div class="history-box">
-    <div class="history-title">📋 last correct entries</div>
+    <div class="history-title">📋 RECENT CORRECT</div>
     <div class="history-items" id="historyContainer">
       <span class="history-chip">——</span>
     </div>
   </div>
-  <div class="footer-message">↵ Enter works · 60 seconds · capitals, spaces, punctuation</div>
+  <div class="footer">sound on · keypress animations · english only · 60 seconds</div>
 </div>
 
 <script>
   (function() {
-    // ---------- PHRASE LIBRARIES (respecting difficulty rules) ----------
-
-    // EASY: single words, final display will be UPPERCASE (via js)
+    // ---------- ENGLISH‑ONLY LIBRARIES (no foreign characters) ----------
     const easyWords = [
       "cat", "dog", "sun", "car", "bus", "hat", "ball", "book", "fish", "tree",
       "moon", "cake", "happy", "house", "mouse", "phone", "table", "chair", "door", "window",
       "apple", "water", "fire", "cloud", "star", "night", "day", "time", "shoe", "shirt",
       "bird", "fish", "frog", "duck", "lion", "bear", "wolf", "deer", "baby", "toy",
-      "smile", "green", "black", "white", "bread", "milk", "sleep", "run", "jump", "read"
+      "smile", "green", "black", "white", "bread", "milk", "sleep", "run", "jump", "read",
+      "quick", "brown", "fox", "jumps", "lazy", "dog", "hello", "world", "type", "fast"
     ];
 
-    // MEDIUM: phrases (with spaces) but everything will be shown as UPPERCASE (no punctuation)
     const mediumPhrases = [
       "quick brown fox", "typing is fun", "speed matters", "keep practicing",
       "sixty seconds", "challenge yourself", "words per minute", "focus and type",
@@ -332,10 +390,10 @@
       "never give up", "good luck", "stay positive", "learn something new",
       "keyboard master", "fast fingers", "muscle memory", "touch typing",
       "time flies", "one minute left", "almost there", "great job",
-      "space bar", "shift key", "upper case", "lower case", "sentence test"
+      "space bar", "shift key", "upper case", "lower case", "sentence test",
+      "practice makes perfect", "type faster please", "keep going", "very good"
     ];
 
-    // HARD: sentences with mixed case, punctuation, apostrophes, commas, etc.
     const hardSentences = [
       "I love coding!",
       "What's your name?",
@@ -354,28 +412,65 @@
       "3, 2, 1... Go!",
       "I've been typing well.",
       "Yes!!! you did it.",
-      "Mind the gap — oops.",
-      "Email: test@example.com",
+      "Mind the gap -- oops.",
+      "Email: test at example dot com",
       "Open the door, please.",
       "Battery at 5%? Charge!",
-      "Hello, 世界",            // unicode mixed
-      "It's 75° outside.",
-      "Follow the ⭐ stars."
+      "Follow the stars."
     ];
 
-    // combine for infinite? but we use distinct sets per mode.
-
     // ---------- game state ----------
-    let currentMode = 'easy';                // easy / medium / hard
+    let currentMode = 'easy';
     let currentSet = [...easyWords];
-    let phraseList = [];                     // shuffled copy
+    let phraseList = [];
     let currentPhrase = '';
-    let score = 0;                           // number of correct entries
-    let timeLeft = 60;                        // seconds
+    let score = 0;                 // number of correct entries
+    let mistakeCount = 0;           // total wrong submissions
+    let timeLeft = 60;
     let timerInterval = null;
-    let gameActive = false;                   // true only when timer >0 and running
-    let history = [];                         // last 6 correct (as string, display format)
-    let startTimeMs = null;
+    let gameActive = false;
+    let history = [];               // last 6 correct phrases (display format)
+
+    // stats for fastest/slowest word (typing time per word)
+    let wordTimings = [];            // { phrase: string, durationMs: number, length: number }
+    let lastWordStartTime = null;
+
+    // sound effects (using Web Audio API)
+    let audioCtx = null;
+    function playSound(type) {
+      if (!audioCtx) {
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) { return; }
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      const now = audioCtx.currentTime;
+      if (type === 'correct') {
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'mistake') {
+        osc.frequency.value = 320;
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'keypress') {
+        // subtle key click
+        osc.frequency.value = 440;
+        gain.gain.setValueAtTime(0.03, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
 
     // DOM elements
     const targetEl = document.getElementById('targetPhrase');
@@ -384,14 +479,20 @@
     const resetBtn = document.getElementById('resetBtn');
     const skipBtn = document.getElementById('skipBtn');
     const timerDisplay = document.getElementById('timerDisplay');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const wpmDisplay = document.getElementById('wpmDisplay');
+    const liveWpm = document.getElementById('liveWpm');
+    const liveMistakes = document.getElementById('liveMistakes');
+    const finalWpm = document.getElementById('finalWpm');
+    const accuracyDisplay = document.getElementById('accuracyDisplay');
+    const totalMistakes = document.getElementById('totalMistakes');
+    const fastestWord = document.getElementById('fastestWord');
+    const slowestWord = document.getElementById('slowestWord');
+    const statsPanel = document.getElementById('statsPanel');
     const historyContainer = document.getElementById('historyContainer');
     const easyBtn = document.getElementById('easyBtn');
     const mediumBtn = document.getElementById('mediumBtn');
     const hardBtn = document.getElementById('hardBtn');
 
-    // ---------- helper functions ----------
+    // helper: shuffle array
     function shuffleArray(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -400,79 +501,96 @@
       return arr;
     }
 
-    // refill phraseList based on currentMode (and shuffle)
     function refillPhraseList() {
       if (currentMode === 'easy') currentSet = [...easyWords];
       else if (currentMode === 'medium') currentSet = [...mediumPhrases];
-      else currentSet = [...hardSentences];  // hard
-
+      else currentSet = [...hardSentences];
       phraseList = shuffleArray([...currentSet]);
     }
 
-    // get next phrase (pop from list, refill if empty)
     function getNextPhrase() {
       if (phraseList.length === 0) refillPhraseList();
       return phraseList.pop();
     }
 
-    // format phrase for display according to difficulty
     function formatForDisplay(phrase, mode) {
-      if (mode === 'easy') {
-        return phrase.toUpperCase();          // all caps, single word
-      } else if (mode === 'medium') {
-        return phrase.toUpperCase();          // all caps, but includes spaces
-      } else {
-        return phrase;                         // hard: keep original (mixed case, punctuation)
-      }
+      if (mode === 'easy' || mode === 'medium') return phrase.toUpperCase();
+      return phrase;  // hard: keep original
     }
 
-    // load new phrase into UI
+    // record timing for the completed word
+    function recordWordTiming(phrase) {
+      if (lastWordStartTime) {
+        const endTime = Date.now();
+        const duration = endTime - lastWordStartTime;
+        wordTimings.push({ phrase, duration, length: phrase.length });
+      }
+      lastWordStartTime = Date.now();  // start next word
+    }
+
+    // load new phrase
     function loadNewPhrase() {
-      if (!gameActive) return;                 // don't change if game not active (except reset)
+      if (!gameActive) return;
       currentPhrase = getNextPhrase();
       targetEl.textContent = formatForDisplay(currentPhrase, currentMode);
       userInput.value = '';
       userInput.focus();
+      // start timing for this word (if first word, set now)
+      if (!lastWordStartTime) lastWordStartTime = Date.now();
     }
 
-    // update timer and wpm
-    function updateTimerDisplay() {
-      timerDisplay.textContent = timeLeft;
-    }
-
-    // calculate WPM based on score and elapsed time
-    function computeWPM() {
-      if (!gameActive || timeLeft >= 60) return 0;   // not started or just finished
-      const elapsedMinutes = (60 - timeLeft) / 60;
-      if (elapsedMinutes <= 0) return 0;
-      // each correct phrase counts as 1 "word" (simplified, but fair for comparison)
-      return Math.round(score / elapsedMinutes);
-    }
-
-    function refreshWPM() {
-      wpmDisplay.textContent = computeWPM();
-    }
-
-    // add correct entry to history
-    function addToHistory(phrase) {
-      let displayPhrase = phrase;
-      if (currentMode === 'easy' || currentMode === 'medium') {
-        displayPhrase = phrase.toUpperCase();
-      } // hard: keep as typed (original)
-      history.unshift(displayPhrase);
-      if (history.length > 6) history.pop();
-      renderHistory();
-    }
-
-    function renderHistory() {
-      if (history.length === 0) {
-        historyContainer.innerHTML = '<span class="history-chip">——</span>';
+    // update live WPM (based on average over last few words? simpler: instantaneous)
+    function refreshLiveWpm() {
+      if (!gameActive) return;
+      if (wordTimings.length === 0) {
+        liveWpm.textContent = '0';
         return;
       }
-      historyContainer.innerHTML = history.map(p => `<span class="history-chip">${p}</span>`).join('');
+      // use last 5 words or all
+      const recent = wordTimings.slice(-5);
+      let totalChars = 0;
+      let totalSec = 0;
+      recent.forEach(t => {
+        totalChars += t.length;
+        totalSec += t.duration / 1000;
+      });
+      if (totalSec === 0) return;
+      const wpm = Math.round((totalChars / 5) / (totalSec / 60));
+      liveWpm.textContent = wpm > 200 ? 200 : wpm;
     }
 
-    // stop timer (game over)
+    // compute final stats
+    function showEndStats() {
+      // WPM: total chars / 5 / minute
+      const totalChars = wordTimings.reduce((acc, t) => acc + t.length, 0);
+      const elapsedMinutes = 1; // 60 seconds
+      const finalWpmValue = Math.round((totalChars / 5) / elapsedMinutes);
+      finalWpm.textContent = finalWpmValue || 0;
+
+      const totalAttempts = score + mistakeCount;
+      const accuracy = totalAttempts === 0 ? 100 : Math.round((score / totalAttempts) * 100);
+      accuracyDisplay.textContent = accuracy + '%';
+      totalMistakes.textContent = mistakeCount;
+
+      // fastest / slowest (by duration per character? use total duration for fair)
+      if (wordTimings.length > 0) {
+        const withSpeed = wordTimings.map(w => ({
+          ...w,
+          timePerChar: w.duration / w.length
+        }));
+        withSpeed.sort((a, b) => a.timePerChar - b.timePerChar);
+        const fastest = withSpeed[0];
+        const slowest = withSpeed[withSpeed.length - 1];
+        fastestWord.textContent = fastest.phrase.length > 12 ? fastest.phrase.substring(0,10)+'…' : fastest.phrase;
+        slowestWord.textContent = slowest.phrase.length > 12 ? slowest.phrase.substring(0,10)+'…' : slowest.phrase;
+      } else {
+        fastestWord.textContent = '---';
+        slowestWord.textContent = '---';
+      }
+      statsPanel.style.display = 'block';
+    }
+
+    // stop game (time over)
     function stopGame() {
       if (timerInterval) {
         clearInterval(timerInterval);
@@ -481,98 +599,113 @@
       gameActive = false;
       submitBtn.disabled = true;
       userInput.disabled = true;
+      showEndStats();
     }
 
-    // start fresh game (keeping current mode)
+    // reset game (new session)
     function resetGame() {
-      // stop old timer
-      if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-      }
-      // reset vars
+      if (timerInterval) clearInterval(timerInterval);
       timeLeft = 60;
       score = 0;
+      mistakeCount = 0;
+      wordTimings = [];
+      lastWordStartTime = null;
       history = [];
       gameActive = true;
       submitBtn.disabled = false;
       userInput.disabled = false;
+      statsPanel.style.display = 'none';
 
-      // refresh phrase list
       refillPhraseList();
       currentPhrase = getNextPhrase();
       targetEl.textContent = formatForDisplay(currentPhrase, currentMode);
       userInput.value = '';
       userInput.focus();
+      lastWordStartTime = Date.now();  // start timing first word
 
-      // update displays
       timerDisplay.textContent = timeLeft;
-      scoreDisplay.textContent = score;
-      wpmDisplay.textContent = '0';
+      liveMistakes.textContent = '0';
+      liveWpm.textContent = '0';
       renderHistory();
 
-      // start timer
       timerInterval = setInterval(() => {
         timeLeft -= 1;
         timerDisplay.textContent = timeLeft;
-        refreshWPM();
+        refreshLiveWpm();
 
         if (timeLeft <= 0) {
           timeLeft = 0;
           timerDisplay.textContent = '0';
           stopGame();
           targetEl.textContent = '⏹ GAME OVER';
-          userInput.disabled = true;
         }
       }, 1000);
     }
 
-    // handle correct answer
-    function handleCorrect() {
-      if (!gameActive) return;
-      score++;
-      scoreDisplay.textContent = score;
-      addToHistory(currentPhrase);
-      refreshWPM();
-      loadNewPhrase();           // automatically next
+    // history render
+    function addToHistory(phrase) {
+      let display = (currentMode === 'easy' || currentMode === 'medium') ? phrase.toUpperCase() : phrase;
+      history.unshift(display);
+      if (history.length > 6) history.pop();
+      renderHistory();
+    }
+    function renderHistory() {
+      if (history.length === 0) {
+        historyContainer.innerHTML = '<span class="history-chip">——</span>';
+        return;
+      }
+      historyContainer.innerHTML = history.map(p => `<span class="history-chip">${p}</span>`).join('');
     }
 
-    // handle mistake (just clear input, no penalty)
+    // handle correct
+    function handleCorrect() {
+      if (!gameActive) return;
+      playSound('correct');
+      recordWordTiming(currentPhrase);
+      score++;
+      liveMistakes.textContent = mistakeCount; // unchanged
+      addToHistory(currentPhrase);
+      refreshLiveWpm();
+      loadNewPhrase();
+    }
+
+    // handle mistake
     function handleMistake() {
       if (!gameActive) return;
-      // flash red briefly
+      playSound('mistake');
+      mistakeCount++;
+      liveMistakes.textContent = mistakeCount;
+      // flash red
       targetEl.style.color = '#ff8888';
-      setTimeout(() => {
-        targetEl.style.color = '#ffe484';
-      }, 150);
+      setTimeout(() => targetEl.style.color = '#ffe484', 150);
       userInput.value = '';
       userInput.focus();
     }
 
-    // ---------- event listeners ----------
-    submitBtn.addEventListener('click', () => {
-      if (!gameActive || !currentPhrase) return;
-      const typed = userInput.value; // keep original case/spaces
-      // compare depending on mode:
-      let expected = currentPhrase;
-      if (currentMode === 'easy' || currentMode === 'medium') {
-        // case‑insensitive compare (but we show uppercase, stored lowercase)
-        if (typed.toLowerCase() === currentPhrase.toLowerCase()) {
-          handleCorrect();
-        } else {
-          handleMistake();
-        }
-      } else {
-        // hard: exact match (including case & punctuation)
-        if (typed === currentPhrase) {
-          handleCorrect();
-        } else {
-          handleMistake();
-        }
+    // keypress animation + subtle click
+    userInput.addEventListener('keydown', (e) => {
+      if (!gameActive) return;
+      if (e.key.length === 1) { // printable character
+        playSound('keypress');
+        targetEl.classList.add('keypress-flash');
+        setTimeout(() => targetEl.classList.remove('keypress-flash'), 100);
       }
     });
 
-    // Enter key
+    // submit
+    submitBtn.addEventListener('click', () => {
+      if (!gameActive || !currentPhrase) return;
+      const typed = userInput.value;
+      let expected = currentPhrase;
+      if (currentMode === 'easy' || currentMode === 'medium') {
+        if (typed.toLowerCase() === currentPhrase.toLowerCase()) handleCorrect();
+        else handleMistake();
+      } else {
+        if (typed === currentPhrase) handleCorrect();
+        else handleMistake();
+      }
+    });
+
     userInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -580,26 +713,23 @@
       }
     });
 
-    // skip button (counts as mistake, load new phrase)
     skipBtn.addEventListener('click', () => {
       if (!gameActive) return;
-      // no score change, just skip
+      // skip counts as mistake? we count it as mistake to be fair
+      mistakeCount++;
+      liveMistakes.textContent = mistakeCount;
+      playSound('mistake');
       loadNewPhrase();
     });
 
-    // reset button
     resetBtn.addEventListener('click', resetGame);
 
-    // difficulty change (must reset game)
     function setMode(mode) {
       currentMode = mode;
-      // update active class
-      [easyBtn, mediumBtn, hardBtn].forEach(btn => btn.classList.remove('active'));
+      [easyBtn, mediumBtn, hardBtn].forEach(b => b.classList.remove('active'));
       if (mode === 'easy') easyBtn.classList.add('active');
       else if (mode === 'medium') mediumBtn.classList.add('active');
       else hardBtn.classList.add('active');
-
-      // reset everything with new mode
       resetGame();
     }
 
@@ -607,11 +737,8 @@
     mediumBtn.addEventListener('click', () => setMode('medium'));
     hardBtn.addEventListener('click', () => setMode('hard'));
 
-    // initialise
-    function init() {
-      setMode('easy');  // triggers resetGame
-    }
-    init();
+    // init
+    setMode('easy');
   })();
 </script>
 </body>
