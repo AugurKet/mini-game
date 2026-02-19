@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>听觉边际 · 高频挑战</title>
+  <title>听觉边际 · 低频→高频扫描</title>
   <style>
     * {
       margin: 0;
@@ -253,8 +253,8 @@
     <div class="brand">
       <div class="logo">🦻</div>
       <div>
-        <h1>听觉边际 · 高频挑战</h1>
-        <p class="subtitle">频率从高到低扫描 — 听不见时立刻按【停止】</p>
+        <h1>听觉边际 · 低频→高频扫描</h1>
+        <p class="subtitle">频率从低向高攀升 — 听不见时立刻按【停止】</p>
       </div>
     </div>
 
@@ -272,7 +272,7 @@
 
   <main class="card">
     <div class="panel">
-      <!-- 波形选择 & 参数 (起止频率互换: 高频→低频) -->
+      <!-- 波形选择 & 参数 (起止频率: 低→高) -->
       <div class="row">
         <label class="lab">波形</label>
         <select id="waveType">
@@ -285,14 +285,14 @@
       </div>
 
       <div class="row">
-        <label class="lab">起始频率 (高)</label>
-        <input id="startFreq" type="number" min="1000" max="22000" value="18000" step="100">
+        <label class="lab">起始频率 (低)</label>
+        <input id="startFreq" type="number" min="20" max="10000" value="500" step="100">
         <span class="unit">Hz</span>
       </div>
 
       <div class="row">
-        <label class="lab">结束频率 (低)</label>
-        <input id="endFreq" type="number" min="20" max="15000" value="2000" step="100">
+        <label class="lab">结束频率 (高)</label>
+        <input id="endFreq" type="number" min="1000" max="22000" value="18000" step="100">
         <span class="unit">Hz</span>
       </div>
 
@@ -315,7 +315,7 @@
       </div>
 
       <div id="msg" class="msg">
-        💡 建议使用耳机，舒适音量。听不到时立刻按【停止】，系统会记录你的高频极限。
+        💡 建议使用耳机，舒适音量。频率从低到高，听不到时立刻按【停止】记录你的高频上限。
       </div>
     </div>
 
@@ -326,7 +326,7 @@
         <span style="font-size: 16px; color: #ffd966;" id="userPositionHint"></span>
       </div>
       <div class="compare-grid" id="compareGrid">
-        <!-- 通过JS动态渲染, 同时保留静态后备 -->
+        <!-- 通过JS动态渲染 -->
       </div>
     </div>
 
@@ -363,17 +363,16 @@
     // 状态变量
     let isPlaying = false;            // 扫描是否进行中
     let sweepInterval = null;         // 定时更新频率
-    let startTime = 0;                // 用于线性插值
-    let sweepDuration = 10;           // 实际扫描时长(秒)
-    let startHz = 18000;
-    let endHz = 2000;
+    let sweepDuration = 10;           
+    let startHz = 500;                // 低频起点
+    let endHz = 18000;                // 高频终点
     let lastResult = null;            // 最后记录的极限频率 (用户停止时)
 
     // 更新音量显示
     volumeSlider.addEventListener('input', () => {
       volLabel.textContent = volumeSlider.value;
       if (gainNode) {
-        gainNode.gain.setValueAtTime(volumeSlider.value / 100, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(volumeSlider.value / 100, audioCtx?.currentTime || 0);
       }
     });
 
@@ -391,7 +390,6 @@
         oscillator = null;
       }
       if (audioCtx && audioCtx.state !== 'closed') {
-        // 不关闭context，便于快速重启；但可以suspend
         if (audioCtx.state === 'running') audioCtx.suspend();
       }
       isPlaying = false;
@@ -399,7 +397,7 @@
       stopBtn.disabled = true;
     }
 
-    // 重置UI (不清除结果)
+    // 重置UI (可选择是否保留结果)
     function resetToIdle(keepResult = true) {
       stopOscillatorAndTimer();
       freqNowSpan.textContent = '—';
@@ -407,16 +405,13 @@
         freqResultSpan.textContent = '—';
         lastResult = null;
       } else {
-        // 若已有lastResult，保持显示
         if (lastResult) freqResultSpan.textContent = lastResult;
       }
-      // 更新比较表格高亮 (仍然反映lastResult)
       renderComparison(lastResult);
     }
 
-    // 开始高频扫描 (由start按钮触发)
+    // 开始低频→高频扫描
     function startSweep() {
-      // 清理之前的扫描
       stopOscillatorAndTimer();
 
       // 读取参数
@@ -425,16 +420,15 @@
       sweepDuration = parseFloat(durationInput.value);
       const vol = parseFloat(volumeSlider.value) / 100;
 
-      // 基本验证: 起始必须大于结束 (高频→低频)
-      if (startHz <= endHz) {
-        msgDiv.innerHTML = '⚠️ 起始频率应高于结束频率 (高→低扫描)。已自动交换。';
-        // 自动交换
+      // 验证: 起始必须小于结束 (低→高)
+      if (startHz >= endHz) {
+        msgDiv.innerHTML = '⚠️ 起始频率应低于结束频率 (低→高扫描)。已自动交换。';
         [startHz, endHz] = [endHz, startHz];
         startFreqInput.value = startHz;
         endFreqInput.value = endHz;
       }
 
-      // 初始化音频上下文 (用户手势内)
+      // 初始化音频上下文
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       } else if (audioCtx.state === 'suspended') {
@@ -450,40 +444,33 @@
       oscillator.connect(gainNode).connect(audioCtx.destination);
       oscillator.frequency.setValueAtTime(startHz, audioCtx.currentTime);
 
-      // 开始振荡器
       oscillator.start();
       isPlaying = true;
       startBtn.disabled = true;
       stopBtn.disabled = false;
-      freqResultSpan.textContent = '…';   // 扫描中清掉上次结果?
+      freqResultSpan.textContent = '…';   // 清掉上次结果
       lastResult = null;
 
       // 用setInterval更新频率 (线性插值)
-      const updateIntervalMs = 50; // 50ms刷新一次显示/频率
+      const updateIntervalMs = 50; 
       const startTime = audioCtx.currentTime;
-      const totalSteps = sweepDuration * 1000 / updateIntervalMs;
-      let step = 0;
 
-      if (sweepInterval) clearInterval(sweepInterval);
       sweepInterval = setInterval(() => {
         if (!isPlaying) return;
 
         const now = audioCtx.currentTime;
-        const elapsed = now - startTime;       // 经过的秒数
+        const elapsed = now - startTime;
         let progress = Math.min(elapsed / sweepDuration, 1.0);
 
-        // 线性插值频率: 高频→低频
-        const currentFreq = startHz - (startHz - endHz) * progress;
-        // 更新振荡器
+        // 线性插值: 低 → 高
+        const currentFreq = startHz + (endHz - startHz) * progress;
         if (oscillator) {
           oscillator.frequency.setValueAtTime(currentFreq, audioCtx.currentTime);
         }
-        // 显示当前频率 (取整)
         freqNowSpan.textContent = Math.round(currentFreq);
 
-        // 到达终点自动停止 (progress >= 1)
+        // 到达终点自动停止
         if (progress >= 0.99) {
-          // 扫描结束，自动停止并记录最终频率 (低频端)
           lastResult = Math.round(endHz);
           freqResultSpan.textContent = lastResult;
           freqNowSpan.textContent = Math.round(endHz);
@@ -493,33 +480,31 @@
         }
       }, updateIntervalMs);
 
-      // 保险：万一没触发到终点，但时间结束
+      // 超时保护
       setTimeout(() => {
         if (isPlaying) {
-          // 强制结束
           lastResult = Math.round(endHz);
           freqResultSpan.textContent = lastResult;
           stopOscillatorAndTimer();
           renderComparison(lastResult);
         }
-      }, sweepDuration * 1000 + 200);
+      }, sweepDuration * 1000 + 300);
     }
 
     // 用户按下【停止】——记录当前频率作为极限
     function stopAndRecord() {
       if (!isPlaying) return;
 
-      // 取当前显示频率
       const currentHz = parseFloat(freqNowSpan.textContent);
       if (!isNaN(currentHz) && currentHz > 0) {
         lastResult = Math.round(currentHz);
         freqResultSpan.textContent = lastResult;
       } else {
-        lastResult = '—';
+        lastResult = null;
       }
       stopOscillatorAndTimer();
       renderComparison(lastResult);
-      msgDiv.innerHTML = `⏸️ 停止于 ${lastResult} Hz。你的高频极限 ≈ ${lastResult} Hz`;
+      msgDiv.innerHTML = `⏸️ 停止于 ${lastResult || '?'} Hz。你的高频极限 ≈ ${lastResult || '—'} Hz`;
     }
 
     // ---------- 比较表格绘制 (人类/动物) ----------
@@ -539,7 +524,6 @@
       for (let s of species) {
         let highlightClass = '';
         let userMark = '';
-        // 若用户有记录且在物种范围内 (± 200hz 宽容)
         if (userValue !== null && userValue >= s.low && userValue <= s.high) {
           highlightClass = 'highlight-user';
           userMark = '👆 你的极限在此范围内';
@@ -553,7 +537,6 @@
       }
       compareGrid.innerHTML = htmlStr;
 
-      // 添加额外的文字提示
       if (userValue !== null) {
         if (userValue > 16000) userPositionHint.innerHTML = `✨ 你的高频 (${userValue} Hz) 超越多数成年人！`;
         else if (userValue > 10000) userPositionHint.innerHTML = `👂 高频 ${userValue} Hz，接近年轻人平均。`;
@@ -569,13 +552,13 @@
       freqNowSpan.textContent = '—';
       freqResultSpan.textContent = '—';
       lastResult = null;
-      startFreqInput.value = 18000;
-      endFreqInput.value = 2000;
+      startFreqInput.value = 500;
+      endFreqInput.value = 18000;
       durationInput.value = 10;
       volumeSlider.value = 25;
       volLabel.textContent = '25';
       waveSelect.value = 'sine';
-      msgDiv.innerHTML = '💡 使用耳机，从高频滑向低频。听不到立即按停止。';
+      msgDiv.innerHTML = '💡 使用耳机，从低到高扫描。听不到立即按停止。';
       renderComparison(null);
       if (audioCtx) {
         audioCtx.close().then(() => { audioCtx = null; });
@@ -585,31 +568,17 @@
     }
 
     // ----- 事件绑定 -----
-    startBtn.addEventListener('click', () => {
-      startSweep();
-    });
+    startBtn.addEventListener('click', startSweep);
+    stopBtn.addEventListener('click', stopAndRecord);
+    resetBtn.addEventListener('click', fullReset);
 
-    stopBtn.addEventListener('click', () => {
-      stopAndRecord();
-    });
-
-    resetBtn.addEventListener('click', () => {
-      fullReset();
-    });
-
-    // 初始化比较表格 (空数据)
+    // 初始化比较表格
     renderComparison(null);
-
-    // 停止按钮初始禁用
     stopBtn.disabled = true;
 
-    // 页面卸载时关闭音频
     window.addEventListener('beforeunload', () => {
       if (audioCtx) audioCtx.close();
     });
-
-    // 音量滑条实时更新gain
-    // 处理数字输入范围限制
   })();
 </script>
 </body>
