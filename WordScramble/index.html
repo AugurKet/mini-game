@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Scramble · Vocabulary Challenge</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(145deg, #1a2639 0%, #2c3e50 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .game-container {
+      max-width: 700px;
+      width: 100%;
+      background: rgba(20, 30, 45, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 40px;
+      border: 2px solid #4a6fa5;
+      box-shadow: 0 25px 40px -10px #000000cc;
+      overflow: hidden;
+      padding: 30px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #ffd966;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 0 #8b6f3c;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #aac8f0;
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+    
+    .stats-panel {
+      background: #1e3146;
+      border-radius: 60px;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      border: 1px solid #5475a3;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-label {
+      color: #9bb9e0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .stat-value {
+      color: #ffe484;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    
+    .difficulty-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      justify-content: center;
+    }
+    
+    .difficulty-btn {
+      flex: 1;
+      padding: 15px 0;
+      border: none;
+      border-radius: 40px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.1s linear;
+      box-shadow: 0 6px 0 #0f1a28;
+    }
+    
+    .difficulty-btn.easy {
+      background: #2e7d32;
+      color: white;
+    }
+    
+    .difficulty-btn.medium {
+      background: #ed6c02;
+      color: white;
+    }
+    
+    .difficulty-btn.hard {
+      background: #d32f2f;
+      color: white;
+    }
+    
+    .difficulty-btn.active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #0f1a28;
+      filter: brightness(1.1);
+    }
+    
+    .game-card {
+      background: #0f1e30;
+      border-radius: 30px;
+      padding: 35px 25px;
+      border: 2px solid #3c6090;
+      box-shadow: inset 0 2px 10px #00000080;
+      margin-bottom: 20px;
+    }
+    
+    .scrambled-word {
+      text-align: center;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: 15px;
+      color: #ffd966;
+      text-transform: uppercase;
+      margin: 20px 0;
+      text-shadow: 0 5px 0 #7a5f2e;
+      word-break: break-all;
+    }
+    
+    .hint-box {
+      background: #1d334d;
+      border-radius: 50px;
+      padding: 15px 25px;
+      margin: 15px 0 25px;
+      border: 1px dashed #8bb0ff;
+      color: #c3dcff;
+      font-size: 20px;
+      text-align: center;
+    }
+    
+    .input-area {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    
+    #guessInput {
+      flex: 2;
+      padding: 18px 25px;
+      border: 3px solid #3e6190;
+      border-radius: 60px;
+      background: #1a2b40;
+      color: white;
+      font-size: 24px;
+      font-weight: 600;
+      text-transform: uppercase;
+      outline: none;
+    }
+    
+    #guessInput:focus {
+      border-color: #ffbc6c;
+    }
+    
+    .action-btn {
+      flex: 1;
+      padding: 18px 0;
+      border: none;
+      border-radius: 60px;
+      background: #1f8b4c;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 7px 0 #0e4525;
+      transition: 0.07s;
+    }
+    
+    .action-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 #0e4525;
+    }
+    
+    .action-btn.secondary {
+      background: #546e7a;
+      box-shadow: 0 7px 0 #2a3a44;
+    }
+    
+    .action-btn:disabled {
+      opacity: 0.5;
+      transform: none;
+      box-shadow: 0 5px 0 #0e4525;
+      pointer-events: none;
+    }
+    
+    .message {
+      background: #263f5c;
+      border-radius: 40px;
+      padding: 18px;
+      text-align: center;
+      color: #ffd966;
+      font-size: 20px;
+      font-weight: 600;
+      border-left: 8px solid #ffb347;
+    }
+    
+    .score-message {
+      text-align: center;
+      margin: 15px 0;
+      font-size: 22px;
+      color: #b3d6ff;
+    }
+    
+    .next-hint {
+      color: #90caf9;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    
+    .footer {
+      text-align: center;
+      color: #5f7ea3;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🔤 WORD SCRAMBLE</h1>
+    <div class="subtitle">Unscramble the letters · 3 difficulties · 600 words</div>
+    
+    <div class="stats-panel">
+      <div class="stat">
+        <div class="stat-label">Score</div>
+        <div class="stat-value"><span id="scoreDisplay">0</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Best</div>
+        <div class="stat-value"><span id="bestDisplay">0</span></div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Words Left</div>
+        <div class="stat-value"><span id="wordsLeft">200</span></div>
+      </div>
+    </div>
+    
+    <div class="difficulty-selector">
+      <button id="easyBtn" class="difficulty-btn easy active">Easy</button>
+      <button id="mediumBtn" class="difficulty-btn medium">Medium</button>
+      <button id="hardBtn" class="difficulty-btn hard">Hard</button>
+    </div>
+    
+    <div class="game-card">
+      <div class="scrambled-word" id="scrambledWord">????</div>
+      
+      <div class="hint-box">
+        <span id="hintText">Click New Word to start</span>
+      </div>
+      
+      <div class="input-area">
+        <input type="text" id="guessInput" placeholder="YOUR ANSWER" maxlength="20" autocomplete="off">
+        <button id="submitBtn" class="action-btn">✓</button>
+      </div>
+      
+      <div style="display: flex; gap: 12px;">
+        <button id="newWordBtn" class="action-btn secondary" style="flex: 1;">🔄 New Word</button>
+        <button id="skipBtn" class="action-btn secondary" style="flex: 1;">⏩ Skip</button>
+      </div>
+    </div>
+    
+    <div id="messageBox" class="message">
+      💡 Select difficulty and click New Word to start!
+    </div>
+    
+    <div class="score-message" id="scoreMessage"></div>
+    <div class="footer">600 words · Test your vocabulary</div>
+  </div>
+
+  <script>
+    // ==================== WORD LIBRARY (600 words) ====================
+    const wordLibrary = {
+      easy: [
+        "cat", "dog", "sun", "car", "bus", "hat", "bat", "ball", "book", "pen",
+        "cup", "bed", "red", "blue", "fish", "bird", "tree", "star", "moon", "cake",
+        "milk", "egg", "apple", "happy", "house", "mouse", "phone", "table", "chair", "door",
+        "window", "paper", "pencil", "teacher", "student", "school", "garden", "flower", "grass", "water",
+        "fire", "rain", "snow", "wind", "cloud", "sky", "night", "day", "week", "month",
+        "year", "time", "clock", "watch", "shoe", "sock", "shirt", "pants", "dress", "skirt",
+        "coat", "hat", "glove", "scarf", "boot", "sand", "rock", "stone", "hill", "mountain",
+        "river", "lake", "ocean", "sea", "beach", "island", "forest", "desert", "cave", "volcano",
+        "tiger", "lion", "bear", "wolf", "fox", "deer", "zebra", "giraffe", "monkey", "elephant",
+        "snake", "lizard", "frog", "bug", "ant", "bee", "fly", "spider", "worm", "snail"
+      ],
+      
+      medium: [
+        "guitar", "piano", "violin", "drum", "music", "dance", "sing", "song", "melody", "rhythm",
+        "artist", "painter", "canvas", "brush", "color", "rainbow", "purple", "orange", "yellow", "green",
+        "bicycle", "motorcycle", "train", "airplane", "rocket", "spaceship", "submarine", "sailboat", "canoe", "kayak",
+        "breakfast", "lunch", "dinner", "supper", "snack", "dessert", "chocolate", "vanilla", "strawberry", "blueberry",
+        "kitchen", "bathroom", "bedroom", "living", "dining", "basement", "attic", "garage", "balcony", "garden",
+        "blanket", "pillow", "mattress", "curtain", "carpet", "furniture", "cabinet", "drawer", "shelf", "mirror",
+        "weather", "temperature", "hurricane", "tornado", "thunder", "lightning", "earthquake", "tsunami", "avalanche", "drought",
+        "butterfly", "dragonfly", "grasshopper", "caterpillar", "ladybug", "firefly", "mosquito", "cockroach", "beetle", "cricket",
+        "penguin", "dolphin", "whale", "shark", "octopus", "jellyfish", "starfish", "seahorse", "crab", "lobster",
+        "astronaut", "scientist", "doctor", "nurse", "engineer", "architect", "pilot", "captain", "soldier", "police",
+        "library", "museum", "theater", "cinema", "stadium", "hospital", "church", "temple", "mosque", "castle",
+        "challenge", "problem", "solution", "mystery", "secret", "riddle", "puzzle", "game", "sport", "race",
+        "journey", "adventure", "vacation", "holiday", "festival", "celebration", "birthday", "wedding", "party", "parade",
+        "sunrise", "sunset", "dawn", "dusk", "twilight", "midnight", "noon", "morning", "afternoon", "evening",
+        "universe", "galaxy", "planet", "asteroid", "comet", "meteor", "satellite", "telescope", "microscope", "laboratory",
+        "dinosaur", "fossil", "extinct", "prehistoric", "ancient", "medieval", "modern", "future", "past", "present",
+        "language", "english", "spanish", "french", "german", "italian", "russian", "japanese", "chinese", "korean",
+        "dictionary", "thesaurus", "encyclopedia", "glossary", "index", "chapter", "paragraph", "sentence", "grammar", "vocabulary",
+        "computer", "keyboard", "monitor", "mouse", "printer", "scanner", "speaker", "microphone", "headphone", "camera"
+      ],
+      
+      hard: [
+        "exaggerate", "accommodate", "accompany", "accomplish", "accumulate", "accustom", "achievement", "acknowledge", "acquaintance", "acquire",
+        "adaptable", "adjustment", "admirable", "admission", "adolescent", "advantage", "advertisement", "affectionate", "aggressive", "agreement",
+        "alphabetical", "alternative", "amateur", "ambiguous", "ambitious", "analysis", "anniversary", "announcement", "anticipate", "anxiety",
+        "apologize", "apparatus", "apparent", "appearance", "application", "appointment", "appreciate", "appropriate", "approximate", "architecture",
+        "assignment", "assistance", "associate", "atmosphere", "attachment", "attendance", "attention", "attitude", "attraction", "available",
+        "awareness", "awkward", "background", "balance", "barrier", "beautiful", "beginning", "behaviour", "beneficial", "boundary",
+        "brilliant", "business", "calendar", "campaign", "candidate", "capacity", "category", "celebration", "cemetery", "certainty",
+        "challenge", "character", "chemical", "circumstance", "civilization", "classic", "classroom", "colleague", "collection", "college",
+        "combination", "comfortable", "commercial", "commission", "committee", "communicate", "community", "company", "comparison", "competition",
+        "complaint", "complete", "complex", "complicate", "component", "concentrate", "conception", "concern", "conclusion", "condition",
+        "conference", "confidence", "confirmation", "conflict", "confuse", "congratulate", "connection", "conscious", "consequence", "consider",
+        "consistent", "constant", "constitution", "construction", "consult", "consume", "contact", "contain", "contemporary", "content",
+        "continent", "continue", "contract", "contribute", "control", "convenient", "conversation", "cooperate", "coordinate", "correct",
+        "correspond", "council", "courteous", "creature", "criterion", "criticism", "culture", "curious", "currency", "curriculum",
+        "customary", "dangerous", "daughter", "decision", "decorate", "definite", "delicate", "delicious", "delivery", "democracy",
+        "dependent", "deposit", "description", "desert", "design", "desperate", "destination", "destruction", "determine", "develop",
+        "difference", "difficult", "dilemma", "direction", "disappear", "disaster", "discipline", "discover", "discuss", "disease",
+        "disgust", "dishonest", "dismiss", "disorder", "display", "distance", "distinct", "distract", "distribute", "district",
+        "disturb", "diverse", "division", "divorce", "document", "domestic", "dominant", "doubtful", "dramatic", "dreadful",
+        "economic", "economy", "educated", "effective", "efficient", "effort", "election", "electric", "elementary", "embarrass",
+        "emergency", "emotional", "emphasis", "employ", "encourage", "endless", "energetic", "enforce", "engineer", "enjoyable",
+        "enormous", "enough", "enroll", "ensure", "entertain", "enthusiasm", "entire", "entrance", "envelope", "environment",
+        "equipment", "equivalent", "especially", "essential", "establish", "estimate", "eventual", "everybody", "everyday", "everyone",
+        "evidence", "exactly", "examine", "example", "excellent", "except", "exchange", "excite", "exclude",
+        "exercise", "exhaust", "exhibit", "exist", "expand", "expect", "expense", "expensive", "experience", "experiment",
+        "explain", "explode", "explore", "expose", "express", "extend", "extent", "external", "extraordinary"
+      ]
+    };
+
+    // ==================== GAME STATE ====================
+    let currentDifficulty = 'easy';
+    let currentWordList = [...wordLibrary.easy];
+    let usedIndices = new Set();
+    let currentWord = '';
+    let currentScrambled = '';
+    let score = 0;
+    let bestScore = 0;
+    let messageTimeout = null;
+
+    // DOM elements
+    const scrambledEl = document.getElementById('scrambledWord');
+    const hintEl = document.getElementById('hintText');
+    const guessInput = document.getElementById('guessInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const newWordBtn = document.getElementById('newWordBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const messageBox = document.getElementById('messageBox');
+    const scoreMessage = document.getElementById('scoreMessage');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const bestDisplay = document.getElementById('bestDisplay');
+    const wordsLeftEl = document.getElementById('wordsLeft');
+    const easyBtn = document.getElementById('easyBtn');
+    const mediumBtn = document.getElementById('mediumBtn');
+    const hardBtn = document.getElementById('hardBtn');
+
+    // ==================== HELPER FUNCTIONS ====================
+    function scrambleWord(word) {
+      const arr = word.split('');
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr.join('');
+    }
+
+    function updateWordsLeft() {
+      const total = currentWordList.length;
+      const left = total - usedIndices.size;
+      wordsLeftEl.textContent = left;
+    }
+
+    function getRandomWord() {
+      if (usedIndices.size >= currentWordList.length) {
+        // All words used - reset
+        usedIndices.clear();
+        messageBox.textContent = "🎉 Great! You've completed all words! Starting over...";
+      }
+      
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * currentWordList.length);
+      } while (usedIndices.has(randomIndex) && usedIndices.size < currentWordList.length);
+      
+      usedIndices.add(randomIndex);
+      return currentWordList[randomIndex];
+    }
+
+    function loadNewWord() {
+      currentWord = getRandomWord();
+      currentScrambled = scrambleWord(currentWord);
+      scrambledEl.textContent = currentScrambled.toUpperCase();
+      
+      // Simple hint: first and last letter + length
+      const first = currentWord[0].toUpperCase();
+      const last = currentWord[currentWord.length - 1].toUpperCase();
+      hintEl.textContent = `🔍 ${currentWord.length} letters · Starts with "${first}" · Ends with "${last}"`;
+      
+      guessInput.value = '';
+      guessInput.focus();
+      updateWordsLeft();
+      
+      // Clear any timeout message
+      if (messageTimeout) clearTimeout(messageTimeout);
+      messageBox.textContent = '🤔 Type your guess and press Submit';
+    }
+
+    // ==================== SCORE MANAGEMENT ====================
+    function updateScore(points) {
+      score += points;
+      if (score < 0) score = 0;
+      scoreDisplay.textContent = score;
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestDisplay.textContent = bestScore;
+        // Save to localStorage
+        localStorage.setItem('wordScrambleBest', bestScore);
+      }
+    }
+
+    // Load best score from localStorage
+    function loadBestScore() {
+      const saved = localStorage.getItem('wordScrambleBest');
+      if (saved) {
+        bestScore = parseInt(saved);
+        bestDisplay.textContent = bestScore;
+      }
+    }
+
+    // ==================== DIFFICULTY HANDLING ====================
+    function setDifficulty(level) {
+      currentDifficulty = level;
+      currentWordList = [...wordLibrary[level]];
+      usedIndices.clear();
+      
+      // Update button active states
+      easyBtn.classList.remove('active');
+      mediumBtn.classList.remove('active');
+      hardBtn.classList.remove('active');
+      
+      if (level === 'easy') easyBtn.classList.add('active');
+      else if (level === 'medium') mediumBtn.classList.add('active');
+      else hardBtn.classList.add('active');
+      
+      // Load first word
+      loadNewWord();
+      messageBox.textContent = `✅ ${level.charAt(0).toUpperCase() + level.slice(1)} mode · ${currentWordList.length} words available`;
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    submitBtn.addEventListener('click', () => {
+      const guess = guessInput.value.trim().toLowerCase();
+      if (!guess) {
+        messageBox.textContent = '⚠️ Please type your guess first!';
+        return;
+      }
+      
+      if (guess === currentWord) {
+        // Correct!
+        updateScore(10);
+        messageBox.textContent = '🎉 Correct! +10 points!';
+        scoreMessage.textContent = '👍 Great job!';
+        if (messageTimeout) clearTimeout(messageTimeout);
+        messageTimeout = setTimeout(() => {
+          scoreMessage.textContent = '';
+        }, 1500);
+        
+        // Load next word automatically
+        loadNewWord();
+      } else {
+        // Wrong
+        updateScore(-2);
+        messageBox.textContent = `❌ Wrong guess! -2 points. Try again or skip.`;
+        guessInput.value = '';
+        guessInput.focus();
+      }
+    });
+
+    newWordBtn.addEventListener('click', () => {
+      loadNewWord();
+    });
+
+    skipBtn.addEventListener('click', () => {
+      messageBox.textContent = `⏩ Skipped · The word was "${currentWord.toUpperCase()}"`;
+      loadNewWord();
+    });
+
+    // Enter key in input field
+    guessInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitBtn.click();
+      }
+    });
+
+    // Difficulty buttons
+    easyBtn.addEventListener('click', () => setDifficulty('easy'));
+    mediumBtn.addEventListener('click', () => setDifficulty('medium'));
+    hardBtn.addEventListener('click', () => setDifficulty('hard'));
+
+    // ==================== INITIALIZE ====================
+    function init() {
+      loadBestScore();
+      setDifficulty('easy');
+    }
+
+    init();
+  </script>
+</body>
+</html>
