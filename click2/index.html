@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>极速点盒 · 动感升级</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(145deg, #0b1120 0%, #1a2639 100%);
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #f0f3fa;
+    }
+
+    .game {
+      width: 360px;
+      height: 560px;
+      background: rgba(10, 20, 40, 0.9);
+      backdrop-filter: blur(4px);
+      border-radius: 32px;
+      border: 1px solid rgba(74, 144, 226, 0.3);
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 2px #1e2b4a inset;
+      overflow: hidden;
+      padding: 18px 16px 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0 0 4px 0;
+      font-weight: 600;
+      font-size: 28px;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #c0e0ff, #a0d0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 2px #00000060);
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      background: #0e1a2b;
+      padding: 12px 18px;
+      border-radius: 60px;
+      margin: 8px 0 12px;
+      border: 1px solid #3e5a7c;
+      font-weight: 600;
+      font-size: 18px;
+      box-shadow: inset 0 3px 6px #00000055;
+    }
+
+    .stats span {
+      color: #ffe484;
+      background: #1f3147;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 22px;
+      margin-left: 8px;
+    }
+
+    .record-badge {
+      background: #2f3e5a;
+      border-radius: 40px;
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      border: 1px solid #f5c542;
+      color: #fae47e;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 0 12px #ffd96655;
+    }
+
+    .record-badge span {
+      background: #1f2c3f;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: 26px;
+      color: #ffd966;
+    }
+
+    .arena {
+      flex: 1;
+      background: #0a111f;
+      border-radius: 28px;
+      position: relative;
+      border: 3px solid #2e4b6e;
+      box-shadow: inset 0 0 20px #000000, 0 10px 15px #0000004d;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .box {
+      width: 64px;
+      height: 64px;
+      background: radial-gradient(circle at 30% 30%, #ffd966, #e68a2e);
+      position: absolute;
+      border-radius: 20% 50% 20% 50%;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 10px 0 #9e5d1a, 0 0 20px #f0b323;
+      transition: transform 0.07s ease, filter 0.1s;
+      z-index: 20;
+      border: 2px solid #fce38a;
+    }
+
+    .box:active {
+      transform: scale(0.85);
+      filter: brightness(1.5);
+    }
+
+    /* 点击出现的爆裂小特效 (用伪类做微光) */
+    .box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, transparent 70%);
+      opacity: 0;
+      border-radius: inherit;
+    }
+
+    .hit-effect {
+      animation: hitPop 0.15s ease-out forwards;
+    }
+
+    @keyframes hitPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.5); background: #ffd966; }
+      100% { transform: scale(1); }
+    }
+
+    .start {
+      background: linear-gradient(145deg, #3b71ca, #1f4a9e);
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 22px;
+      padding: 16px 10px;
+      border-radius: 60px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 10px 0 #0d213b, 0 4px 20px #4b7bec;
+      transition: 0.08s linear;
+      margin-top: 6px;
+      border: 1px solid #8bb3f0;
+    }
+
+    .start:active {
+      transform: translateY(6px);
+      box-shadow: 0 4px 0 #0d213b, 0 6px 18px #4b7bec;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #9bb9e0;
+      text-align: center;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game">
+  <h2>⚡ 极速点盒 ⚡</h2>
+
+  <!-- 最高分 BEST RECORD 独立展示 -->
+  <div class="record-badge">
+    🏆 BEST RECORD <span id="bestScore">0</span>
+  </div>
+
+  <div class="stats">
+    <div>🎯 得分 <span id="score">0</span></div>
+    <div>⏳ 剩余 <span id="time">15</span>s</div>
+  </div>
+
+  <!-- 主要游戏区域（盒子移动范围） -->
+  <div class="arena" id="arena">
+    <div class="box" id="box"></div>
+  </div>
+
+  <div class="footer">
+    <button class="start" id="startBtn">▶ 开始游戏</button>
+  </div>
+  <div class="hint">✨ 点击盒子越快，得分越高！刷新纪录有惊喜~</div>
+</div>
+
+<script>
+  (function() {
+    // ----- 元素 -----
+    const box = document.getElementById("box");
+    const startBtn = document.getElementById("startBtn");
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+    const bestEl = document.getElementById("bestScore");
+    const arena = document.getElementById("arena");   // 容器参考
+
+    // ----- 游戏状态 -----
+    let score = 0;
+    let time = 15;
+    let timer = null;
+    let gameActive = false;          // 防止时间结束后仍可点击
+
+    // ----- 最高分 (localStorage 持久化) -----
+    let bestRecord = 0;
+    try {
+      const saved = localStorage.getItem('clickBox_best');
+      if (saved) bestRecord = parseInt(saved, 10) || 0;
+    } catch (e) { /* 忽略 */ }
+    bestEl.textContent = bestRecord;
+
+    // ----- 更新最高分显示 + 存储 -----
+    function updateBestRecord( currentScore ) {
+      if (currentScore > bestRecord) {
+        bestRecord = currentScore;
+        bestEl.textContent = bestRecord;
+        // 存到本地
+        try {
+          localStorage.setItem('clickBox_best', bestRecord);
+        } catch (e) {}
+        // 小动画提醒破纪录 (让best badge闪烁)
+        const badge = document.querySelector('.record-badge');
+        badge.style.transition = '0.2s';
+        badge.style.transform = 'scale(1.05)';
+        badge.style.backgroundColor = '#4d3b1f';
+        setTimeout(() => {
+          badge.style.transform = 'scale(1)';
+          badge.style.backgroundColor = '#2f3e5a';
+        }, 200);
+      }
+    }
+
+    // ----- 随机位置 (考虑盒子大小 64x64) -----
+    function randomPosition() {
+      const arenaRect = arena.getBoundingClientRect();
+      // 盒子的尺寸固定 64px，防止跑出arena可视区
+      const maxLeft = arena.clientWidth - 64;
+      const maxTop = arena.clientHeight - 64;
+
+      // 防御：如果容器太小 (小于64) 就强制0
+      let left = Math.max(0, Math.min(maxLeft, Math.random() * (maxLeft || 1)));
+      let top = Math.max(0, Math.min(maxTop, Math.random() * (maxTop || 1)));
+
+      box.style.left = left + "px";
+      box.style.top = top + "px";
+    }
+
+    // ----- 点击盒子的处理（生动反馈 + 加分）-----
+    function handleBoxClick(e) {
+      if (!gameActive) return;        // 不在游戏中
+
+      // 增加得分
+      score++;
+      scoreEl.textContent = score;
+
+      // 1. 盒子点击动效 (类名动画)
+      box.classList.add('hit-effect');
+      setTimeout(() => {
+        box.classList.remove('hit-effect');
+      }, 150);
+
+      // 2. 随机微缩 + 变色 (已通过active和伪类完成, 额外加一点彩蛋)
+      // 快速变背景色闪一下 (通过添加内联样式, 然后移除)
+      box.style.backgroundColor = '#ffaa33';
+      setTimeout(() => {
+        box.style.backgroundColor = ''; // 恢复css定义
+      }, 80);
+
+      // 3. 移动新位置
+      randomPosition();
+
+      // 4. 可选的加分漂浮数字效果(额外用一个小提示, 但为了简洁直接做在盒子文字？不破坏设计)
+      // 增加一个小彩蛋: 偶尔改变盒子形状(趣味)
+      if (score % 5 === 0) {
+        box.style.borderRadius = '50% 20% 50% 20%';  // 扭一下
+      } else {
+        box.style.borderRadius = '20% 50% 20% 50%';  // 恢复原风格
+      }
+    }
+
+    // 绑定盒子点击
+    box.addEventListener("click", handleBoxClick);
+
+    // ----- 开始/重置游戏 -----
+    function startGame() {
+      // 若已有计时器则清除
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+
+      // 重置变量
+      score = 0;
+      time = 15;
+      gameActive = true;
+
+      // 更新UI
+      scoreEl.textContent = score;
+      timeEl.textContent = time;
+      startBtn.style.display = "none";          // 隐藏开始按钮（游戏进行中）
+      box.style.display = "block";
+      box.style.borderRadius = '20% 50% 20% 50%'; // 恢复初始形状
+
+      // 生成随机初始位置
+      randomPosition();
+
+      // 启动倒计时
+      timer = setInterval(() => {
+        time--;
+        timeEl.textContent = time;
+
+        // 时间耗尽
+        if (time <= 0) {
+          clearInterval(timer);
+          timer = null;
+          gameActive = false;           // 禁止再点击加分
+
+          // 隐藏盒子
+          box.style.display = "none";
+
+          // 尝试更新最高分 (传入最终得分)
+          updateBestRecord(score);
+
+          // 显示开始按钮 (变为“再来一局”)
+          startBtn.style.display = "block";
+          startBtn.textContent = "🔥 再来一局";
+
+          // 弹窗提醒 (但不如加一个生动的alert? 用更友好的提示)
+          // 这里用 alert 保留原风格，但加上破纪录提示
+          let message = `⏰ 时间到！得分: ${score}`;
+          if (score > bestRecord - 1 && score > 0) { // 破纪录情况已在update里处理，但还是提示
+            message = `🎉 新纪录！ 得分: ${score}  🎉`;
+          } else {
+            message = `⌛ 游戏结束 得分: ${score}`;
+          }
+          // 为了体验不强制alert，改用一个小弹出提醒？保留alert也无妨，但可更柔和使用。保持原风格但加个记录对比
+          alert(message);   // 可以保留，直观
+        }
+      }, 1000);
+    }
+
+    // 绑定开始按钮
+    startBtn.addEventListener("click", () => {
+      startGame();
+    });
+
+    // 为了防止点击开始前或者结束后误触盒子，gameActive 控制
+    // 额外保险：当游戏未激活，隐藏盒子不可点
+    // 调整初始状态
+    box.style.display = "none";
+    gameActive = false;
+
+    // 如果点击重新开始按钮时，也要确保之前计时器关闭
+    // 已经放在startGame里
+
+    // 可选: 如果用户点击开始后快速点盒子，不会因为之前的定时器造成双计时器 (已处理)
+
+    // 加分动感: 晃动一下容器(轻微彩蛋)当得分每过10分？
+    // 不做太复杂，保留简洁
+
+    // 自适应: 确保arena尺寸变动时盒子不超出 (已经在random中用最新client尺寸)
+    window.addEventListener('resize', () => {
+      if (gameActive && box.style.display === 'block') {
+        // 重新随机落点防止出界
+        randomPosition();
+      }
+    });
+
+    // 额外有趣: 盒子旁边可以加个小尾巴？但为了流畅就这样
+    // 但可以加一点悬浮效果
+    box.addEventListener('mouseenter', () => {
+      if (!gameActive) return;
+      box.style.transform = 'scale(1.1)';
+    });
+    box.addEventListener('mouseleave', () => {
+      if (!gameActive) return;
+      box.style.transform = 'scale(1)';
+    });
+    // 修正mouseleave和点击冲突：点击时transform被覆盖，没关系
+
+    // 启动初始化完成
+  })();
+</script>
+</body>
+</html>
