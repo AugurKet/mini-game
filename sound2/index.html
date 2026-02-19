@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>听觉边际 · 高频挑战</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: linear-gradient(145deg, #10141c 0%, #1b2330 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .app {
+      max-width: 780px;
+      width: 100%;
+      background: rgba(18, 26, 40, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 48px;
+      border: 1px solid #2c405c;
+      box-shadow: 0 25px 45px -10px #000000cc, 0 0 0 1px #3b5680 inset;
+      overflow: hidden;
+    }
+    .topbar {
+      background: #0f1a2b;
+      padding: 28px 28px 20px;
+      border-bottom: 2px solid #2f4b70;
+    }
+    .brand {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .logo {
+      font-size: 52px;
+      filter: drop-shadow(0 0 8px #78aeff);
+    }
+    h1 {
+      color: white;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #e0edff, #b3d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      color: #90acc9;
+      font-size: 15px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .stats {
+      display: flex;
+      gap: 20px;
+      background: #14233b;
+      border-radius: 100px;
+      padding: 16px 24px;
+      border: 1px solid #365a82;
+    }
+    .stat {
+      flex: 1;
+    }
+    .stat .label {
+      font-size: 13px;
+      color: #8facd1;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .stat .value {
+      font-size: 40px;
+      font-weight: 800;
+      color: #ffe484;
+      line-height: 1.2;
+      text-shadow: 0 3px 5px #00000050;
+    }
+    .stat .value span {
+      color: #f5d25e;
+    }
+    .card {
+      padding: 28px 28px 18px;
+    }
+    .panel {
+      background: #0d1727;
+      border-radius: 32px;
+      padding: 24px;
+      border: 1px solid #314d70;
+      box-shadow: inset 0 2px 5px #00000050;
+      margin-bottom: 20px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .lab {
+      width: 120px;
+      color: #b9d2f0;
+      font-weight: 600;
+      font-size: 16px;
+    }
+    select, input[type="number"] {
+      background: #1f3147;
+      border: 2px solid #3d5f86;
+      border-radius: 40px;
+      padding: 12px 22px;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      outline: none;
+      flex: 1 1 200px;
+      transition: 0.15s;
+    }
+    select option { background: #1f3147; }
+    input[type="number"]:focus, select:focus { border-color: #ffbc6c; }
+    .unit {
+      color: #afcbff;
+      min-width: 50px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    input[type="range"] {
+      flex: 1;
+      height: 8px;
+      background: #2e405b;
+      border-radius: 20px;
+      appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #ffe484;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 10px black;
+      cursor: pointer;
+    }
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin: 30px 0 20px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: none;
+      background: #2d405d;
+      padding: 16px 28px;
+      border-radius: 60px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #b1cbff;
+      cursor: pointer;
+      flex: 1 0 auto;
+      box-shadow: 0 7px 0 #121f30;
+      transition: 0.07s linear;
+      border: 1px solid #5777a4;
+    }
+    .btn:active { transform: translateY(5px); box-shadow: 0 2px 0 #121f30; }
+    .btnGreen {
+      background: #1f8b4c;
+      color: white;
+      box-shadow: 0 7px 0 #0e4525;
+      border-color: #7edb9e;
+    }
+    .btnGhost {
+      background: transparent;
+      box-shadow: 0 7px 0 #0f1a28;
+      border: 1px solid #4f6e94;
+    }
+    .btn:disabled {
+      opacity: 0.35;
+      transform: none;
+      box-shadow: 0 5px 0 #121f30;
+      pointer-events: none;
+    }
+    .msg {
+      background: #11263f;
+      border-radius: 28px;
+      padding: 18px 22px;
+      color: #b3d6ff;
+      font-weight: 500;
+      border-left: 6px solid #ffb05c;
+    }
+    .disclaimer {
+      font-size: 13px;
+      color: #597a9f;
+      text-align: center;
+      margin: 16px 0 10px;
+    }
+    .footer {
+      text-align: center;
+      padding: 18px;
+      color: #5d7da2;
+      background: #0b1422;
+      font-size: 15px;
+    }
+
+    /* 比较表格 */
+    .compare-section {
+      background: #101c2d;
+      border-radius: 30px;
+      padding: 20px;
+      margin: 18px 0 0;
+      border: 1px solid #3f6190;
+    }
+    .compare-title {
+      color: #f5d371;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .comp-item {
+      background: #1b3149;
+      border-radius: 24px;
+      padding: 14px 10px;
+      text-align: center;
+      border: 1px solid #5379ab;
+    }
+    .comp-emoji { font-size: 28px; margin-bottom: 5px; }
+    .comp-name { font-weight: 700; color: white; font-size: 18px; }
+    .comp-range { color: #aacbff; font-size: 15px; margin: 6px 0 2px; }
+    .comp-desc { color: #ffcf7a; font-size: 14px; }
+    .highlight-user {
+      background: #3f5055;
+      border: 2px solid #f5c542;
+      box-shadow: 0 0 15px #f5b34299;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🦻</div>
+      <div>
+        <h1>听觉边际 · 高频挑战</h1>
+        <p class="subtitle">频率从高到低扫描 — 听不见时立刻按【停止】</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">当前频率</div>
+        <div class="value"><span id="freqNow">—</span> Hz</div>
+      </div>
+      <div class="stat">
+        <div class="label">你的极限</div>
+        <div class="value"><span id="freqResult">—</span> Hz</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="card">
+    <div class="panel">
+      <!-- 波形选择 & 参数 (起止频率互换: 高频→低频) -->
+      <div class="row">
+        <label class="lab">波形</label>
+        <select id="waveType">
+          <option value="sine" selected>正弦 (纯净)</option>
+          <option value="triangle">三角</option>
+          <option value="square">方波 (含泛音)</option>
+          <option value="sawtooth">锯齿</option>
+        </select>
+        <span class="unit"></span>
+      </div>
+
+      <div class="row">
+        <label class="lab">起始频率 (高)</label>
+        <input id="startFreq" type="number" min="1000" max="22000" value="18000" step="100">
+        <span class="unit">Hz</span>
+      </div>
+
+      <div class="row">
+        <label class="lab">结束频率 (低)</label>
+        <input id="endFreq" type="number" min="20" max="15000" value="2000" step="100">
+        <span class="unit">Hz</span>
+      </div>
+
+      <div class="row">
+        <label class="lab">扫描时长</label>
+        <input id="duration" type="number" min="4" max="20" value="10">
+        <span class="unit">秒</span>
+      </div>
+
+      <div class="row">
+        <label class="lab">音量</label>
+        <input id="volume" type="range" min="0" max="100" value="25">
+        <span class="unit"><span id="volLabel">25</span>%</span>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" class="btn btnGreen">▶ 开始扫描</button>
+        <button id="stopBtn" class="btn" disabled>⏹ 停止</button>
+        <button id="resetBtn" class="btn btnGhost">↺ 重置</button>
+      </div>
+
+      <div id="msg" class="msg">
+        💡 建议使用耳机，舒适音量。听不到时立刻按【停止】，系统会记录你的高频极限。
+      </div>
+    </div>
+
+    <!-- 比较区块：人类 vs 动物 (动态高亮你的结果) -->
+    <div class="compare-section" id="compareBox">
+      <div class="compare-title">
+        <span>🔬 听力对比参考</span>
+        <span style="font-size: 16px; color: #ffd966;" id="userPositionHint"></span>
+      </div>
+      <div class="compare-grid" id="compareGrid">
+        <!-- 通过JS动态渲染, 同时保留静态后备 -->
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ 耳机/扬声器频响限制可能影响结果。仅作趣味参考，非医学测量。
+    </div>
+  </main>
+  <footer class="footer">🎧 向上挑战听觉边际 · 对比人类与动物</footer>
+</div>
+
+<script>
+  (function() {
+    // ---------- DOM 元素 ----------
+    const waveSelect = document.getElementById('waveType');
+    const startFreqInput = document.getElementById('startFreq');
+    const endFreqInput = document.getElementById('endFreq');
+    const durationInput = document.getElementById('duration');
+    const volumeSlider = document.getElementById('volume');
+    const volLabel = document.getElementById('volLabel');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const freqNowSpan = document.getElementById('freqNow');
+    const freqResultSpan = document.getElementById('freqResult');
+    const msgDiv = document.getElementById('msg');
+    const compareGrid = document.getElementById('compareGrid');
+    const userPositionHint = document.getElementById('userPositionHint');
+
+    // ---------- 音频上下文 ----------
+    let audioCtx = null;
+    let oscillator = null;
+    let gainNode = null;
+
+    // 状态变量
+    let isPlaying = false;            // 扫描是否进行中
+    let sweepInterval = null;         // 定时更新频率
+    let startTime = 0;                // 用于线性插值
+    let sweepDuration = 10;           // 实际扫描时长(秒)
+    let startHz = 18000;
+    let endHz = 2000;
+    let lastResult = null;            // 最后记录的极限频率 (用户停止时)
+
+    // 更新音量显示
+    volumeSlider.addEventListener('input', () => {
+      volLabel.textContent = volumeSlider.value;
+      if (gainNode) {
+        gainNode.gain.setValueAtTime(volumeSlider.value / 100, audioCtx.currentTime);
+      }
+    });
+
+    // ---------- 辅助函数 ----------
+    function stopOscillatorAndTimer() {
+      if (sweepInterval) {
+        clearInterval(sweepInterval);
+        sweepInterval = null;
+      }
+      if (oscillator) {
+        try {
+          oscillator.stop();
+          oscillator.disconnect();
+        } catch (e) {}
+        oscillator = null;
+      }
+      if (audioCtx && audioCtx.state !== 'closed') {
+        // 不关闭context，便于快速重启；但可以suspend
+        if (audioCtx.state === 'running') audioCtx.suspend();
+      }
+      isPlaying = false;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    // 重置UI (不清除结果)
+    function resetToIdle(keepResult = true) {
+      stopOscillatorAndTimer();
+      freqNowSpan.textContent = '—';
+      if (!keepResult) {
+        freqResultSpan.textContent = '—';
+        lastResult = null;
+      } else {
+        // 若已有lastResult，保持显示
+        if (lastResult) freqResultSpan.textContent = lastResult;
+      }
+      // 更新比较表格高亮 (仍然反映lastResult)
+      renderComparison(lastResult);
+    }
+
+    // 开始高频扫描 (由start按钮触发)
+    function startSweep() {
+      // 清理之前的扫描
+      stopOscillatorAndTimer();
+
+      // 读取参数
+      startHz = parseFloat(startFreqInput.value);
+      endHz = parseFloat(endFreqInput.value);
+      sweepDuration = parseFloat(durationInput.value);
+      const vol = parseFloat(volumeSlider.value) / 100;
+
+      // 基本验证: 起始必须大于结束 (高频→低频)
+      if (startHz <= endHz) {
+        msgDiv.innerHTML = '⚠️ 起始频率应高于结束频率 (高→低扫描)。已自动交换。';
+        // 自动交换
+        [startHz, endHz] = [endHz, startHz];
+        startFreqInput.value = startHz;
+        endFreqInput.value = endHz;
+      }
+
+      // 初始化音频上下文 (用户手势内)
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } else if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      // 创建节点
+      oscillator = audioCtx.createOscillator();
+      gainNode = audioCtx.createGain();
+      oscillator.type = waveSelect.value;
+      gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+
+      oscillator.connect(gainNode).connect(audioCtx.destination);
+      oscillator.frequency.setValueAtTime(startHz, audioCtx.currentTime);
+
+      // 开始振荡器
+      oscillator.start();
+      isPlaying = true;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      freqResultSpan.textContent = '…';   // 扫描中清掉上次结果?
+      lastResult = null;
+
+      // 用setInterval更新频率 (线性插值)
+      const updateIntervalMs = 50; // 50ms刷新一次显示/频率
+      const startTime = audioCtx.currentTime;
+      const totalSteps = sweepDuration * 1000 / updateIntervalMs;
+      let step = 0;
+
+      if (sweepInterval) clearInterval(sweepInterval);
+      sweepInterval = setInterval(() => {
+        if (!isPlaying) return;
+
+        const now = audioCtx.currentTime;
+        const elapsed = now - startTime;       // 经过的秒数
+        let progress = Math.min(elapsed / sweepDuration, 1.0);
+
+        // 线性插值频率: 高频→低频
+        const currentFreq = startHz - (startHz - endHz) * progress;
+        // 更新振荡器
+        if (oscillator) {
+          oscillator.frequency.setValueAtTime(currentFreq, audioCtx.currentTime);
+        }
+        // 显示当前频率 (取整)
+        freqNowSpan.textContent = Math.round(currentFreq);
+
+        // 到达终点自动停止 (progress >= 1)
+        if (progress >= 0.99) {
+          // 扫描结束，自动停止并记录最终频率 (低频端)
+          lastResult = Math.round(endHz);
+          freqResultSpan.textContent = lastResult;
+          freqNowSpan.textContent = Math.round(endHz);
+          stopOscillatorAndTimer();
+          renderComparison(lastResult);
+          msgDiv.innerHTML = '✅ 扫描完成。你听到了全程？若听不到高频应提前停止。';
+        }
+      }, updateIntervalMs);
+
+      // 保险：万一没触发到终点，但时间结束
+      setTimeout(() => {
+        if (isPlaying) {
+          // 强制结束
+          lastResult = Math.round(endHz);
+          freqResultSpan.textContent = lastResult;
+          stopOscillatorAndTimer();
+          renderComparison(lastResult);
+        }
+      }, sweepDuration * 1000 + 200);
+    }
+
+    // 用户按下【停止】——记录当前频率作为极限
+    function stopAndRecord() {
+      if (!isPlaying) return;
+
+      // 取当前显示频率
+      const currentHz = parseFloat(freqNowSpan.textContent);
+      if (!isNaN(currentHz) && currentHz > 0) {
+        lastResult = Math.round(currentHz);
+        freqResultSpan.textContent = lastResult;
+      } else {
+        lastResult = '—';
+      }
+      stopOscillatorAndTimer();
+      renderComparison(lastResult);
+      msgDiv.innerHTML = `⏸️ 停止于 ${lastResult} Hz。你的高频极限 ≈ ${lastResult} Hz`;
+    }
+
+    // ---------- 比较表格绘制 (人类/动物) ----------
+    function renderComparison(userFreq) {
+      const userValue = (typeof userFreq === 'number' && !isNaN(userFreq)) ? userFreq : null;
+
+      const species = [
+        { name: '人类 (成年人)', emoji: '👨', range: '20 ~ 16000 Hz', low: 20, high: 16000, desc: '通常上限随年龄下降' },
+        { name: '狗', emoji: '🐕', range: '40 ~ 45000 Hz', low: 40, high: 45000, desc: '听见远超人类高频' },
+        { name: '猫', emoji: '🐈', range: '45 ~ 64000 Hz', low: 45, high: 64000, desc: '超高音猎手' },
+        { name: '蝙蝠', emoji: '🦇', range: '2000 ~ 110000 Hz', low: 2000, high: 110000, desc: '回声定位大师' },
+        { name: '海豚', emoji: '🐬', range: '150 ~ 150000 Hz', low: 150, high: 150000, desc: '超声波交流' },
+        { name: '老鼠', emoji: '🐭', range: '1000 ~ 70000 Hz', low: 1000, high: 70000, desc: '警惕高频' }
+      ];
+
+      let htmlStr = '';
+      for (let s of species) {
+        let highlightClass = '';
+        let userMark = '';
+        // 若用户有记录且在物种范围内 (± 200hz 宽容)
+        if (userValue !== null && userValue >= s.low && userValue <= s.high) {
+          highlightClass = 'highlight-user';
+          userMark = '👆 你的极限在此范围内';
+        }
+        htmlStr += `<div class="comp-item ${highlightClass}">
+          <div class="comp-emoji">${s.emoji}</div>
+          <div class="comp-name">${s.name}</div>
+          <div class="comp-range">${s.range}</div>
+          <div class="comp-desc">${userMark || s.desc}</div>
+        </div>`;
+      }
+      compareGrid.innerHTML = htmlStr;
+
+      // 添加额外的文字提示
+      if (userValue !== null) {
+        if (userValue > 16000) userPositionHint.innerHTML = `✨ 你的高频 (${userValue} Hz) 超越多数成年人！`;
+        else if (userValue > 10000) userPositionHint.innerHTML = `👂 高频 ${userValue} Hz，接近年轻人平均。`;
+        else userPositionHint.innerHTML = `🔉 测得 ${userValue} Hz，可再试试安静环境。`;
+      } else {
+        userPositionHint.innerHTML = '进行测试后，你的结果会高亮';
+      }
+    }
+
+    // 重置所有 (包括结果)
+    function fullReset() {
+      stopOscillatorAndTimer();
+      freqNowSpan.textContent = '—';
+      freqResultSpan.textContent = '—';
+      lastResult = null;
+      startFreqInput.value = 18000;
+      endFreqInput.value = 2000;
+      durationInput.value = 10;
+      volumeSlider.value = 25;
+      volLabel.textContent = '25';
+      waveSelect.value = 'sine';
+      msgDiv.innerHTML = '💡 使用耳机，从高频滑向低频。听不到立即按停止。';
+      renderComparison(null);
+      if (audioCtx) {
+        audioCtx.close().then(() => { audioCtx = null; });
+      } else {
+        audioCtx = null;
+      }
+    }
+
+    // ----- 事件绑定 -----
+    startBtn.addEventListener('click', () => {
+      startSweep();
+    });
+
+    stopBtn.addEventListener('click', () => {
+      stopAndRecord();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      fullReset();
+    });
+
+    // 初始化比较表格 (空数据)
+    renderComparison(null);
+
+    // 停止按钮初始禁用
+    stopBtn.disabled = true;
+
+    // 页面卸载时关闭音频
+    window.addEventListener('beforeunload', () => {
+      if (audioCtx) audioCtx.close();
+    });
+
+    // 音量滑条实时更新gain
+    // 处理数字输入范围限制
+  })();
+</script>
+</body>
+</html>
