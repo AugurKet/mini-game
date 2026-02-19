@@ -1,0 +1,66 @@
+// wordScrambleWords.js
+const wordLibrary = {
+  easy: [
+    "cat", "dog", "sun", "car", "bus", "hat", "bat", "ball", "book", "pen",
+    "cup", "bed", "red", "blue", "fish", "bird", "tree", "star", "moon", "cake",
+    "milk", "egg", "apple", "happy", "house", "mouse", "phone", "table", "chair", "door",
+    "window", "paper", "pencil", "teacher", "student", "school", "garden", "flower", "grass", "water",
+    "fire", "rain", "snow", "wind", "cloud", "sky", "night", "day", "week", "month",
+    "year", "time", "clock", "watch", "shoe", "sock", "shirt", "pants", "dress", "skirt",
+    "coat", "hat", "glove", "scarf", "boot", "sand", "rock", "stone", "hill", "mountain",
+    "river", "lake", "ocean", "sea", "beach", "island", "forest", "desert", "cave", "volcano",
+    "tiger", "lion", "bear", "wolf", "fox", "deer", "zebra", "giraffe", "monkey", "elephant",
+    "snake", "lizard", "frog", "bug", "ant", "bee", "fly", "spider", "worm", "snail"
+  ],
+  
+  medium: [
+    "guitar", "piano", "violin", "drum", "music", "dance", "sing", "song", "melody", "rhythm",
+    "artist", "painter", "canvas", "brush", "color", "rainbow", "purple", "orange", "yellow", "green",
+    "bicycle", "motorcycle", "train", "airplane", "rocket", "spaceship", "submarine", "sailboat", "canoe", "kayak",
+    "breakfast", "lunch", "dinner", "supper", "snack", "dessert", "chocolate", "vanilla", "strawberry", "blueberry",
+    "kitchen", "bathroom", "bedroom", "living", "dining", "basement", "attic", "garage", "balcony", "garden",
+    "blanket", "pillow", "mattress", "curtain", "carpet", "furniture", "cabinet", "drawer", "shelf", "mirror",
+    "weather", "temperature", "hurricane", "tornado", "thunder", "lightning", "earthquake", "tsunami", "avalanche", "drought",
+    "butterfly", "dragonfly", "grasshopper", "caterpillar", "ladybug", "firefly", "mosquito", "cockroach", "beetle", "cricket",
+    "penguin", "dolphin", "whale", "shark", "octopus", "jellyfish", "starfish", "seahorse", "crab", "lobster",
+    "astronaut", "scientist", "doctor", "nurse", "engineer", "architect", "pilot", "captain", "soldier", "police",
+    "library", "museum", "theater", "cinema", "stadium", "hospital", "church", "temple", "mosque", "castle",
+    "challenge", "problem", "solution", "mystery", "secret", "riddle", "puzzle", "game", "sport", "race",
+    "journey", "adventure", "vacation", "holiday", "festival", "celebration", "birthday", "wedding", "party", "parade",
+    "sunrise", "sunset", "dawn", "dusk", "twilight", "midnight", "noon", "morning", "afternoon", "evening",
+    "universe", "galaxy", "planet", "asteroid", "comet", "meteor", "satellite", "telescope", "microscope", "laboratory",
+    "dinosaur", "fossil", "extinct", "prehistoric", "ancient", "medieval", "modern", "future", "past", "present",
+    "language", "english", "spanish", "french", "german", "italian", "russian", "japanese", "chinese", "korean",
+    "dictionary", "thesaurus", "encyclopedia", "glossary", "index", "chapter", "paragraph", "sentence", "grammar", "vocabulary",
+    "computer", "keyboard", "monitor", "mouse", "printer", "scanner", "speaker", "microphone", "headphone", "camera"
+  ],
+  
+  hard: [
+    "exaggerate", "accommodate", "accompany", "accomplish", "accumulate", "accustom", "achievement", "acknowledge", "acquaintance", "acquire",
+    "adaptable", "adjustment", "admirable", "admission", "adolescent", "advantage", "advertisement", "affectionate", "aggressive", "agreement",
+    "alphabetical", "alternative", "amateur", "ambiguous", "ambitious", "analysis", "anniversary", "announcement", "anticipate", "anxiety",
+    "apologize", "apparatus", "apparent", "appearance", "application", "appointment", "appreciate", "appropriate", "approximate", "architecture",
+    "assignment", "assistance", "associate", "atmosphere", "attachment", "attendance", "attention", "attitude", "attraction", "available",
+    "awareness", "awkward", "background", "balance", "barrier", "beautiful", "beginning", "behaviour", "beneficial", "boundary",
+    "brilliant", "business", "calendar", "campaign", "candidate", "capacity", "category", "celebration", "cemetery", "certainty",
+    "challenge", "character", "chemical", "circumstance", "civilization", "classic", "classroom", "colleague", "collection", "college",
+    "combination", "comfortable", "commercial", "commission", "committee", "communicate", "community", "company", "comparison", "competition",
+    "complaint", "complete", "complex", "complicate", "component", "concentrate", "conception", "concern", "conclusion", "condition",
+    "conference", "confidence", "confirmation", "conflict", "confuse", "congratulate", "connection", "conscious", "consequence", "consider",
+    "consistent", "constant", "constitution", "construction", "consult", "consume", "contact", "contain", "contemporary", "content",
+    "continent", "continue", "contract", "contribute", "control", "convenient", "conversation", "cooperate", "coordinate", "correct",
+    "correspond", "council", "courteous", "creature", "criterion", "criticism", "culture", "curious", "currency", "curriculum",
+    "customary", "dangerous", "daughter", "decision", "decorate", "definite", "delicate", "delicious", "delivery", "democracy",
+    "dependent", "deposit", "description", "desert", "design", "desperate", "destination", "destruction", "determine", "develop",
+    "difference", "difficult", "dilemma", "direction", "disappear", "disaster", "discipline", "discover", "discuss", "disease",
+    "disgust", "dishonest", "dismiss", "disorder", "display", "distance", "distinct", "distract", "distribute", "district",
+    "disturb", "diverse", "division", "divorce", "document", "domestic", "dominant", "doubtful", "dramatic", "dreadful",
+    "economic", "economy", "educated", "effective", "efficient", "effort", "election", "electric", "elementary", "embarrass",
+    "emergency", "emotional", "emphasis", "employ", "encourage", "endless", "energetic", "enforce", "engineer", "enjoyable",
+    "enormous", "enough", "enroll", "ensure", "entertain", "enthusiasm", "entire", "entrance", "envelope", "environment",
+    "equipment", "equivalent", "especially", "essential", "establish", "estimate", "eventual", "everybody", "everyday", "everyone",
+    "evidence", "exactly", "exaggerate", "examine", "example", "excellent", "except", "exchange", "excite", "exclude",
+    "exercise", "exhaust", "exhibit", "exist", "expand", "expect", "expense", "expensive", "experience", "experiment",
+    "explain", "explode", "explore", "expose", "express", "extend", "extent", "external", "extract", "extraordinary"
+  ]
+};
