@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Retro Tetris</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050510;
+            font-family: 'Courier New', Courier, monospace;
+            touch-action: none; /* Prevent scroll on touch devices */
+        }
+        #game-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass through to container, except for buttons */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hud-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #33f;
+            box-shadow: 0 0 10px #33f, inset 0 0 10px #33f;
+            border-radius: 8px;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+        
+        /* Mobile Controls */
+        #mobile-controls {
+            pointer-events: auto;
+            display: none;
+            padding: 20px;
+            gap: 20px;
+            user-select: none;
+        }
+        
+        @media (max-width: 768px) {
+            #mobile-controls {
+                display: flex;
+            }
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+        
+        .control-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.9);
+        }
+
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 5px;
+        }
+
+        #game-over-screen {
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D Canvas Container -->
+    <div id="game-container"></div>
+
+    <!-- UI Overlay -->
+    <div id="ui-layer">
+        
+        <!-- Header / Stats -->
+        <div class="flex justify-between items-start p-4">
+            <div class="hud-panel p-4 flex flex-col items-center">
+                <h1 class="text-2xl font-bold tracking-widest mb-2 text-cyan-400">TETRIS 3D</h1>
+                <div class="text-lg">SCORE: <span id="score-val">0</span></div>
+            </div>
+            
+            <div class="hud-panel p-4 flex flex-col items-end">
+                <div class="text-lg">LEVEL: <span id="level-val">1</span></div>
+                <div class="text-lg">LINES: <span id="lines-val">0</span></div>
+            </div>
+        </div>
+
+        <!-- Touch Controls (Mobile Only) -->
+        <div id="mobile-controls" class="w-full justify-between items-end pb-8">
+            <div class="d-pad">
+                <div class="col-start-1 row-start-2 control-btn" id="btn-left">◀</div>
+                <div class="col-start-2 row-start-2 control-btn" id="btn-down">▼</div>
+                <div class="col-start-3 row-start-2 control-btn" id="btn-right">▶</div>
+            </div>
+            <div class="flex gap-4">
+                <div class="control-btn bg-blue-600/50 border-blue-400" id="btn-rotate">↻</div>
+                <div class="control-btn bg-red-600/50 border-red-400" id="btn-drop">⤓</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-screen" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-50">
+        <h2 class="text-6xl font-bold text-red-500 mb-4 animate-pulse tracking-widest drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">GAME OVER</h2>
+        <div class="hud-panel p-6 mb-8 text-center">
+            <p class="text-2xl mb-2">FINAL SCORE: <span id="final-score" class="text-yellow-400">0</span></p>
+            <p class="text-xl">LINES CLEARED: <span id="final-lines" class="text-cyan-400">0</span></p>
+        </div>
+        <button id="restart-btn" class="px-8 py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded shadow-[0_0_15px_#0891b2] transition-colors text-xl">
+            PLAY AGAIN
+        </button>
+    </div>
+
+<script>
+window.onload = function() {
+
+    // --- TETRIS LOGIC & DATA ---
+    const COLS = 10;
+    const ROWS = 20;
+    const EMPTY = -1;
+
+    // Tetromino definitions and colors
+    const SHAPES = [
+        [[1, 1, 1, 1]],                             // I
+        [[1, 0, 0], [1, 1, 1]],                     // J
+        [[0, 0, 1], [1, 1, 1]],                     // L
+        [[1, 1], [1, 1]],                           // O
+        [[0, 1, 1], [1, 1, 0]],                     // S
+        [[0, 1, 0], [1, 1, 1]],                     // T
+        [[1, 1, 0], [0, 1, 1]]                      // Z
+    ];
+
+    const COLORS = [
+        0x00FFFF, // Cyan (I)
+        0x0000FF, // Blue (J)
+        0xFFA500, // Orange (L)
+        0xFFFF00, // Yellow (O)
+        0x00FF00, // Green (S)
+        0x800080, // Purple (T)
+        0xFF0000  // Red (Z)
+    ];
+
+    let board = [];
+    let score = 0;
+    let lines = 0;
+    let level = 1;
+    let isGameOver = false;
+
+    let currentPiece = null;
+    let dropCounter = 0;
+    let dropInterval = 1000;
+    let lastTime = 0;
+
+    // Initialize logic board
+    function initLogic() {
+        board = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+        score = 0;
+        lines = 0;
+        level = 1;
+        isGameOver = false;
+        updateScoreboard();
+        spawnPiece();
+    }
+
+    // --- THREE.JS SETUP ---
+    const container = document.getElementById('game-container');
+    const scene = new THREE.Scene();
+    
+    // Add retro fog and background
+    scene.background = new THREE.Color(0x0a0a1a);
+    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.02);
+
+    // Camera setup for a cool 3D isometric/perspective view
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(4.5, 10, 26); // Center is roughly x=4.5, y=10
+    camera.lookAt(4.5, 9, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Perf optimization
+    container.appendChild(renderer.domElement);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 20);
+    scene.add(dirLight);
+
+    const pointLight = new THREE.PointLight(0x4444ff, 1, 50);
+    pointLight.position.set(4.5, 10, 5);
+    scene.add(pointLight);
+
+    // --- 3D MESH POOLING ---
+    // Instead of creating/destroying geometry, we reuse a fixed set of meshes.
+    const blockGeometry = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+    
+    // Create board meshes (20x10)
+    const boardMeshes = [];
+    for (let y = 0; y < ROWS; y++) {
+        boardMeshes[y] = [];
+        for (let x = 0; x < COLS; x++) {
+            const mat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 80 });
+            const mesh = new THREE.Mesh(blockGeometry, mat);
+            mesh.position.set(x, y, 0);
+            mesh.visible = false;
+            scene.add(mesh);
+            boardMeshes[y][x] = mesh;
+        }
+    }
+
+    // Create active piece meshes (max 4 blocks)
+    const activeMeshes = [];
+    for (let i = 0; i < 4; i++) {
+        const mat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 100 });
+        const mesh = new THREE.Mesh(blockGeometry, mat);
+        mesh.visible = false;
+        scene.add(mesh);
+        activeMeshes.push(mesh);
+    }
+
+    // Create ghost piece meshes (max 4 blocks)
+    const ghostMeshes = [];
+    for (let i = 0; i < 4; i++) {
+        const mat = new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, 
+            transparent: true, 
+            opacity: 0.2,
+            wireframe: true 
+        });
+        const mesh = new THREE.Mesh(blockGeometry, mat);
+        mesh.visible = false;
+        scene.add(mesh);
+        ghostMeshes.push(mesh);
+    }
+
+    // Create playfield boundaries (Visual only)
+    const boundsMaterial = new THREE.LineBasicMaterial({ color: 0x3333ff, transparent: true, opacity: 0.5 });
+    const boundsGeo = new THREE.BufferGeometry();
+    // U-shape bounding box points
+    const pts = [
+        new THREE.Vector3(-0.5, 19.5, 0.5),
+        new THREE.Vector3(-0.5, -0.5, 0.5),
+        new THREE.Vector3(9.5, -0.5, 0.5),
+        new THREE.Vector3(9.5, 19.5, 0.5),
+        new THREE.Vector3(9.5, 19.5, -0.5),
+        new THREE.Vector3(9.5, -0.5, -0.5),
+        new THREE.Vector3(-0.5, -0.5, -0.5),
+        new THREE.Vector3(-0.5, 19.5, -0.5)
+    ];
+    boundsGeo.setFromPoints(pts);
+    const boundsLine = new THREE.Line(boundsGeo, boundsMaterial);
+    scene.add(boundsLine);
+
+    // Add a grid behind
+    const gridHelper = new THREE.GridHelper(30, 30, 0x111133, 0x111133);
+    gridHelper.rotation.x = Math.PI / 2;
+    gridHelper.position.set(4.5, 10, -1);
+    scene.add(gridHelper);
+
+    // --- GAME MECHANICS ---
+
+    function spawnPiece() {
+        const typeId = Math.floor(Math.random() * SHAPES.length);
+        const shape = SHAPES[typeId];
+        currentPiece = {
+            shape: shape,
+            colorId: typeId,
+            x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
+            y: ROWS - shape.length
+        };
+
+        // Check immediate collision (Game Over condition)
+        if (checkCollision(0, 0, currentPiece.shape)) {
+            gameOver();
+        }
+    }
+
+    function checkCollision(offsetX, offsetY, shape) {
+        for (let y = 0; y < shape.length; y++) {
+            for (let x = 0; x < shape[y].length; x++) {
+                if (shape[y][x]) {
+                    const newX = currentPiece.x + x + offsetX;
+                    const newY = currentPiece.y - y + offsetY; // -y because logical array draws top-down, but visually y is up
+
+                    // Wall/Floor checks
+                    if (newX < 0 || newX >= COLS || newY < 0) {
+                        return true;
+                    }
+                    // Board check
+                    if (newY < ROWS && board[newY][newX] !== EMPTY) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    function rotate() {
+        const shape = currentPiece.shape;
+        const newShape = shape[0].map((val, index) => shape.map(row => row[index]).reverse());
+        
+        // Basic wall kick (try to adjust if rotation hits a wall)
+        let offset = 0;
+        if (checkCollision(0, 0, newShape)) {
+            if (!checkCollision(1, 0, newShape)) offset = 1;
+            else if (!checkCollision(-1, 0, newShape)) offset = -1;
+            else if (!checkCollision(2, 0, newShape)) offset = 2; // for I piece
+            else if (!checkCollision(-2, 0, newShape)) offset = -2;
+        }
+
+        if (!checkCollision(offset, 0, newShape)) {
+            currentPiece.shape = newShape;
+            currentPiece.x += offset;
+        }
+    }
+
+    function moveDown() {
+        if (!checkCollision(0, -1, currentPiece.shape)) {
+            currentPiece.y -= 1;
+            dropCounter = 0;
+        } else {
+            lockPiece();
+        }
+    }
+
+    function hardDrop() {
+        let dropDistance = 0;
+        while (!checkCollision(0, -1, currentPiece.shape)) {
+            currentPiece.y -= 1;
+            dropDistance++;
+        }
+        score += dropDistance * 2; // Bonus for hard drop
+        updateScoreboard();
+        lockPiece();
+    }
+
+    function lockPiece() {
+        // Copy piece to board
+        for (let y = 0; y < currentPiece.shape.length; y++) {
+            for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                if (currentPiece.shape[y][x]) {
+                    const boardY = currentPiece.y - y;
+                    const boardX = currentPiece.x + x;
+                    if (boardY >= 0 && boardY < ROWS) {
+                        board[boardY][boardX] = currentPiece.colorId;
+                    }
+                }
+            }
+        }
+
+        clearLines();
+        spawnPiece();
+    }
+
+    function clearLines() {
+        let linesClearedThisTurn = 0;
+        for (let y = 0; y < ROWS; y++) {
+            let isFull = true;
+            for (let x = 0; x < COLS; x++) {
+                if (board[y][x] === EMPTY) {
+                    isFull = false;
+                    break;
+                }
+            }
+
+            if (isFull) {
+                // Remove line and add empty at top
+                board.splice(y, 1);
+                board.push(Array(COLS).fill(EMPTY));
+                y--; // Re-check this index
+                linesClearedThisTurn++;
+            }
+        }
+
+        if (linesClearedThisTurn > 0) {
+            // Original Nintendo scoring system logic
+            const lineScores = [0, 40, 100, 300, 1200];
+            score += lineScores[linesClearedThisTurn] * level;
+            lines += linesClearedThisTurn;
+            level = Math.floor(lines / 10) + 1;
+            
+            // Speed up
+            dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+            updateScoreboard();
+        }
+    }
+
+    function getGhostY() {
+        let ghostY = currentPiece.y;
+        while (!checkCollision(0, ghostY - currentPiece.y - 1, currentPiece.shape)) {
+            ghostY -= 1;
+        }
+        return ghostY;
+    }
+
+    // --- RENDER SYNCHRONIZATION ---
+
+    function syncVisuals() {
+        // Sync Board
+        for (let y = 0; y < ROWS; y++) {
+            for (let x = 0; x < COLS; x++) {
+                const val = board[y][x];
+                const mesh = boardMeshes[y][x];
+                if (val !== EMPTY) {
+                    mesh.visible = true;
+                    mesh.material.color.setHex(COLORS[val]);
+                } else {
+                    mesh.visible = false;
+                }
+            }
+        }
+
+        // Sync Active Piece & Ghost Piece
+        activeMeshes.forEach(m => m.visible = false);
+        ghostMeshes.forEach(m => m.visible = false);
+
+        if (currentPiece && !isGameOver) {
+            let activeIdx = 0;
+            const ghostY = getGhostY();
+
+            for (let y = 0; y < currentPiece.shape.length; y++) {
+                for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                    if (currentPiece.shape[y][x]) {
+                        const wX = currentPiece.x + x;
+                        const wY = currentPiece.y - y;
+                        const gY = ghostY - y;
+
+                        // Ghost Piece block
+                        const ghostMesh = ghostMeshes[activeIdx];
+                        ghostMesh.visible = true;
+                        ghostMesh.position.set(wX, gY, 0);
+                        ghostMesh.material.color.setHex(COLORS[currentPiece.colorId]);
+
+                        // Active Piece block
+                        const activeMesh = activeMeshes[activeIdx];
+                        activeMesh.visible = true;
+                        activeMesh.position.set(wX, wY, 0);
+                        activeMesh.material.color.setHex(COLORS[currentPiece.colorId]);
+                        
+                        activeIdx++;
+                    }
+                }
+            }
+        }
+    }
+
+    function updateScoreboard() {
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('level-val').innerText = level;
+        document.getElementById('lines-val').innerText = lines;
+    }
+
+    function gameOver() {
+        isGameOver = true;
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('final-lines').innerText = lines;
+    }
+
+    // --- MAIN GAME LOOP ---
+
+    function animate(time = 0) {
+        requestAnimationFrame(animate);
+
+        const deltaTime = time - lastTime;
+        lastTime = time;
+
+        if (!isGameOver) {
+            dropCounter += deltaTime;
+            if (dropCounter > dropInterval) {
+                moveDown();
+                dropCounter = 0;
+            }
+            syncVisuals();
+            
+            // Subtle camera movement for 3D effect based on mouse/time
+            camera.position.x = 4.5 + Math.sin(time * 0.0005) * 0.5;
+            camera.lookAt(4.5, 9, 0);
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    // --- INPUT HANDLING ---
+
+    function handleInput(key) {
+        if (isGameOver) return;
+        
+        switch(key) {
+            case 'ArrowLeft':
+                if (!checkCollision(-1, 0, currentPiece.shape)) currentPiece.x -= 1;
+                break;
+            case 'ArrowRight':
+                if (!checkCollision(1, 0, currentPiece.shape)) currentPiece.x += 1;
+                break;
+            case 'ArrowDown':
+                moveDown();
+                break;
+            case 'ArrowUp':
+                rotate();
+                break;
+            case ' ':
+                hardDrop();
+                break;
+        }
+        syncVisuals(); // Instant visual feedback
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const gameKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' '];
+        if (gameKeys.includes(e.key)) {
+            e.preventDefault(); // Stop scrolling
+            handleInput(e.key);
+        }
+    });
+
+    // Touch / On-screen controls
+    const bindBtn = (id, key) => {
+        const el = document.getElementById(id);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(key); });
+        el.addEventListener('mousedown', (e) => { e.preventDefault(); handleInput(key); });
+    };
+
+    bindBtn('btn-left', 'ArrowLeft');
+    bindBtn('btn-right', 'ArrowRight');
+    bindBtn('btn-down', 'ArrowDown');
+    bindBtn('btn-rotate', 'ArrowUp');
+    bindBtn('btn-drop', ' ');
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        document.getElementById('game-over-screen').classList.add('hidden');
+        initLogic();
+    });
+
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // START EVERYTHING
+    initLogic();
+    animate();
+};
+</script>
+</body>
+</html>
