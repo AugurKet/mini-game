@@ -1,6 +1,9 @@
 /* 1. 整体页面排版：强行限制在一屏内，不准出现滚动条 */
 body {
-    background: radial-gradient(circle at center, #2a2a2a 0%, #0a0a0a 100%);
+/* 核心魔法：放上赤壁背景，并盖上一层 60% 浓度的黑色遮罩，让背景不至于喧宾夺主 */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('Images/chibi.jpg') no-repeat center center;
+    background-size: cover; /* 让背景图铺满全屏 */
+    
     color: #fff;
     font-family: 'Arial', sans-serif;
     text-align: center;
@@ -37,7 +40,14 @@ h2 {
 
 /* 4. 中间战况播报区：固定宽度防止挤压卡牌 */
 .center-area {
-    width: 220px;
+   .center-area {
+    width: 240px;
+    background: rgba(0, 0, 0, 0.5); /* 半透明黑底 */
+    border: 1px solid #b8860b; /* 暗金边框 */
+    border-radius: 8px; /* 圆角 */
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8); /* 立体阴影 */
+    backdrop-filter: blur(5px); /* 毛玻璃模糊效果，极其高级！ */  
 }
 #round-result {
     font-size: 18px;
@@ -130,4 +140,27 @@ button:hover span {
 /* 电脑未翻开的牌变暗 */
 .hidden-card img {
     filter: brightness(0.1) grayscale(100%);
+}
+
+/* 音乐控制按钮样式 */
+#bgm-btn {
+    position: absolute; /* 固定在右上角 */
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #b8860b;
+    color: #fce69d;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    display: block; /* 覆盖之前 button 的 flex 属性 */
+}
+
+#bgm-btn:hover {
+    background: #b8860b;
+    color: #000;
+    transform: scale(1.05); /* 鼠标放上去微微放大 */
 }
