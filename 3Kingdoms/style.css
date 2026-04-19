@@ -182,3 +182,53 @@ button span, .stats p span {
     object-position: top !important;
     display: block !important;
 }
+
+/* =========================================
+   手机端响应式适配 (当屏幕宽度小于 768px 时生效)
+   ========================================= */
+@media screen and (max-width: 768px) {
+    .game-board {
+        flex-wrap: wrap; /* 允许换行 */
+        gap: 10px; /* 缩小元素之间的整体间距 */
+        padding: 0 10px; /* 左右留一点安全边距 */
+        justify-content: space-between; /* 让两张卡牌分居左右 */
+    }
+
+    /* 把中间的“对战播报文字”移到最上面，并占满整行 */
+    .center-area {
+        width: 100%;
+        order: -1; /* 强行排在最前面 */
+        margin-bottom: 15px;
+    }
+
+    /* 玩家和电脑的区域各占屏幕的 48% */
+    .player-area, .cpu-area {
+        width: 48%;
+    }
+
+    /* 卡牌宽度填满 48% 的区域 */
+    .card {
+        width: 100%;
+        box-sizing: border-box; /* 确保 padding 不会撑破宽度 */
+        padding: 8px; /* 缩小卡牌内边距 */
+    }
+
+    /* 缩小手机端的图片高度，避免屏幕被拉得太长 */
+    .card img {
+        height: 160px; 
+    }
+
+    /* 缩小数值按钮的字体和间距 */
+    .stats button, .stats p {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    /* 缩小标题字体 */
+    h1 {
+        font-size: 20px;
+    }
+    h2 {
+        font-size: 14px;
+    }
+}
