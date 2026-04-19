@@ -84,20 +84,28 @@ h2 {
     gap: 6px; /* 按钮之间的间距变窄 */
 }
 
-button {
+/* 让玩家的按钮和电脑的文本框共享相同的高级UI底板 */
+button, .stats p {
     background: linear-gradient(to right, #333333, #222222);
     color: #ccc;
     border: 1px solid #8b6508;
-    padding: 6px 12px; /* 按钮上下高度变扁 */
-    cursor: pointer;
+    padding: 6px 12px;
     border-radius: 4px;
-    transition: all 0.2s ease;
     font-size: 14px;
     display: flex;
-    justify-content: space-between; /* 文字在左，数字在右 */
+    justify-content: space-between; 
     align-items: center;
+    margin: 0; /* 非常关键：消除段落 <p> 自带的上下空隙 */
+    box-sizing: border-box; /* 确保宽度一致 */
 }
 
+/* 玩家专属设置：鼠标变成手指，并有动画过渡 */
+button {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 只有玩家的按钮才有鼠标悬浮的发光和浮动效果，电脑作为展示用不需要 */
 button:hover {
     background: linear-gradient(to right, #b8860b, #daa520);
     color: #000;
@@ -105,13 +113,15 @@ button:hover {
     transform: translateX(4px);
 }
 
-button span {
+/* 双方数字的高亮样式共享 */
+button span, .stats p span {
     font-weight: bold;
     font-size: 16px;
     color: #ffd700;
     text-shadow: 1px 1px 2px #000;
 }
 
+/* 玩家按钮悬浮时，数字变黑 */
 button:hover span {
     color: #000;
     text-shadow: none;
