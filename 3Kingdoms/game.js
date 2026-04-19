@@ -28,7 +28,7 @@ function updateUI() {
     document.getElementById('p-vitality').innerText = pCard.vitality;
     document.getElementById('p-charisma').innerText = pCard.charisma;
     // 图片路径配置
-    document.getElementById('player-img').src = images/${pCard.image};
+    document.getElementById('player-img').src = Images/${pCard.image};
 
     // 电脑牌先重置为问号
     let cCard = cpuDeck[0];
@@ -54,7 +54,7 @@ function playRound(attribute) {
     document.getElementById('c-leadership').innerText = cCard.leadership;
     document.getElementById('c-vitality').innerText = cCard.vitality;
     document.getElementById('c-charisma').innerText = cCard.charisma;
-    document.getElementById('cpu-img').src = images/${cCard.image};
+    document.getElementById('cpu-img').src = Images/${cCard.image};
     document.getElementById('cpu-card').classList.remove('hidden-card');
 
     let pValue = pCard[attribute];
