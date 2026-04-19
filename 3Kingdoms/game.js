@@ -90,3 +90,19 @@ function playRound(attribute) {
     // 延迟 2.5 秒后进入下一回合
     setTimeout(updateUI, 2500);
 }
+
+// ====== 音乐控制逻辑 ======
+let bgmPlaying = false;
+function toggleBGM() {
+    let bgm = document.getElementById('bgm');
+    let btn = document.getElementById('bgm-btn');
+    
+    if (bgmPlaying) {
+        bgm.pause();
+        btn.innerText = "🎵 播放战歌";
+    } else {
+        bgm.play();
+        btn.innerText = "🔇 暂停战歌";
+    }
+    bgmPlaying = !bgmPlaying;
+}
