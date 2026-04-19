@@ -157,7 +157,7 @@
             const item = document.createElement("div");
             item.className = "gallery-item" + (gameState.collectedIds.includes(h.id) ? " unlocked" : "");
             item.id = "gallery-" + h.id;
-            item.innerHTML = `<img class="pixel-art" src="images/${h.img}" alt="${h.name}">`;
+            item.innerHTML = `<img class="pixel-art" src="image/${h.img}" alt="${h.name}">`;
             grid.appendChild(item);
         });
     }
@@ -170,7 +170,7 @@
         const imgEl = document.getElementById("cardImage");
         const txtEl = document.getElementById("cardText");
         
-        imgEl.src = "images/" + hero.img;
+        imgEl.src = "image/" + hero.img;
         imgEl.style.display = "block";
         txtEl.style.display = "none";
 
