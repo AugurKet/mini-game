@@ -213,7 +213,7 @@
             // 采用上下排版的最新图鉴样式，路径修复为 images/
             item.innerHTML = `
                 <div class="img-box">
-                    <img class="pixel-art" src="images/${h.img}" alt="${h.name}">
+                    <img class="pixel-art" src="image/${h.img}" alt="${h.name}">
                 </div>
                 <div class="info-box">
                     <span class="nickname">${h.nickname}</span>
@@ -232,7 +232,7 @@
         const imgEl = document.getElementById("cardImage");
         const txtEl = document.getElementById("cardText");
         
-        imgEl.src = "images/" + hero.img; // 修复路径为 images/
+        imgEl.src = "image/" + hero.img; // 修复路径为 images/
         imgEl.style.display = "block";
         txtEl.style.display = "none";
 
