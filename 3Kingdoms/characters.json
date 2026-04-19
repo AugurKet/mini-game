@@ -1,0 +1,18 @@
+[
+  {"name": "孙策", "force": 92, "intelligence": 69, "leadership": 92, "vitality": 80, "charisma": 92, "image": "sunce.jpg"},
+  {"name": "陆逊", "force": 66, "intelligence": 95, "leadership": 96, "vitality": 85, "charisma": 90, "image": "luxun.jpg"},
+  {"name": "太史慈", "force": 93, "intelligence": 66, "leadership": 82, "vitality": 88, "charisma": 79, "image": "taishici.jpg"},
+  {"name": "甘宁", "force": 94, "intelligence": 60, "leadership": 86, "vitality": 85, "charisma": 75, "image": "ganning.jpg"},
+  {"name": "夏侯惇", "force": 90, "intelligence": 63, "leadership": 89, "vitality": 92, "charisma": 82, "image": "xiahoudun.jpg"},
+  {"name": "姜维", "force": 89, "intelligence": 90, "leadership": 90, "vitality": 88, "charisma": 80, "image": "jiangwei.jpg"},
+  {"name": "庞统", "force": 34, "intelligence": 97, "leadership": 78, "vitality": 50, "charisma": 65, "image": "pangtong.jpg"},
+  {"name": "贾诩", "force": 48, "intelligence": 97, "leadership": 86, "vitality": 92, "charisma": 60, "image": "jiaxu.jpg"},
+  {"name": "荀彧", "force": 14, "intelligence": 95, "leadership": 70, "vitality": 60, "charisma": 94, "image": "xunyu.jpg"},
+  {"name": "鲁肃", "force": 56, "intelligence": 92, "leadership": 88, "vitality": 80, "charisma": 93, "image": "lusu.jpg"},
+  {"name": "吕蒙", "force": 81, "intelligence": 89, "leadership": 91, "vitality": 82, "charisma": 80, "image": "lumeng.jpg"},
+  {"name": "魏延", "force": 92, "intelligence": 50, "leadership": 82, "vitality": 88, "charisma": 40, "image": "weiyan.jpg"},
+  {"name": "邓艾", "force": 87, "intelligence": 89, "leadership": 93, "vitality": 85, "charisma": 70, "image": "dengai.jpg"},
+  {"name": "钟会", "force": 50, "intelligence": 91, "leadership": 82, "vitality": 75, "charisma": 65, "image": "zhonghui.jpg"},
+  {"name": "董卓", "force": 87, "intelligence": 60, "leadership": 75, "vitality": 90, "charisma": 10, "image": "dongzhuo.jpg"},
+  {"name": "貂蝉", "force": 20, "intelligence": 81, "leadership": 20, "vitality": 70, "charisma": 100, "image": "diaochan.jpg"}
+]
