@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水浒：天命图鉴 v0.4.1 (JPG 支持版)</title>
+    <title>水浒：天命图鉴 v0.5 (36天罡完整版)</title>
     <style>
-        /* 复古风格 CSS */
         body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 20px; }
         .wrapper { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
         .container { border: 4px solid #5c3a21; border-radius: 10px; background: #fffaf0; width: 320px; padding: 20px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
         .gallery-container { border: 4px solid #5c3a21; border-radius: 10px; background: #fffaf0; width: 80%; max-width: 800px; margin: 0 auto; padding: 20px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
         h1 { color: #8b0000; font-size: 24px; margin-bottom: 20px; border-bottom: 2px dashed #b89f7d; padding-bottom: 10px; }
         
-        /* 关键 CSS：让像素画保持清晰不模糊 */
         .pixel-art { image-rendering: pixelated; image-rendering: crisp-edges; }
 
         .card-display { width: 150px; height: 150px; border: 4px solid #b89f7d; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e8dcc4; overflow: hidden; }
@@ -28,7 +26,6 @@
         .option-btn:hover { background-color: #8b0000; }
         #feedback { font-weight: bold; margin-top: 10px; min-height: 20px; color: #8b0000; }
 
-        /* 图鉴网格样式 */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 20px; }
         .gallery-item { width: 80px; height: 80px; background-color: #ccc; border: 2px solid #777; display: flex; align-items: center; justify-content: center; border-radius: 5px; overflow: hidden; position: relative; }
         .gallery-item img { width: 100%; height: 100%; object-fit: contain; opacity: 0.2; }
@@ -61,27 +58,26 @@
 
 <div class="gallery-container">
     <h1>梁山图鉴 (<span id="collectedCount">0</span>/36)</h1>
-    <div id="galleryGrid" class="gallery-grid">
-        </div>
+    <div id="galleryGrid" class="gallery-grid"></div>
 </div>
 
 <script>
     let reputation = 50;
     
-    // --- 已全部更新为 .jpg 后缀 ---
+    // 完整的 36 天罡数组，确保语法严丝合缝
     const heroes = [
         { id: "h1", name: "宋江", rarity: "SSR", image: "images/songjiang.jpg" },
-        { id: "h2", name: "林冲", rarity: "SSR", image: "images/linchong.jpg" },
-        { id: "h3", name: "吴用", rarity: "SR", image: "images/wuyong.jpg" }, 
-        { id: "h4", name: "卢俊义", rarity: "SSR", image: "images/lujunyi.jpg" }, 
-        { id: "h5", name: "公孙胜", rarity: "SR", image: "images/gongsunsheng.jpg" }, 
-        { id: "h6", name: "关胜", rarity: "SR", image: "images/guansheng.jpg" }, 
+        { id: "h2", name: "卢俊义", rarity: "SSR", image: "images/lujunyi.jpg" },
+        { id: "h3", name: "吴用", rarity: "SSR", image: "images/wuyong.jpg" },
+        { id: "h4", name: "公孙胜", rarity: "SSR", image: "images/gongsunsheng.jpg" },
+        { id: "h5", name: "关胜", rarity: "SSR", image: "images/guansheng.jpg" },
+        { id: "h6", name: "林冲", rarity: "SSR", image: "images/linchong.jpg" },
         { id: "h7", name: "秦明", rarity: "SR", image: "images/qinming.jpg" },
         { id: "h8", name: "呼延灼", rarity: "SR", image: "images/huyanzhuo.jpg" },
         { id: "h9", name: "花荣", rarity: "SR", image: "images/huarong.jpg" },
         { id: "h10", name: "柴进", rarity: "SR", image: "images/chaijin.jpg" },
         { id: "h11", name: "李应", rarity: "SR", image: "images/liying.jpg" },
-        { id: "h12", name: "朱仝", rarity: "SR", image: "images/zhu_tong.jpg" },
+        { id: "h12", name: "朱仝", rarity: "SR", image: "images/zhutong.jpg" },
         { id: "h13", name: "鲁智深", rarity: "SSR", image: "images/luzhishen.jpg" },
         { id: "h14", name: "武松", rarity: "SSR", image: "images/wusong.jpg" },
         { id: "h15", name: "董平", rarity: "SR", image: "images/dongping.jpg" },
@@ -89,7 +85,7 @@
         { id: "h17", name: "杨志", rarity: "SR", image: "images/yangzhi.jpg" },
         { id: "h18", name: "徐宁", rarity: "SR", image: "images/xuning.jpg" },
         { id: "h19", name: "索超", rarity: "SR", image: "images/suochao.jpg" },
-        { id: "h20", name: "戴宗", rarity: "SR", image: "images/daizong.jpg" },
+        { id: "h20", name: "戴宗", rarity: "SR", image: "images/dai_zong.jpg" },
         { id: "h21", name: "刘唐", rarity: "SR", image: "images/liutang.jpg" },
         { id: "h22", name: "李逵", rarity: "SSR", image: "images/likui.jpg" },
         { id: "h23", name: "史进", rarity: "SR", image: "images/shijin.jpg" },
@@ -107,7 +103,6 @@
         { id: "h35", name: "解宝", rarity: "SR", image: "images/xiebao.jpg" },
         { id: "h36", name: "燕青", rarity: "SSR", image: "images/yanqing.jpg" }
     ];
-    ];
 
     let collectedHeroes = [];
 
@@ -123,7 +118,7 @@
             const item = document.createElement("div");
             item.className = "gallery-item";
             item.id = "gallery-" + hero.id;
-            item.innerHTML = `<img class="pixel-art" src="${hero.image}" alt="${hero.name}">`;
+            item.innerHTML = `<img class="pixel-art" src="${hero.image}" alt="${hero.name}" onerror="this.src='https://via.placeholder.com/80/cccccc/000000?text=缺图'">`;
             grid.appendChild(item);
         });
     }
@@ -140,6 +135,8 @@
         const imgElement = document.getElementById("cardImage");
         const textElement = document.getElementById("cardText");
         
+        // 增加错误处理，如果图片没找到不至于裂开
+        imgElement.onerror = function() { this.src = 'https://via.placeholder.com/150/cccccc/000000?text=缺图'; };
         imgElement.src = drawnHero.image;
         imgElement.style.display = "block";
         textElement.style.display = "none";
@@ -148,7 +145,7 @@
             collectedHeroes.push(drawnHero.id);
             document.getElementById("collectedCount").innerText = collectedHeroes.length;
             const galleryItem = document.getElementById("gallery-" + drawnHero.id);
-            galleryItem.classList.add("unlocked");
+            if(galleryItem) galleryItem.classList.add("unlocked");
         }
     }
 
@@ -178,6 +175,7 @@
         document.getElementById("optionsBox").innerHTML = "";
     }
 
+    // 启动引擎
     initGallery();
 </script>
 
