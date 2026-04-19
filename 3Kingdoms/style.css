@@ -168,3 +168,17 @@ button span, .stats p span {
     color: #000;
     transform: scale(1.05); 
 }
+
+/* 终极核武器：强制锁死玩家和电脑的图片与卡牌尺寸，无视任何缓存错误 */
+#player-card, #cpu-card {
+    width: 240px !important;
+    max-width: 240px !important;
+}
+
+#player-img, #cpu-img {
+    width: 100% !important;
+    height: 190px !important;
+    object-fit: cover !important;
+    object-position: top !important;
+    display: block !important;
+}
