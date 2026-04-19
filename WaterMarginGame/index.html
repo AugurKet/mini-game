@@ -107,6 +107,29 @@
     let collectedHeroes = [];
 
     const questions = [
+           // --- 财富与风险规划篇 (Scenario) ---
+        { type: "scenario", question: "生辰纲将途经高海拔雪山，你的规划是？", options: ["咬牙硬挺", "提前规划风险对冲与保障"], correctIndex: 1, reward: 20, explanation: "极佳决策！做好高海拔意外与医疗的保障规划才是长远之计。获得 20 声望！" },
+        { type: "scenario", question: "山寨库银日益增多，单纯存放在地窖容易发霉贬值。大当家决定如何打理这笔公款？", options: ["全部换成真金白银埋入深山", "招募懂行的账房进行系统的财富规划与分散投资", "今朝有酒今朝醉，全部分发给喽啰"], correctIndex: 1, reward: 25, explanation: "深谋远虑！引入专业的财富规划，方能确保山寨基业长青。获得 25 声望！" },
+        { type: "scenario", question: "有兄弟提出，每次下山执行高危任务，家眷无人照料。你决定怎么做？", options: ["设立‘山寨抚恤互助金’，通过制度转移风险", "生死有命，各安天道", "只给头领家属发安家费"], correctIndex: 0, reward: 20, explanation: "大格局！建立类似于现代保险的互助基金，能极大安抚人心。获得 20 声望！" },
+
+        // --- 耐力与长征篇 (Scenario/Trivia) ---
+        { type: "scenario", question: "神行太保戴宗要选拔一批兄弟组建‘长跑营’，要求能连续奔袭百里（超级马拉松）。选拔时你最看重什么品质？", options: ["瞬间的爆发力", "百里挑一的极强耐力与科学补给策略", "体型必须庞大魁梧"], correctIndex: 1, reward: 20, explanation: "内行！超长距离奔袭靠的是耐力底子和科学补给，而非蛮力。获得 20 声望！" },
+        { type: "trivia", question: "戴宗的‘神行法’日行八百里，他在腿上通常要绑几个甲马？", options: ["两个", "四个", "六个", "八个"], correctIndex: 1, reward: 15, explanation: "正确！戴宗作法时，腿上绑四个甲马便能日行八百里。获得 15 声望！" },
+
+        // --- 统筹与聚会篇 (Scenario) ---
+        { type: "scenario", question: "明年五月，山寨准备举办一场盛大的‘群英返山大会’（Homecoming Day）。为了让老兄弟们都有归属感并留下纪念，你派谁去主理筹备并设计海报？", options: ["黑旋风李逵", "浪子燕青与玉臂匠金大坚", "急先锋索超"], correctIndex: 1, reward: 20, explanation: "知人善任！燕青懂交际，金大坚懂刻字设计，筹备大会再合适不过。获得 20 声望！" },
+        { type: "scenario", question: "在聚会大合影时，大当家觉得某位兄弟的画像画得太胖了。作为主事者，你应当？", options: ["痛打画师三十大板", "要求画师重新修改，将身形调整至精干瘦削的状态", "凑合着看吧"], correctIndex: 1, reward: 15, explanation: "注重细节！呈现出精干的状态更能彰显山寨的精神面貌。获得 15 声望！" },
+
+        // --- 科技与载具篇 (Scenario) ---
+        { type: "scenario", question: "山寨缴获了几辆西夏国最新打造的‘神行车’（采用高新动力技术）。谁最适合去研究这些新载具的运作与充能？", options: ["轰天雷凌振", "赤发鬼刘唐", "花和尚鲁智深"], correctIndex: 0, reward: 20, explanation: "正解！凌振是山寨里首屈一指的火炮与机械技术专家。获得 20 声望！" },
+
+        // --- 经典文学常识篇 (Trivia) ---
+        { type: "trivia", question: "‘朴’字的正确读音是？", options: ["guó", "pǔ", "pō", "piáo"], correctIndex: 1, reward: 15, explanation: "正确！念 pǔ。获得 15 声望！" },
+        { type: "trivia", question: "《水浒传》中，‘景阳冈打虎’的是哪位好汉？", options: ["林冲", "鲁智深", "武松", "李逵"], correctIndex: 2, reward: 10, explanation: "经典送分题！武二郎景阳冈打虎名扬天下。获得 10 声望！" },
+        { type: "trivia", question: "鲁智深拳打镇关西时，是以什么借口消遣郑屠的？", options: ["嫌弃肉不新鲜", "要切十斤精肉、十斤肥肉、十斤寸金软骨，且都要剁成臊子", "怪郑屠态度不好", "嫌肉卖得太贵"], correctIndex: 1, reward: 15, explanation: "这等切肉法，摆明了是来找茬的。获得 15 声望！" },
+        { type: "trivia", question: "梁山泊排座次后，谁担任了‘掌管机密军师’一职？", options: ["吴用", "公孙胜", "朱武", "萧让"], correctIndex: 0, reward: 10, explanation: "智多星吴用，梁山第一军师。获得 10 声望！" },
+        { type: "trivia", question: "‘倒拔垂杨柳’展现了哪位好汉的惊人膂力？", options: ["武松", "李逵", "卢俊义", "鲁智深"], correctIndex: 3, reward: 10, explanation: "花和尚鲁智深，力大无穷。获得 10 声望！" },
+        { type: "trivia", question: "宋江在浔阳楼题的反诗中，有一句是‘他年若得报冤仇’，下一句是？", options: ["敢笑黄巢不丈夫", "血染浔阳江口", "定让贪官尽低头", "替天行道显威风"], correctIndex: 1, reward: 20, explanation: "
         { type: "trivia", question: "‘朴’字的正确读音是？", options: ["guó", "pǔ", "pō", "piáo"], correctIndex: 1, reward: 15, explanation: "正确！念 pǔ。获得 15 声望！" },
         { type: "scenario", question: "生辰纲将途经高海拔雪山，你的规划是？", options: ["咬牙硬挺", "提前规划风险对冲与保障"], correctIndex: 1, reward: 20, explanation: "极佳决策！做好保障规划才是长远之计。获得 20 声望！" }
     ];
