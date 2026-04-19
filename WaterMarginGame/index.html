@@ -3,71 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水浒：天命图鉴 v0.1</title>
+    <title>水浒：天命图鉴 v0.2</title>
     <style>
-        /* 这里的 CSS 是用来给页面做简单的复古“装修”的 */
-        body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 50px; }
-        .container { border: 4px solid #5c3a21; border-radius: 10px; background: #fffaf0; width: 300px; margin: 0 auto; padding: 20px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
-        h1 { color: #8b0000; font-size: 24px; margin-bottom: 20px; }
+        body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 20px; }
+        .wrapper { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; }
+        .container { border: 4px solid #5c3a21; border-radius: 10px; background: #fffaf0; width: 320px; padding: 20px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
+        h1 { color: #8b0000; font-size: 24px; margin-bottom: 20px; border-bottom: 2px dashed #b89f7d; padding-bottom: 10px; }
+        
+        /* 聚义厅样式 */
         .card-display { width: 150px; height: 150px; border: 2px dashed #b89f7d; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #555; background: #e8dcc4; text-align: center; line-height: 1.5; }
-        .btn { background-color: #8b0000; color: white; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        .btn { background-color: #8b0000; color: white; border: none; padding: 10px 15px; font-size: 16px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; margin: 5px; }
         .btn:hover { background-color: #a52a2a; }
-        .stats { margin-top: 20px; font-size: 14px; color: #333; }
+        .stats { margin-top: 20px; font-size: 18px; color: #333; font-weight: bold; background: #e8dcc4; padding: 10px; border-radius: 5px; }
+        
+        /* 文汇阁样式 */
+        .question-box { background: #e8dcc4; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align: left; font-size: 16px; min-height: 80px; }
+        .option-btn { display: block; width: 100%; background-color: #5c3a21; color: white; border: none; padding: 10px; font-size: 14px; cursor: pointer; border-radius: 5px; margin-bottom: 10px; transition: 0.3s; text-align: left; }
+        .option-btn:hover { background-color: #8b0000; }
+        #feedback { font-weight: bold; margin-top: 10px; min-height: 20px; color: #8b0000; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>聚义厅</h1>
-    <div id="cardDisplay" class="card-display">等待招募...</div>
-    <button class="btn" onclick="drawCard()">招募好汉 (消耗10声望)</button>
-    <div class="stats">
-        <p>当前声望：<span id="repValue">100</span></p>
+<div class="stats">当前山寨声望：<span id="repValue">20</span></div>
+
+<div class="wrapper">
+    <div class="container">
+        <h1>聚义厅</h1>
+        <div id="cardDisplay" class="card-display">等待招募...</div>
+        <button class="btn" onclick="drawCard()">招募好汉 (消耗10声望)</button>
+    </div>
+
+    <div class="container">
+        <h1>文汇阁</h1>
+        <div id="questionBox" class="question-box">点击下方按钮获取江湖事件</div>
+        <div id="optionsBox"></div>
+        <div id="feedback"></div>
+        <button class="btn" onclick="loadQuestion()" style="width: 100%; background-color: #2e8b57;">翻阅江湖案卷 (获取新题)</button>
     </div>
 </div>
 
 <script>
-    // 这里的 JavaScript 是游戏的底层逻辑，目前放了一个极简版的武将数据库
-    const heroes = [
-        { name: "宋江", rarity: "SSR" },
-        { name: "林冲", rarity: "SSR" },
-        { name: "朱武", rarity: "SR" },
-        { name: "时迁", rarity: "R" },
-        { name: "王英", rarity: "R" }
+    // --- 玩家数据 ---
+    let reputation = 20; // 初始声望少一点，逼着去答题
+    let currentQuestion = null;
+
+    // --- 题库数据 (JSON格式) ---
+    const questions = [
+        {
+            type: "trivia",
+            question: "咱们梁山聚义，最讲究文化传承。古训箴言中常有‘朴’字，请问它的正确读音是什么？",
+            options: ["念作 guó", "念作 pǔ", "念作 pō", "念作 piáo"],
+            correctIndex: 1, // 数组从0开始算，1就是第二个选项
+            reward: 15,
+            explanation: "正确！‘朴’在这里是念 pǔ，答对了方显咱们大当家的文化底蕴。获得 15 声望！"
+        },
+        {
+            type: "scenario",
+            question: "山寨准备接一趟护送生辰纲的镖，路途遥远且要翻越海拔3500至5500米的雪山。面对极端的自然环境风险，你的规划是？",
+            options: [
+                "只要兄弟们咬牙硬挺，不需要任何额外保障方案。", 
+                "提前规划完善的‘风险对冲’与随行保障计划，确保万无一失。"
+            ],
+            correctIndex: 1,
+            reward: 20,
+            explanation: "极佳的决策！高海拔攀登容不得侥幸，做好周全的财富与人身保障规划才是长远之计。获得 20 声望！"
+        }
     ];
 
-    let reputation = 100; // 玩家初始声望
+    // --- 武将数据 ---
+    const heroes = [
+        { name: "宋江", rarity: "SSR" }, { name: "林冲", rarity: "SSR" },
+        { name: "朱武", rarity: "SR" }, { name: "时迁", rarity: "R" }, { name: "王英", rarity: "R" }
+    ];
 
-    // 抽卡核心功能
+    // --- 更新声望显示 ---
+    function updateReputationDisplay() {
+        document.getElementById("repValue").innerText = reputation;
+    }
+
+    // --- 抽卡逻辑 ---
     function drawCard() {
         if (reputation < 10) {
-            alert("大当家，声望不足！请先去赚取声望。");
+            alert("大当家，声望不足 10 点！请移步文汇阁答题赚取声望。");
             return;
         }
-
-        // 扣除声望并更新显示
         reputation -= 10;
-        document.getElementById("repValue").innerText = reputation;
+        updateReputationDisplay();
 
-        // 简单的随机抽卡逻辑
         const randomIndex = Math.floor(Math.random() * heroes.length);
         const drawnHero = heroes[randomIndex];
-
-        // 显示抽卡结果
         const display = document.getElementById("cardDisplay");
         display.innerText = drawnHero.name + "\n(" + drawnHero.rarity + ")";
 
-        // 根据稀有度改变字体和边框颜色
         if (drawnHero.rarity === "SSR") {
-            display.style.color = "#ff4500"; // 橙红色
-            display.style.border = "3px solid #ff4500";
+            display.style.color = "#ff4500"; display.style.border = "3px solid #ff4500";
         } else if (drawnHero.rarity === "SR") {
-            display.style.color = "#8a2be2"; // 紫色
-            display.style.border = "3px solid #8a2be2";
+            display.style.color = "#8a2be2"; display.style.border = "3px solid #8a2be2";
         } else {
-            display.style.color = "#333"; // 黑色
-            display.style.border = "2px solid #333";
+            display.style.color = "#333"; display.style.border = "2px solid #333";
         }
+    }
+
+    // --- 加载题目逻辑 ---
+    function loadQuestion() {
+        // 随机抽一道题
+        const randomIndex = Math.floor(Math.random() * questions.length);
+        currentQuestion = questions[randomIndex];
+
+        // 清空之前的反馈
+        document.getElementById("feedback").innerText = "";
+        
+        // 显示题目
+        document.getElementById("questionBox").innerText = currentQuestion.question;
+
+        // 生成选项按钮
+        const optionsBox = document.getElementById("optionsBox");
+        optionsBox.innerHTML = ""; // 清空旧选项
+        
+        for (let i = 0; i < currentQuestion.options.length; i++) {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = currentQuestion.options[i];
+            btn.onclick = function() { checkAnswer(i); };
+            optionsBox.appendChild(btn);
+        }
+    }
+
+    // --- 核对答案逻辑 ---
+    function checkAnswer(selectedIndex) {
+        const feedback = document.getElementById("feedback");
+        const optionsBox = document.getElementById("optionsBox");
+
+        if (selectedIndex === currentQuestion.correctIndex) {
+            feedback.style.color = "green";
+            feedback.innerText = currentQuestion.explanation;
+            reputation += currentQuestion.reward;
+            updateReputationDisplay();
+        } else {
+            feedback.style.color = "red";
+            feedback.innerText = "抉择失误，江湖险恶，需再三思量啊！声望无变动。";
+        }
+        
+        // 答完题后清空选项，防止重复点击刷分
+        optionsBox.innerHTML = "";
     }
 </script>
 
