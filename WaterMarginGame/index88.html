@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水浒：天命图鉴 v2.3 - 动态战场版</title>
+    <style>
+        /* --- 1. 动态背景与火星特效 --- */
+        body { 
+            font-family: "Microsoft YaHei", sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            color: #333; 
+            margin: 0; 
+            background-image: url('images/bg.jpg'); 
+            background-size: cover; 
+            background-position: center top; 
+            background-attachment: fixed;
+            overflow-x: hidden; 
+            /* 背景呼吸动画：模拟火光忽明忽暗 */
+            animation: backgroundPulse 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes backgroundPulse {
+            0% { filter: brightness(1) contrast(1); transform: scale(1); }
+            50% { filter: brightness(1.1) contrast(1.05); transform: scale(1.01); }
+            100% { filter: brightness(0.9) contrast(1); transform: scale(1); }
+        }
+
+        /* 火星粒子 */
+        .ember {
+            position: fixed;
+            bottom: -10px;
+            background: radial-gradient(circle, #ff4500, #ff0000);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1; /* 确保飘在背景之上 */
+            opacity: 0;
+            animation: emberFloat linear infinite;
+        }
+
+        @keyframes emberFloat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- 2. 界面布局 --- */
+        .wrapper, .gallery-container, .stats-bar, .music-btn, .style-btn {
+            position: relative;
+            z-index: 10; /* 确保文字和按钮在火星之上，不影响操作 */
+        }
+
+        .wrapper { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+        .container { 
+            border: 4px solid #5c3a21; 
+            border-radius: 10px; 
+            background: rgba(255, 250, 240, 0.95); 
+            width: 320px; 
+            padding: 20px; 
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.6); 
+        }
+        
+        .gallery-container { 
+            border: 4px solid #5c3a21; 
+            border-radius: 10px; 
+            background: rgba(255, 250, 240, 0.95); 
+            width: 90%; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.6);
+            max-height: 420px; 
+            overflow-y: auto;  
+        }
+
+        .gallery-container::-webkit-scrollbar { width: 10px; }
+        .gallery-container::-webkit-scrollbar-track { background: rgba(232, 220, 196, 0.8); border-radius: 5px; }
+        .gallery-container::-webkit-scrollbar-thumb { background: #8b0000; border-radius: 5px; }
+
+        h1 { color: #8b0000; font-size: 24px; margin-bottom: 20px; border-bottom: 2px dashed #b89f7d; padding-bottom: 10px; }
+        .pixel-art { image-rendering: pixelated; }
+        .card-display { width: 150px; height: 150px; border: 4px solid #b89f7d; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e8dcc4; overflow: hidden; }
+        .card-display img { width: 100%; height: 100%; object-fit: contain; display: none; }
+        
+        .btn { background-color: #8b0000; color: white; border: none; padding: 10px 15px; font-size: 16px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; margin: 5px; }
+        .btn:hover { background-color: #a52a2a; transform: translateY(-2px); }
+        .style-btn { background-color: #4b0082; }
+        .music-btn { background-color: #cd853f; }
+        
+        .stats-bar { margin-bottom: 20px; font-size: 18px; font-weight: bold; background: rgba(139, 0, 0, 0.9); color: #fff; padding: 10px 20px; border-radius: 50px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .question-box { background: #e8dcc4; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align: left; font-size: 16px; min-height: 60px; line-height: 1.4; border: 1px solid #b89f7d; }
+        .option-btn { display: block; width: 100%; background-color: #5c3a21; color: white; border: none; padding: 10px; font-size: 14px; cursor: pointer; border-radius: 5px; margin-bottom: 10px; }
+        .option-btn:hover { background-color: #8b0000; }
+        
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 12px; margin-top: 20px; }
+        .gallery-item { width: 85px; background-color: #ccc; border: 2px solid #777; border-radius: 5px; overflow: hidden; display: flex; flex-direction: column; }
+        .img-box { height: 95px; width: 100%; overflow: hidden; background: #e8dcc4; display: flex; align-items: center; justify-content: center; }
+        .img-box img { width: 100%; height: 100%; object-fit: contain; opacity: 0.15; filter: grayscale(100%); }
+        .gallery-item.unlocked .img-box img { opacity: 1; filter: grayscale(0%); }
+        .info-box { background: #4a3320; padding: 5px 0; text-align: center; border-top: 2px solid #777; line-height: 1.2; }
+        .gallery-item.unlocked .info-box { background: #8b0000; border-top: 2px solid #ffb800; }
+        .info-box .nickname { display: block; font-size: 10px; color: #a99a86; }
+        .gallery-item.unlocked .info-box .nickname { color: #ffcc00; }
+        .info-box .name { display: block; font-size: 14px; font-weight: bold; color: #ccc; }
+        .gallery-item.unlocked .info-box .name { color: #ffffff; }
+        .gallery-item.unlocked { border-color: #ffb800; box-shadow: 0 0 10px rgba(255,184,0,0.5); }
+        
+        #victoryModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; flex-direction: column; align-items: center; justify-content: center; }
+        .victory-title { font-size: 45px; font-weight: bold; color: #ffd700; text-shadow: 0 0 20px #ff8c00; margin-bottom: 20px; animation: popIn 1s; }
+        .next-level-btn { background: linear-gradient(135deg, #ff4500, #8b0000); color: white; padding: 15px 40px; font-size: 24px; font-weight: bold; border: 2px solid #ffd700; border-radius: 10px; cursor: pointer; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 10px #ff4500; } 50% { box-shadow: 0 0 30px #ffd700; } 100% { box-shadow: 0 0 10px #ff4500; } }
+    </style>
+</head>
+<body>
+
+<div id="victoryModal">
+    <div class="victory-title">✨ 三十六天罡齐聚梁山！✨</div>
+    <button class="next-level-btn" onclick="startNextLevel()">挥师下山 (开启第二关)</button>
+</div>
+
+<button class="btn top-btn style-btn" id="artStyleBtn" onclick="toggleArtStyle()">🎨 画风：AI 重制版</button>
+<button class="btn top-btn music-btn" id="musicToggleBtn" onclick="toggleBGM()">🎵 播放背景音乐</button>
+<br>
+
+<div class="stats-bar">当前山寨声望：<span id="repValue">0</span></div>
+
+<div class="wrapper">
+    <div class="container">
+        <h1>聚义厅</h1>
+        <div id="cardDisplay" class="card-display">
+            <img id="cardImage" class="pixel-art" src="" alt="头像">
+            <span id="cardText" style="color:#555">等待招募...</span>
+        </div>
+        <button class="btn" onclick="drawCard()">招募好汉 (消耗10)</button>
+    </div>
+    <div class="container">
+        <h1>文汇阁</h1>
+        <div id="questionBox" class="question-box">点击下方翻阅案卷</div>
+        <div id="optionsBox"></div>
+        <div id="feedback"></div>
+        <button class="btn" onclick="loadQuestion()" style="width: 100%; background-color: #2e8b57;">翻阅案卷 (赚声望)</button>
+    </div>
+</div>
+
+<div class="gallery-container">
+    <h1>梁山图鉴 (<span id="collectedCount">0</span>/36)</h1>
+    <div id="galleryGrid" class="gallery-grid"></div>
+</div>
+
+<script>
+    // --- 游戏逻辑 ---
+    const bgm = new Audio('bgm.mp3'); bgm.loop = true; bgm.volume = 0.5;
+    const soundCorrect = new Audio('correct.mp3');
+    const soundWrong = new Audio('wrong.mp3');
+
+    let isMusicPlaying = false;
+    function toggleBGM() {
+        const btn = document.getElementById("musicToggleBtn");
+        if (isMusicPlaying) { bgm.pause(); btn.innerText = "🎵 播放背景音乐 (关闭)"; } 
+        else { bgm.play(); btn.innerText = "🎵 暂停背景音乐 (播放中)"; }
+        isMusicPlaying = !isMusicPlaying;
+    }
+
+    const heroes = [
+        { id: "h1", nickname: "及时雨", name: "宋江", img: "songjiang.jpg" }, { id: "h2", nickname: "玉麒麟", name: "卢俊义", img: "lujunyi.jpg" },
+        { id: "h3", nickname: "智多星", name: "吴用", img: "wuyong.jpg" }, { id: "h4", nickname: "入云龙", name: "公孙胜", img: "gongsunsheng.jpg" },
+        { id: "h5", nickname: "大刀", name: "关胜", img: "guansheng.jpg" }, { id: "h6", nickname: "豹子头", name: "林冲", img: "linchong.jpg" },
+        { id: "h7", nickname: "霹雳火", name: "秦明", img: "qinming.jpg" }, { id: "h8", nickname: "双鞭", name: "呼延灼", img: "huyanzhuo.jpg" },
+        { id: "h9", nickname: "小李广", name: "花荣", img: "huarong.jpg" }, { id: "h10", nickname: "小旋风", name: "柴进", img: "chaijin.jpg" },
+        { id: "h11", nickname: "扑天雕", name: "李应", img: "liying.jpg" }, { id: "h12", nickname: "美髯公", name: "朱仝", img: "zhutong.jpg" },
+        { id: "h13", nickname: "花和尚", name: "鲁智深", img: "luzhishen.jpg" }, { id: "h14", nickname: "行者", name: "武松", img: "wusong.jpg" },
+        { id: "h15", nickname: "双枪将", name: "董平", img: "dongping.jpg" }, { id: "h16", nickname: "没羽箭", name: "张清", img: "zhangqing.jpg" },
+        { id: "h17", nickname: "青面兽", name: "杨志", img: "yangzhi.jpg" }, { id: "h18", nickname: "金枪手", name: "徐宁", img: "xuning.jpg" },
+        { id: "h19", nickname: "急先锋", name: "索超", img: "suochao.jpg" }, { id: "h20", nickname: "神行太保", name: "戴宗", img: "daizong.jpg" },
+        { id: "h21", nickname: "赤发鬼", name: "刘唐", img: "liutang.jpg" }, { id: "h22", nickname: "黑旋风", name: "李逵", img: "likui.jpg" },
+        { id: "h23", nickname: "九纹龙", name: "史进", img: "shijin.jpg" }, { id: "h24", nickname: "没遮拦", name: "穆弘", img: "muhong.jpg" },
+        { id: "h25", nickname: "插翅虎", name: "雷横", img: "leiheng.jpg" }, { id: "h26", nickname: "混江龙", name: "李俊", img: "lijun.jpg" },
+        { id: "h27", nickname: "立地太岁", name: "阮小二", img: "ruanxiaoer.jpg" }, { id: "h28", nickname: "船火儿", name: "张横", img: "zhangheng.jpg" },
+        { id: "h29", nickname: "短命二郎", name: "阮小五", img: "ruanxiaowu.jpg" }, { id: "h30", nickname: "浪里白条", name: "张顺", img: "zhangshun.jpg" },
+        { id: "h31", nickname: "活阎罗", name: "阮小七", img: "ruanxiaoqi.jpg" }, { id: "h32", nickname: "病关索", name: "杨雄", img: "yangxiong.jpg" },
+        { id: "h33", nickname: "拼命三郎", name: "石秀", img: "shixiu.jpg" }, { id: "h34", nickname: "两头蛇", name: "解珍", img: "xiezhen.jpg" },
+        { id: "h35", nickname: "双尾蝎", name: "解宝", img: "xiebao.jpg" }, { id: "h36", nickname: "浪子", name: "燕青", img: "yanqing.jpg" }
+    ];
+
+    const questions = [
+        { type: "trivia", question: "‘朴’字的正确读音是？", options: ["guó", "pǔ", "pō"], correctIndex: 1, reward: 15, explanation: "正确！念 pǔ。获得 15 声望！" },
+        { type: "scenario", question: "生辰纲将途经高海拔雪山，你的规划是？", options: ["咬牙硬挺", "提前规划风险对冲与保障"], correctIndex: 1, reward: 20, explanation: "极佳决策！做好保障规划才是长远之计。获得 20 声望！" }
+    ];
+
+    let gameState = { reputation: 50, collectedIds: [], level1Cleared: false, artStyle: 'ai' };
+    let currentDrawnHeroId = null;
+
+    function saveGame() { localStorage.setItem('water_margin_save', JSON.stringify(gameState)); }
+    function loadGame() {
+        const saved = localStorage.getItem('water_margin_save');
+        if (saved) gameState = JSON.parse(saved);
+        updateArtStyleUI(); updateUI(); initGallery();
+    }
+
+    function toggleArtStyle() {
+        gameState.artStyle = (gameState.artStyle === 'ai') ? 'classic' : 'ai';
+        saveGame(); updateArtStyleUI(); initGallery();
+        if (currentDrawnHeroId) {
+            const hero = heroes.find(h => h.id === currentDrawnHeroId);
+            const folder = gameState.artStyle === 'ai' ? 'images/' : 'image/';
+            document.getElementById("cardImage").src = folder + hero.img;
+        }
+    }
+
+    function updateArtStyleUI() { document.getElementById("artStyleBtn").innerText = "🎨 画风：" + (gameState.artStyle === 'ai' ? "AI 重制版" : "88年 经典版"); }
+    function updateUI() { document.getElementById("repValue").innerText = gameState.reputation; document.getElementById("collectedCount").innerText = gameState.collectedIds.length; }
+
+    function initGallery() {
+        const grid = document.getElementById("galleryGrid"); grid.innerHTML = "";
+        const folder = gameState.artStyle === 'ai' ? 'images/' : 'image/';
+        heroes.forEach(h => {
+            const unlocked = gameState.collectedIds.includes(h.id);
+            const item = document.createElement("div");
+            item.className = "gallery-item" + (unlocked ? " unlocked" : "");
+            item.innerHTML = `<div class="img-box"><img class="pixel-art" src="${folder}${h.img}"></div><div class="info-box"><span class="nickname">${h.nickname}</span><span class="name">${h.name}</span></div>`;
+            grid.appendChild(item);
+        });
+    }
+
+    function drawCard() {
+        if (gameState.reputation < 10) { alert("声望不足！"); return; }
+        gameState.reputation -= 10;
+        const hero = heroes[Math.floor(Math.random() * heroes.length)];
+        currentDrawnHeroId = hero.id;
+        const folder = gameState.artStyle === 'ai' ? 'images/' : 'image/';
+        document.getElementById("cardImage").src = folder + hero.img;
+        document.getElementById("cardImage").style.display = "block";
+        document.getElementById("cardText").style.display = "none";
+        if (!gameState.collectedIds.includes(hero.id)) gameState.collectedIds.push(hero.id);
+        if (gameState.collectedIds.length === heroes.length && !gameState.level1Cleared) {
+            gameState.level1Cleared = true; saveGame();
+            setTimeout(() => document.getElementById("victoryModal").style.display = "flex", 800);
+        }
+        saveGame(); updateUI(); initGallery();
+    }
+
+    function loadQuestion() {
+        const q = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById("questionBox").innerText = q.question;
+        const box = document.getElementById("optionsBox"); box.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const b = document.createElement("button"); b.className = "option-btn"; b.innerText = opt;
+            b.onclick = () => {
+                if (idx === q.correctIndex) { soundCorrect.play(); gameState.reputation += q.reward; } 
+                else { soundWrong.play(); }
+                box.innerHTML = ""; saveGame(); updateUI();
+            };
+            box.appendChild(b);
+        });
+    }
+
+    // --- 3. 战场火星粒子生成脚本 ---
+    function createEmbers() {
+        const body = document.body;
+        for (let i = 0; i < 35; i++) {
+            let ember = document.createElement("div");
+            ember.className = "ember";
+            let size = Math.random() * 4 + 2 + "px";
+            ember.style.width = size; ember.style.height = size;
+            ember.style.left = Math.random() * 100 + "vw";
+            ember.style.animationDuration = Math.random() * 5 + 5 + "s";
+            ember.style.animationDelay = Math.random() * 10 + "s";
+            ember.style.filter = `blur(${Math.random() * 2}px)`;
+            body.appendChild(ember);
+        }
+    }
+
+    loadGame();
+    createEmbers(); // 启动火星
+</script>
+
+</body>
+</html>
