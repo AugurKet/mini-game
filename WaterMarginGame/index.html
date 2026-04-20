@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水浒：天命图鉴 v1.0 - 视听完全体</title>
+    <title>水浒：天命图鉴 v2.0 - 闯关前夕版</title>
     <style>
-        body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 20px; color: #333; }
+        body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 20px; color: #333; margin: 0; }
         .wrapper { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
         .container { border: 4px solid #5c3a21; border-radius: 10px; background: #fffaf0; width: 320px; padding: 20px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
         
-        /* 👇 这里是修改的重点：限制了高度，并开启了垂直滚动 */
+        /* 图鉴区域：带复古滚动条 */
         .gallery-container { 
             border: 4px solid #5c3a21; 
             border-radius: 10px; 
@@ -19,11 +19,9 @@
             margin: 0 auto; 
             padding: 20px; 
             box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-            max-height: 420px; /* 限制最大高度 */
-            overflow-y: auto;  /* 开启内部滚动条 */
+            max-height: 420px; 
+            overflow-y: auto;  
         }
-
-        /* 👇 新增的代码：把系统默认的丑陋滚动条，变成有复古木质感的样式 */
         .gallery-container::-webkit-scrollbar { width: 10px; }
         .gallery-container::-webkit-scrollbar-track { background: #e8dcc4; border-radius: 5px; }
         .gallery-container::-webkit-scrollbar-thumb { background: #8b0000; border-radius: 5px; }
@@ -47,11 +45,11 @@
         .option-btn:hover { background-color: #8b0000; }
         #feedback { font-weight: bold; margin-top: 10px; min-height: 20px; color: #8b0000; font-size: 14px; }
 
-        /* --- 图鉴网格全新样式 --- */
+        /* 图鉴网格样式 */
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 12px; margin-top: 20px; }
         .gallery-item { width: 85px; background-color: #ccc; border: 2px solid #777; border-radius: 5px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
         
-        .img-box { height: 85px; width: 100%; overflow: hidden; background: #e8dcc4; display: flex; align-items: center; justify-content: center; }
+        .img-box { height: 95px; width: 100%; overflow: hidden; background: #e8dcc4; display: flex; align-items: center; justify-content: center; }
         .img-box img { width: 100%; height: 100%; object-fit: contain; opacity: 0.15; filter: grayscale(100%); }
         .gallery-item.unlocked .img-box img { opacity: 1; filter: grayscale(0%); }
         
@@ -60,16 +58,32 @@
         
         .info-box .nickname { display: block; font-size: 10px; color: #a99a86; }
         .gallery-item.unlocked .info-box .nickname { color: #ffcc00; }
-        
         .info-box .name { display: block; font-size: 14px; font-weight: bold; color: #ccc; margin-top: 2px; }
         .gallery-item.unlocked .info-box .name { color: #ffffff; }
-        
         .gallery-item.unlocked { border-color: #ffb800; box-shadow: 0 0 10px rgba(255,184,0,0.5); }
         
         .reset-btn { margin-top: 40px; font-size: 12px; color: #999; text-decoration: underline; cursor: pointer; background: none; border: none; }
+
+        /* --- 新增：满级通关特效弹窗 --- */
+        #victoryModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .victory-title { font-size: 45px; font-weight: bold; color: #ffd700; text-shadow: 0 0 20px #ff8c00, 0 0 40px #ff0000; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .victory-desc { font-size: 20px; color: #fff; margin-bottom: 40px; animation: fadeIn 2s ease-in; line-height: 1.6; }
+        
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        
+        .next-level-btn { background: linear-gradient(135deg, #ff4500, #8b0000); color: white; padding: 15px 40px; font-size: 24px; font-weight: bold; border: 2px solid #ffd700; border-radius: 10px; cursor: pointer; box-shadow: 0 0 20px rgba(255, 69, 0, 0.8); transition: transform 0.2s; animation: pulse 1.5s infinite; }
+        .next-level-btn:hover { transform: scale(1.1); }
+        @keyframes pulse { 0% { box-shadow: 0 0 10px #ff4500; } 50% { box-shadow: 0 0 30px #ffd700; } 100% { box-shadow: 0 0 10px #ff4500; } }
     </style>
 </head>
 <body>
+
+<div id="victoryModal">
+    <div class="victory-title">✨ 三十六天罡齐聚梁山！✨</div>
+    <div class="victory-desc">大当家，山寨兵强马壮，是时候下山替天行道了！<br>高俅老贼的十万禁军正在逼近...</div>
+    <button class="next-level-btn" onclick="startNextLevel()">挥师下山 (开启第二关)</button>
+</div>
 
 <button class="btn music-btn" id="musicToggleBtn" onclick="toggleBGM()">🎵 播放背景音乐 (关闭状态)</button>
 <br>
@@ -124,47 +138,28 @@
         isMusicPlaying = !isMusicPlaying;
     }
 
-    // --- 1. 英雄数据 (含称号) ---
+    // --- 1. 英雄数据 ---
     const heroes = [
-        { id: "h1", nickname: "及时雨", name: "宋江", rarity: "SSR", img: "songjiang.jpg" },
-        { id: "h2", nickname: "玉麒麟", name: "卢俊义", rarity: "SSR", img: "lujunyi.jpg" },
-        { id: "h3", nickname: "智多星", name: "吴用", rarity: "SSR", img: "wuyong.jpg" },
-        { id: "h4", nickname: "入云龙", name: "公孙胜", rarity: "SSR", img: "gongsunsheng.jpg" },
-        { id: "h5", nickname: "大刀", name: "关胜", rarity: "SSR", img: "guansheng.jpg" },
-        { id: "h6", nickname: "豹子头", name: "林冲", rarity: "SSR", img: "linchong.jpg" },
-        { id: "h7", nickname: "霹雳火", name: "秦明", rarity: "SR", img: "qinming.jpg" },
-        { id: "h8", nickname: "双鞭", name: "呼延灼", rarity: "SR", img: "huyanzhuo.jpg" },
-        { id: "h9", nickname: "小李广", name: "花荣", rarity: "SR", img: "huarong.jpg" },
-        { id: "h10", nickname: "小旋风", name: "柴进", rarity: "SR", img: "chaijin.jpg" },
-        { id: "h11", nickname: "扑天雕", name: "李应", rarity: "SR", img: "liying.jpg" },
-        { id: "h12", nickname: "美髯公", name: "朱仝", rarity: "SR", img: "zhutong.jpg" },
-        { id: "h13", nickname: "花和尚", name: "鲁智深", rarity: "SSR", img: "luzhishen.jpg" },
-        { id: "h14", nickname: "行者", name: "武松", rarity: "SSR", img: "wusong.jpg" },
-        { id: "h15", nickname: "双枪将", name: "董平", rarity: "SR", img: "dongping.jpg" },
-        { id: "h16", nickname: "没羽箭", name: "张清", rarity: "SR", img: "zhangqing.jpg" },
-        { id: "h17", nickname: "青面兽", name: "杨志", rarity: "SR", img: "yangzhi.jpg" },
-        { id: "h18", nickname: "金枪手", name: "徐宁", rarity: "SR", img: "xuning.jpg" },
-        { id: "h19", nickname: "急先锋", name: "索超", rarity: "SR", img: "suochao.jpg" },
-        { id: "h20", nickname: "神行太保", name: "戴宗", rarity: "SR", img: "daizong.jpg" },
-        { id: "h21", nickname: "赤发鬼", name: "刘唐", rarity: "SR", img: "liutang.jpg" },
-        { id: "h22", nickname: "黑旋风", name: "李逵", rarity: "SSR", img: "likui.jpg" },
-        { id: "h23", nickname: "九纹龙", name: "史进", rarity: "SR", img: "shijin.jpg" },
-        { id: "h24", nickname: "没遮拦", name: "穆弘", rarity: "SR", img: "muhong.jpg" },
-        { id: "h25", nickname: "插翅虎", name: "雷横", rarity: "SR", img: "leiheng.jpg" },
-        { id: "h26", nickname: "混江龙", name: "李俊", rarity: "SR", img: "lijun.jpg" },
-        { id: "h27", nickname: "立地太岁", name: "阮小二", rarity: "SR", img: "ruanxiaoer.jpg" },
-        { id: "h28", nickname: "船火儿", name: "张横", rarity: "SR", img: "zhangheng.jpg" },
-        { id: "h29", nickname: "短命二郎", name: "阮小五", rarity: "SR", img: "ruanxiaowu.jpg" },
-        { id: "h30", nickname: "浪里白条", name: "张顺", rarity: "SR", img: "zhangshun.jpg" },
-        { id: "h31", nickname: "活阎罗", name: "阮小七", rarity: "SR", img: "ruanxiaoqi.jpg" },
-        { id: "h32", nickname: "病关索", name: "杨雄", rarity: "SR", img: "yangxiong.jpg" },
-        { id: "h33", nickname: "拼命三郎", name: "石秀", rarity: "SR", img: "shixiu.jpg" },
-        { id: "h34", nickname: "两头蛇", name: "解珍", rarity: "SR", img: "xiezhen.jpg" },
-        { id: "h35", nickname: "双尾蝎", name: "解宝", rarity: "SR", img: "xiebao.jpg" },
-        { id: "h36", nickname: "浪子", name: "燕青", rarity: "SSR", img: "yanqing.jpg" }
+        { id: "h1", nickname: "及时雨", name: "宋江", rarity: "SSR", img: "songjiang.jpg" }, { id: "h2", nickname: "玉麒麟", name: "卢俊义", rarity: "SSR", img: "lujunyi.jpg" },
+        { id: "h3", nickname: "智多星", name: "吴用", rarity: "SSR", img: "wuyong.jpg" }, { id: "h4", nickname: "入云龙", name: "公孙胜", rarity: "SSR", img: "gongsunsheng.jpg" },
+        { id: "h5", nickname: "大刀", name: "关胜", rarity: "SSR", img: "guansheng.jpg" }, { id: "h6", nickname: "豹子头", name: "林冲", rarity: "SSR", img: "linchong.jpg" },
+        { id: "h7", nickname: "霹雳火", name: "秦明", rarity: "SR", img: "qinming.jpg" }, { id: "h8", nickname: "双鞭", name: "呼延灼", rarity: "SR", img: "huyanzhuo.jpg" },
+        { id: "h9", nickname: "小李广", name: "花荣", rarity: "SR", img: "huarong.jpg" }, { id: "h10", nickname: "小旋风", name: "柴进", rarity: "SR", img: "chaijin.jpg" },
+        { id: "h11", nickname: "扑天雕", name: "李应", rarity: "SR", img: "liying.jpg" }, { id: "h12", nickname: "美髯公", name: "朱仝", rarity: "SR", img: "zhutong.jpg" },
+        { id: "h13", nickname: "花和尚", name: "鲁智深", rarity: "SSR", img: "luzhishen.jpg" }, { id: "h14", nickname: "行者", name: "武松", rarity: "SSR", img: "wusong.jpg" },
+        { id: "h15", nickname: "双枪将", name: "董平", rarity: "SR", img: "dongping.jpg" }, { id: "h16", nickname: "没羽箭", name: "张清", rarity: "SR", img: "zhangqing.jpg" },
+        { id: "h17", nickname: "青面兽", name: "杨志", rarity: "SR", img: "yangzhi.jpg" }, { id: "h18", nickname: "金枪手", name: "徐宁", rarity: "SR", img: "xuning.jpg" },
+        { id: "h19", nickname: "急先锋", name: "索超", rarity: "SR", img: "suochao.jpg" }, { id: "h20", nickname: "神行太保", name: "戴宗", rarity: "SR", img: "daizong.jpg" },
+        { id: "h21", nickname: "赤发鬼", name: "刘唐", rarity: "SR", img: "liutang.jpg" }, { id: "h22", nickname: "黑旋风", name: "李逵", rarity: "SSR", img: "likui.jpg" },
+        { id: "h23", nickname: "九纹龙", name: "史进", rarity: "SR", img: "shijin.jpg" }, { id: "h24", nickname: "没遮拦", name: "穆弘", rarity: "SR", img: "muhong.jpg" },
+        { id: "h25", nickname: "插翅虎", name: "雷横", rarity: "SR", img: "leiheng.jpg" }, { id: "h26", nickname: "混江龙", name: "李俊", rarity: "SR", img: "lijun.jpg" },
+        { id: "h27", nickname: "立地太岁", name: "阮小二", rarity: "SR", img: "ruanxiaoer.jpg" }, { id: "h28", nickname: "船火儿", name: "张横", rarity: "SR", img: "zhangheng.jpg" },
+        { id: "h29", nickname: "短命二郎", name: "阮小五", rarity: "SR", img: "ruanxiaowu.jpg" }, { id: "h30", nickname: "浪里白条", name: "张顺", rarity: "SR", img: "zhangshun.jpg" },
+        { id: "h31", nickname: "活阎罗", name: "阮小七", rarity: "SR", img: "ruanxiaoqi.jpg" }, { id: "h32", nickname: "病关索", name: "杨雄", rarity: "SR", img: "yangxiong.jpg" },
+        { id: "h33", nickname: "拼命三郎", name: "石秀", rarity: "SR", img: "shixiu.jpg" }, { id: "h34", nickname: "两头蛇", name: "解珍", rarity: "SR", img: "xiezhen.jpg" },
+        { id: "h35", nickname: "双尾蝎", name: "解宝", rarity: "SR", img: "xiebao.jpg" }, { id: "h36", nickname: "浪子", name: "燕青", rarity: "SSR", img: "yanqing.jpg" }
     ];
 
-    // --- 2. 扩充题库 (31题) ---
     const questions = [
         { type: "scenario", question: "生辰纲将途经高海拔雪山，你的规划是？", options: ["咬牙硬挺", "提前规划风险对冲与保障"], correctIndex: 1, reward: 20, explanation: "极佳决策！做好高海拔意外与医疗的保障规划才是长远之计。获得 20 声望！" },
         { type: "scenario", question: "山寨库银日益增多，大当家决定如何打理这笔公款？", options: ["全部换成真金白银埋入深山", "招募懂行的账房进行系统财富规划与分散投资", "全部分发给喽啰"], correctIndex: 1, reward: 25, explanation: "深谋远虑！引入专业的财富规划，方能确保山寨基业长青。获得 25 声望！" },
@@ -190,9 +185,11 @@
     ];
 
     // --- 3. 存档系统逻辑 ---
+    // 我把测试声望改成了 9999，方便您测试抽完 36 人的特效。测完可以改回 50
     let gameState = {
-        reputation: 50,
-        collectedIds: []
+        reputation: 9999, 
+        collectedIds: [],
+        level1Cleared: false // 新增通关标记
     };
 
     function saveGame() {
@@ -203,6 +200,10 @@
         const saved = localStorage.getItem('water_margin_save');
         if (saved) {
             gameState = JSON.parse(saved);
+            // 兼容老存档，防止老存档没有 level1Cleared 属性
+            if (gameState.level1Cleared === undefined) {
+                gameState.level1Cleared = false;
+            }
         }
         updateUI();
         initGallery();
@@ -230,10 +231,10 @@
             item.className = "gallery-item" + (isUnlocked ? " unlocked" : "");
             item.id = "gallery-" + h.id;
             
-            // 采用上下排版的最新图鉴样式，路径修复为 images/
+            // 彻底修复了原代码中的 image/ 错误，现统一为 images/
             item.innerHTML = `
                 <div class="img-box">
-                    <img class="pixel-art" src="image/${h.img}" alt="${h.name}">
+                    <img class="pixel-art" src="images/${h.img}" alt="${h.name}">
                 </div>
                 <div class="info-box">
                     <span class="nickname">${h.nickname}</span>
@@ -252,7 +253,8 @@
         const imgEl = document.getElementById("cardImage");
         const txtEl = document.getElementById("cardText");
         
-        imgEl.src = "image/" + hero.img; // 修复路径为 images/
+        // 彻底修复了路径
+        imgEl.src = "images/" + hero.img; 
         imgEl.style.display = "block";
         txtEl.style.display = "none";
 
@@ -262,11 +264,20 @@
             if (galleryItem) galleryItem.classList.add("unlocked");
         }
         
+        // 满级全屏金光特效触发逻辑
+        if (gameState.collectedIds.length === heroes.length && !gameState.level1Cleared) {
+            gameState.level1Cleared = true;
+            saveGame();
+            setTimeout(() => {
+                soundCorrect.currentTime = 0; soundCorrect.play(); // 播个音效当礼花
+                document.getElementById("victoryModal").style.display = "flex";
+            }, 800);
+        }
+        
         saveGame();
         updateUI();
     }
 
-    let currentQ = null;
     function loadQuestion() {
         currentQ = questions[Math.floor(Math.random() * questions.length)];
         document.getElementById("feedback").innerText = "";
@@ -279,14 +290,14 @@
             b.innerText = opt;
             b.onclick = () => {
                 if (idx === currentQ.correctIndex) {
-                    soundCorrect.currentTime = 0; soundCorrect.play(); // 播放正确音效
+                    soundCorrect.currentTime = 0; soundCorrect.play(); 
                     document.getElementById("feedback").style.color = "green";
                     document.getElementById("feedback").innerText = currentQ.explanation;
                     gameState.reputation += currentQ.reward;
                     saveGame();
                     updateUI();
                 } else {
-                    soundWrong.currentTime = 0; soundWrong.play(); // 播放错误音效
+                    soundWrong.currentTime = 0; soundWrong.play(); 
                     document.getElementById("feedback").style.color = "red";
                     document.getElementById("feedback").innerText = "抉择失误，再思量思量。声望无变动。";
                 }
@@ -294,6 +305,12 @@
             };
             box.appendChild(b);
         });
+    }
+
+    // 弹窗里的下一步按钮逻辑
+    function startNextLevel() {
+        document.getElementById("victoryModal").style.display = "none";
+        alert("敬请期待！系统正在紧锣密鼓地开发【第二关：三打祝家庄】的军营驻地功能！\n（大当家，等您号令，咱们立刻开写第二关的界面！）");
     }
 
     // 初始化加载
