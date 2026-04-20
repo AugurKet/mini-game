@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水浒：天命图鉴 v2.1 - 双画风典藏版</title>
+    <style>
+        body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 20px; color: #333; margin: 0; }
+        .wrapper { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+        .container { border: 4px solid #5c3a21; border-radius: 10px; background: #fffaf0; width: 320px; padding: 20px; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
+        
+        .gallery-container { 
+            border: 4px solid #5c3a21; 
+            border-radius: 10px; 
+            background: #fffaf0; 
+            width: 90%; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            max-height: 420px; 
+            overflow-y: auto;  
+        }
+        .gallery-container::-webkit-scrollbar { width: 10px; }
+        .gallery-container::-webkit-scrollbar-track { background: #e8dcc4; border-radius: 5px; }
+        .gallery-container::-webkit-scrollbar-thumb { background: #8b0000; border-radius: 5px; }
+        .gallery-container::-webkit-scrollbar-thumb:hover { background: #5c3a21; }
+
+        h1 { color: #8b0000; font-size: 24px; margin-bottom: 20px; border-bottom: 2px dashed #b89f7d; padding-bottom: 10px; }
+        
+        .pixel-art { image-rendering: pixelated; image-rendering: crisp-edges; }
+        .card-display { width: 150px; height: 150px; border: 4px solid #b89f7d; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e8dcc4; overflow: hidden; }
+        .card-display img { width: 100%; height: 100%; object-fit: contain; display: none; }
+        
+        .btn { background-color: #8b0000; color: white; border: none; padding: 10px 15px; font-size: 16px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; margin: 5px; }
+        .btn:hover { background-color: #a52a2a; }
+        .top-btn { font-size: 14px; margin-bottom: 20px; }
+        .music-btn { background-color: #cd853f; }
+        .music-btn:hover { background-color: #a0522d; }
+        .style-btn { background-color: #4b0082; }
+        .style-btn:hover { background-color: #2e0854; }
+        
+        .stats-bar { margin-bottom: 20px; font-size: 18px; font-weight: bold; background: #8b0000; color: #fff; padding: 10px 20px; border-radius: 50px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        
+        .question-box { background: #e8dcc4; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align: left; font-size: 16px; min-height: 60px; line-height: 1.4; }
+        .option-btn { display: block; width: 100%; background-color: #5c3a21; color: white; border: none; padding: 10px; font-size: 14px; cursor: pointer; border-radius: 5px; margin-bottom: 10px; text-align: left; }
+        .option-btn:hover { background-color: #8b0000; }
+        #feedback { font-weight: bold; margin-top: 10px; min-height: 20px; color: #8b0000; font-size: 14px; }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 12px; margin-top: 20px; }
+        .gallery-item { width: 85px; background-color: #ccc; border: 2px solid #777; border-radius: 5px; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        
+        .img-box { height: 95px; width: 100%; overflow: hidden; background: #e8dcc4; display: flex; align-items: center; justify-content: center; }
+        .img-box img { width: 100%; height: 100%; object-fit: contain; opacity: 0.15; filter: grayscale(100%); }
+        .gallery-item.unlocked .img-box img { opacity: 1; filter: grayscale(0%); }
+        
+        .info-box { background: #4a3320; padding: 5px 0; text-align: center; border-top: 2px solid #777; line-height: 1.2; }
+        .gallery-item.unlocked .info-box { background: #8b0000; border-top: 2px solid #ffb800; }
+        
+        .info-box .nickname { display: block; font-size: 10px; color: #a99a86; }
+        .gallery-item.unlocked .info-box .nickname { color: #ffcc00; }
+        .info-box .name { display: block; font-size: 14px; font-weight: bold; color: #ccc; margin-top: 2px; }
+        .gallery-item.unlocked .info-box .name { color: #ffffff; }
+        .gallery-item.unlocked { border-color: #ffb800; box-shadow: 0 0 10px rgba(255,184,0,0.5); }
+        
+        .reset-btn { margin-top: 40px; font-size: 12px; color: #999; text-decoration: underline; cursor: pointer; background: none; border: none; }
+
+        #victoryModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .victory-title { font-size: 45px; font-weight: bold; color: #ffd700; text-shadow: 0 0 20px #ff8c00, 0 0 40px #ff0000; margin-bottom: 20px; animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .victory-desc { font-size: 20px; color: #fff; margin-bottom: 40px; animation: fadeIn 2s ease-in; line-height: 1.6; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .next-level-btn { background: linear-gradient(135deg, #ff4500, #8b0000); color: white; padding: 15px 40px; font-size: 24px; font-weight: bold; border: 2px solid #ffd700; border-radius: 10px; cursor: pointer; box-shadow: 0 0 20px rgba(255, 69, 0, 0.8); transition: transform 0.2s; animation: pulse 1.5s infinite; }
+        .next-level-btn:hover { transform: scale(1.1); }
+        @keyframes pulse { 0% { box-shadow: 0 0 10px #ff4500; } 50% { box-shadow: 0 0 30px #ffd700; } 100% { box-shadow: 0 0 10px #ff4500; } }
+    </style>
+</head>
+<body>
+
+<div id="victoryModal">
+    <div class="victory-title">✨ 三十六天罡齐聚梁山！✨</div>
+    <div class="victory-desc">大当家，山寨兵强马壮，是时候下山替天行道了！<br>高俅老贼的十万禁军正在逼近...</div>
+    <button class="next-level-btn" onclick="startNextLevel()">挥师下山 (开启第二关)</button>
+</div>
+
+<!-- 新增画风切换按钮 -->
+<button class="btn top-btn style-btn" id="artStyleBtn" onclick="toggleArtStyle()">🎨 画风：AI 重制版</button>
+<button class="btn top-btn music-btn" id="musicToggleBtn" onclick="toggleBGM()">🎵 播放背景音乐</button>
+<br>
+
+<div class="stats-bar">当前山寨声望：<span id="repValue">0</span></div>
+
+<div class="wrapper">
+    <div class="container">
+        <h1>聚义厅</h1>
+        <div id="cardDisplay" class="card-display">
+            <img id="cardImage" class="pixel-art" src="" alt="头像">
+            <span id="cardText" style="color:#555">等待招募...</span>
+        </div>
+        <button class="btn" onclick="drawCard()">招募好汉 (消耗10)</button>
+    </div>
+
+    <div class="container">
+        <h1>文汇阁</h1>
+        <div id="questionBox" class="question-box">点击下方翻阅案卷</div>
+        <div id="optionsBox"></div>
+        <div id="feedback"></div>
+        <button class="btn" onclick="loadQuestion()" style="width: 100%; background-color: #2e8b57;">翻阅案卷 (赚声望)</button>
+    </div>
+</div>
+
+<div class="gallery-container">
+    <h1>梁山图鉴 (<span id="collectedCount">0</span>/36)</h1>
+    <div id="galleryGrid" class="gallery-grid"></div>
+</div>
+
+<button class="reset-btn" onclick="resetGame()">[ 重新开局 / 清空存档 ]</button>
+
+<script>
+    const bgm = new Audio('bgm.mp3');
+    bgm.loop = true; bgm.volume = 0.5; 
+    const soundCorrect = new Audio('correct.mp3');
+    const soundWrong = new Audio('wrong.mp3');
+
+    let isMusicPlaying = false;
+    function toggleBGM() {
+        const btn = document.getElementById("musicToggleBtn");
+        if (isMusicPlaying) { bgm.pause(); btn.innerText = "🎵 播放背景音乐 (关闭状态)"; } 
+        else { bgm.play(); btn.innerText = "🎵 暂停背景音乐 (播放中...)"; }
+        isMusicPlaying = !isMusicPlaying;
+    }
+
+    const heroes = [
+        { id: "h1", nickname: "及时雨", name: "宋江", rarity: "SSR", img: "songjiang.jpg" }, { id: "h2", nickname: "玉麒麟", name: "卢俊义", rarity: "SSR", img: "lujunyi.jpg" },
+        { id: "h3", nickname: "智多星", name: "吴用", rarity: "SSR", img: "wuyong.jpg" }, { id: "h4", nickname: "入云龙", name: "公孙胜", rarity: "SSR", img: "gongsunsheng.jpg" },
+        { id: "h5", nickname: "大刀", name: "关胜", rarity: "SSR", img: "guansheng.jpg" }, { id: "h6", nickname: "豹子头", name: "林冲", rarity: "SSR", img: "linchong.jpg" },
+        { id: "h7", nickname: "霹雳火", name: "秦明", rarity: "SR", img: "qinming.jpg" }, { id: "h8", nickname: "双鞭", name: "呼延灼", rarity: "SR", img: "huyanzhuo.jpg" },
+        { id: "h9", nickname: "小李广", name: "花荣", rarity: "SR", img: "huarong.jpg" }, { id: "h10", nickname: "小旋风", name: "柴进", rarity: "SR", img: "chaijin.jpg" },
+        { id: "h11", nickname: "扑天雕", name: "李应", rarity: "SR", img: "liying.jpg" }, { id: "h12", nickname: "美髯公", name: "朱仝", rarity: "SR", img: "zhutong.jpg" },
+        { id: "h13", nickname: "花和尚", name: "鲁智深", rarity: "SSR", img: "luzhishen.jpg" }, { id: "h14", nickname: "行者", name: "武松", rarity: "SSR", img: "wusong.jpg" },
+        { id: "h15", nickname: "双枪将", name: "董平", rarity: "SR", img: "dongping.jpg" }, { id: "h16", nickname: "没羽箭", name: "张清", rarity: "SR", img: "zhangqing.jpg" },
+        { id: "h17", nickname: "青面兽", name: "杨志", rarity: "SR", img: "yangzhi.jpg" }, { id: "h18", nickname: "金枪手", name: "徐宁", rarity: "SR", img: "xuning.jpg" },
+        { id: "h19", nickname: "急先锋", name: "索超", rarity: "SR", img: "suochao.jpg" }, { id: "h20", nickname: "神行太保", name: "戴宗", rarity: "SR", img: "daizong.jpg" },
+        { id: "h21", nickname: "赤发鬼", name: "刘唐", rarity: "SR", img: "liutang.jpg" }, { id: "h22", nickname: "黑旋风", name: "李逵", rarity: "SSR", img: "likui.jpg" },
+        { id: "h23", nickname: "九纹龙", name: "史进", rarity: "SR", img: "shijin.jpg" }, { id: "h24", nickname: "没遮拦", name: "穆弘", rarity: "SR", img: "muhong.jpg" },
+        { id: "h25", nickname: "插翅虎", name: "雷横", rarity: "SR", img: "leiheng.jpg" }, { id: "h26", nickname: "混江龙", name: "李俊", rarity: "SR", img: "lijun.jpg" },
+        { id: "h27", nickname: "立地太岁", name: "阮小二", rarity: "SR", img: "ruanxiaoer.jpg" }, { id: "h28", nickname: "船火儿", name: "张横", rarity: "SR", img: "zhangheng.jpg" },
+        { id: "h29", nickname: "短命二郎", name: "阮小五", rarity: "SR", img: "ruanxiaowu.jpg" }, { id: "h30", nickname: "浪里白条", name: "张顺", rarity: "SR", img: "zhangshun.jpg" },
+        { id: "h31", nickname: "活阎罗", name: "阮小七", rarity: "SR", img: "ruanxiaoqi.jpg" }, { id: "h32", nickname: "病关索", name: "杨雄", rarity: "SR", img: "yangxiong.jpg" },
+        { id: "h33", nickname: "拼命三郎", name: "石秀", rarity: "SR", img: "shixiu.jpg" }, { id: "h34", nickname: "两头蛇", name: "解珍", rarity: "SR", img: "xiezhen.jpg" },
+        { id: "h35", nickname: "双尾蝎", name: "解宝", rarity: "SR", img: "xiebao.jpg" }, { id: "h36", nickname: "浪子", name: "燕青", rarity: "SSR", img: "yanqing.jpg" }
+    ];
+
+    const questions = [
+        { type: "scenario", question: "生辰纲将途经高海拔雪山，你的规划是？", options: ["咬牙硬挺", "提前规划风险对冲与保障"], correctIndex: 1, reward: 20, explanation: "极佳决策！做好高海拔意外与医疗的保障规划才是长远之计。获得 20 声望！" },
+        { type: "scenario", question: "山寨库银日益增多，大当家决定如何打理这笔公款？", options: ["全部换成真金白银埋入深山", "招募懂行的账房进行系统财富规划与分散投资", "全部分发给喽啰"], correctIndex: 1, reward: 25, explanation: "深谋远虑！引入专业的财富规划，方能确保山寨基业长青。获得 25 声望！" },
+        { type: "scenario", question: "有兄弟提出下山执行高危任务家眷无人照料。你决定怎么做？", options: ["设立‘山寨抚恤互助金’，通过制度转移风险", "生死有命，各安天道"], correctIndex: 0, reward: 20, explanation: "大格局！建立类似现代保险的互助基金，能极大安抚人心。获得 20 声望！" },
+        { type: "scenario", question: "戴宗选拔兄弟组建‘长跑营’，要求连续奔袭百里。你最看重什么品质？", options: ["瞬间的爆发力", "百里挑一的极强耐力与科学补给策略"], correctIndex: 1, reward: 20, explanation: "内行！超长距离奔袭靠的是耐力底子和科学补给。获得 20 声望！" },
+        { type: "trivia", question: "戴宗的‘神行法’日行八百里，他在腿上通常绑几个甲马？", options: ["两个", "四个", "六个"], correctIndex: 1, reward: 15, explanation: "正确！四个甲马日行八百里。获得 15 声望！" },
+        { type: "scenario", question: "山寨准备举办盛大的‘群英返山大会’。你派谁去主理筹备并设计海报？", options: ["李逵", "燕青与金大坚", "索超"], correctIndex: 1, reward: 20, explanation: "知人善任！燕青懂交际，金大坚懂刻字设计。获得 20 声望！" },
+        { type: "scenario", question: "聚会大合影时，大当家觉得某兄弟画像画得太胖了。你应当？", options: ["要求画师重新修改，将身形调整至精干瘦削", "凑合着看吧"], correctIndex: 0, reward: 15, explanation: "注重细节！呈现精干状态彰显山寨精神。获得 15 声望！" },
+        { type: "scenario", question: "缴获了西夏最新‘神行车’（高新动力技术）。谁最适合去研究充能？", options: ["凌振", "刘唐", "鲁智深"], correctIndex: 0, reward: 20, explanation: "正解！凌振是首屈一指的技术专家。获得 20 声望！" },
+        { type: "trivia", question: "‘朴’字的正确读音是？", options: ["guó", "pǔ", "pō"], correctIndex: 1, reward: 15, explanation: "正确！念 pǔ。获得 15 声望！" },
+        { type: "scenario", question: "江南几位高净值员外有意给山寨投资，但担心资金传承问题。大当家如何出谋划策？", options: ["让他们把银票藏在砖头里", "建议设立家族信托基金，实现资产隔离与定向传承", "买一堆古董存着"], correctIndex: 1, reward: 25, explanation: "专业至极！家族信托是高净值人群财富传承的顶层逻辑。获得 25 声望！" },
+        { type: "scenario", question: "山寨下属的商号面临极大的市场不确定性。账房建议如何做资产配置？", options: ["全仓押注丝绸生意", "将资产合理分配至金银、田产、票号，实现多元化对冲", "全部借放高利贷"], correctIndex: 1, reward: 20, explanation: "稳健！多元化资产配置是抵御市场周期性风险的唯一法则。获得 20 声望！" },
+        { type: "scenario", question: "某头领的妻子为了长远打算，私下想为两个儿子设立教育储备金。大当家建议？", options: ["尽早规划稳健增值的复利型资产组合", "等孩子长大了再出去抢", "存在床底下"], correctIndex: 0, reward: 20, explanation: "未雨绸缪！利用时间复利是教育金规划的核心。获得 20 声望！" },
+        { type: "scenario", question: "‘江南百公里极限拉练’进行到70公里处，许多兄弟遭遇了“撞墙期”，大当家如何指挥？", options: ["拿鞭子抽着跑", "强制降速，补充高能碳水与盐丸，调整呼吸挺过极点", "直接放弃就地睡觉"], correctIndex: 1, reward: 25, explanation: "硬核跑者！战胜撞墙期靠的是科学补给与极强的意志力。获得 25 声望！" },
+        { type: "scenario", question: "即将进行跨昼夜的高山急行军，大当家在清点装备时最强调什么？", options: ["携带最重型的铠甲", "轻量化保暖衣物、头灯以及应急保温毯", "多带几坛好酒"], correctIndex: 1, reward: 20, explanation: "极其专业！极限环境下的轻量化与保温措施是保命关键。获得 20 声望！" },
+        { type: "scenario", question: "一位德高望重的老头领迎来五十岁大寿兼结义二十二周年纪念。大当家送什么最显品味？", options: ["送一百头猪", "请画师根据生平量身定制精美的纪念漫画册", "随便送点银子"], correctIndex: 1, reward: 25, explanation: "太有心了！量身定制的连环画册承载的是无价的回忆。获得 25 声望！" },
+        { type: "scenario", question: "山寨兴办学堂，为了树立正气，大当家决定校训应当尊崇什么学风？", options: ["大块吃肉大碗喝酒", "尊崇儒道，恪守礼义，发扬孔孟遗风", "坑蒙拐骗"], correctIndex: 1, reward: 20, explanation: "格局打开！以儒家文化为底蕴，方能让山寨摘掉草寇的帽子。获得 20 声望！" },
+        { type: "trivia", question: "梁山好汉排座次，谁排在第一位？", options: ["卢俊义", "宋江", "吴用", "公孙胜"], correctIndex: 1, reward: 10, explanation: "呼保义宋江，稳坐第一把交椅。获得 10 声望！" },
+        { type: "trivia", question: "“母夜叉”孙二娘在十字坡开的是什么店？", options: ["打铁铺", "黑店（人肉包子店）", "当铺"], correctIndex: 1, reward: 15, explanation: "江湖险恶，十字坡的包子可不能乱吃！获得 15 声望！" },
+        { type: "trivia", question: "花和尚鲁智深出家前，在渭州担任什么职务？", options: ["教头", "提辖", "都头"], correctIndex: 1, reward: 15, explanation: "鲁提辖拳打镇关西！获得 15 声望！" },
+        { type: "trivia", question: "《水浒传》中，被称为“玉麒麟”的是谁？", options: ["柴进", "卢俊义", "燕青"], correctIndex: 1, reward: 15, explanation: "河北玉麒麟卢俊义，枪棒天下无双。获得 15 声望！" },
+        { type: "trivia", question: "梁山一百单八将中，最后一位（第108位）好汉是谁？", options: ["白日鼠白胜", "鼓上蚤时迁", "金毛犬段景住"], correctIndex: 2, reward: 20, explanation: "资深水浒迷！最后一位正是盗马贼段景住。获得 20 声望！" }
+    ];
+
+    // --- 3. 存档系统逻辑 ---
+    let gameState = {
+        reputation: 9999, // 测试通关用
+        collectedIds: [],
+        level1Cleared: false,
+        artStyle: 'ai' // 默认使用 AI 重制版 (images/)，'classic' 则使用 Koei 版 (image/)
+    };
+
+    let currentDrawnHeroId = null; // 记录当前展示台上的英雄
+
+    function saveGame() { localStorage.setItem('water_margin_save', JSON.stringify(gameState)); }
+
+    function loadGame() {
+        const saved = localStorage.getItem('water_margin_save');
+        if (saved) {
+            gameState = JSON.parse(saved);
+            if (gameState.level1Cleared === undefined) gameState.level1Cleared = false;
+            if (gameState.artStyle === undefined) gameState.artStyle = 'ai';
+        }
+        updateArtStyleUI();
+        updateUI();
+        initGallery();
+    }
+
+    function resetGame() {
+        if (confirm("确定要清空所有声望和图鉴，重新开始吗？")) {
+            localStorage.removeItem('water_margin_save'); location.reload();
+        }
+    }
+
+    // --- 画风切换核心逻辑 ---
+    function toggleArtStyle() {
+        gameState.artStyle = (gameState.artStyle === 'ai') ? 'classic' : 'ai';
+        saveGame();
+        updateArtStyleUI();
+        initGallery(); // 重新渲染下方图鉴
+        
+        // 如果展示台上有武将，一并切换他的画风
+        if (currentDrawnHeroId) {
+            const hero = heroes.find(h => h.id === currentDrawnHeroId);
+            const folder = gameState.artStyle === 'ai' ? 'images/' : 'image/';
+            document.getElementById("cardImage").src = folder + hero.img;
+        }
+    }
+
+    function updateArtStyleUI() {
+        const btn = document.getElementById("artStyleBtn");
+        if (gameState.artStyle === 'ai') {
+            btn.innerText = "🎨 画风：AI 重制版";
+        } else {
+            btn.innerText = "🎨 画风：88年 经典版";
+        }
+    }
+
+    // --- 4. 游戏核心逻辑 ---
+    function updateUI() {
+        document.getElementById("repValue").innerText = gameState.reputation;
+        document.getElementById("collectedCount").innerText = gameState.collectedIds.length;
+    }
+
+    function initGallery() {
+        const grid = document.getElementById("galleryGrid");
+        grid.innerHTML = "";
+        
+        // 根据当前画风决定读取哪个文件夹
+        const folder = gameState.artStyle === 'ai' ? 'images/' : 'image/';
+        
+        heroes.forEach(h => {
+            const isUnlocked = gameState.collectedIds.includes(h.id);
+            const item = document.createElement("div");
+            item.className = "gallery-item" + (isUnlocked ? " unlocked" : "");
+            item.id = "gallery-" + h.id;
+            
+            item.innerHTML = `
+                <div class="img-box">
+                    <img class="pixel-art" src="${folder}${h.img}" alt="${h.name}">
+                </div>
+                <div class="info-box">
+                    <span class="nickname">${h.nickname}</span>
+                    <span class="name">${h.name}</span>
+                </div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
+    function drawCard() {
+        if (gameState.reputation < 10) { alert("大当家，声望不足，请先去文汇阁赚取！"); return; }
+        gameState.reputation -= 10;
+        
+        const hero = heroes[Math.floor(Math.random() * heroes.length)];
+        currentDrawnHeroId = hero.id; // 记录下来
+        
+        const imgEl = document.getElementById("cardImage");
+        const txtEl = document.getElementById("cardText");
+        
+        // 根据当前画风读取图片
+        const folder = gameState.artStyle === 'ai' ? 'images/' : 'image/';
+        imgEl.src = folder + hero.img; 
+        imgEl.style.display = "block";
+        txtEl.style.display = "none";
+
+        if (!gameState.collectedIds.includes(hero.id)) {
+            gameState.collectedIds.push(hero.id);
+            const galleryItem = document.getElementById("gallery-" + hero.id);
+            if (galleryItem) galleryItem.classList.add("unlocked");
+        }
+        
+        if (gameState.collectedIds.length === heroes.length && !gameState.level1Cleared) {
+            gameState.level1Cleared = true; saveGame();
+            setTimeout(() => {
+                soundCorrect.currentTime = 0; soundCorrect.play(); 
+                document.getElementById("victoryModal").style.display = "flex";
+            }, 800);
+        }
+        
+        saveGame(); updateUI();
+    }
+
+    function loadQuestion() {
+        currentQ = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("questionBox").innerText = currentQ.question;
+        const box = document.getElementById("optionsBox");
+        box.innerHTML = "";
+        currentQ.options.forEach((opt, idx) => {
+            const b = document.createElement("button");
+            b.className = "option-btn"; b.innerText = opt;
+            b.onclick = () => {
+                if (idx === currentQ.correctIndex) {
+                    soundCorrect.currentTime = 0; soundCorrect.play(); 
+                    document.getElementById("feedback").style.color = "green";
+                    document.getElementById("feedback").innerText = currentQ.explanation;
+                    gameState.reputation += currentQ.reward;
+                    saveGame(); updateUI();
+                } else {
+                    soundWrong.currentTime = 0; soundWrong.play(); 
+                    document.getElementById("feedback").style.color = "red";
+                    document.getElementById("feedback").innerText = "抉择失误，再思量思量。声望无变动。";
+                }
+                box.innerHTML = "";
+            };
+            box.appendChild(b);
+        });
+    }
+
+    function startNextLevel() {
+        document.getElementById("victoryModal").style.display = "none";
+        alert("敬请期待！系统正在紧锣密鼓地开发【第二关：三打祝家庄】的军营驻地功能！\n（大当家，咱们什么时候开始规划第二关的面板？）");
+    }
+
+    loadGame();
+</script>
+
+</body>
+</html>
