@@ -1,0 +1,112 @@
+/* 引入一种更具现代感和速度感的字体风格 */
+body {
+    background-color: #121212; /* 更深的纯黑背景，突出主体 */
+    color: #ffffff;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background-image: radial-gradient(circle at 50% 0%, #2a2a2a 0%, #121212 70%); /* 增加一丝微弱的聚光灯效果 */
+}
+
+h1 {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #ff3333; /* 赛道红主题色 */
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+}
+
+.game-board {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;
+    margin-top: 40px;
+}
+
+.card {
+    background: linear-gradient(145deg, #2a2a2a, #1f1f1f); /* 模拟碳纤维/金属的微渐变质感 */
+    border: 1px solid #444; 
+    border-top: 4px solid #ff3333; /* 顶部加入赛道红点缀，更有赛车UI的攻击性 */
+    border-radius: 12px;
+    width: 280px; /* 稍微加宽一点，让超跑图片更有张力 */
+    padding: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* 鼠标悬停卡牌微微浮起 */
+}
+
+.card img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #333; 
+    border-bottom: 2px solid #ff3333; /* 分割线 */
+}
+
+h3 {
+    margin: 15px 0 10px 0;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+button {
+    background: #1a1a1a;
+    color: #ccc;
+    border: 1px solid #333;
+    border-left: 4px solid #ff3333; /* 类似赛车仪表盘的刻度条设计 */
+    padding: 12px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-size: 15px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between; /* 让属性名和数值分居左右，更像数据面板 */
+    font-family: monospace; /* 数值部分使用等宽字体，更有机械感 */
+    font-weight: bold;
+}
+
+button:hover {
+    background: #ff3333;
+    color: #fff;
+    border-color: #ff3333;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.6); /* 悬停时产生引擎点火般的红色霓虹泛光 */
+    padding-left: 20px; /* 悬停时文字有一个轻微向右加速的动态反馈 */
+}
+
+.cpu-area p {
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+    padding: 12px 15px;
+    margin: 0;
+    border-radius: 4px;
+    font-size: 15px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    font-family: monospace;
+}
+
+.hidden-card img {
+    filter: brightness(0.15) contrast(1.2); /* 电脑牌未开时不仅变暗，还增加对比度，保留一丝神秘的车辆轮廓 */
+}
+
+#round-result {
+    color: #00e5ff; /* 中间的提示文字用电光蓝，与红色的卡牌形成冷暖对比，提升科幻感 */
+    margin-top: 180px; /* 让提示文字刚好处于两张卡牌中间偏上的视线焦点 */
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
