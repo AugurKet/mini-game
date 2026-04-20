@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超跑卡牌对决 (Top Trumps)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>顶级超跑对决 (Top Trumps)</h1>
+    <div class="game-board">
+        <div class="player-area">
+            <h2>你的车库 (<span id="player-count">16</span>)</h2>
+            <div id="player-card" class="card">
+                <img id="player-img" src="" alt="车辆图片">
+                <h3 id="player-name">车型名称</h3>
+                <div class="stats">
+                    <button onclick="playRound('power')">马力 (HP): <span id="p-power"></span></button>
+                    <button onclick="playRound('top_speed')">极速 (km/h): <span id="p-top_speed"></span></button>
+                    <button onclick="playRound('acceleration')">0-100加速 (s): <span id="p-acceleration"></span></button>
+                    <button onclick="playRound('torque')">扭矩 (Nm): <span id="p-torque"></span></button>
+                    <button onclick="playRound('rarity')">稀有度/身价: <span id="p-rarity"></span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-area">
+            <h2 id="round-result">选择一项车辆属性发起比拼！</h2>
+        </div>
+
+        <div class="cpu-area">
+            <h2>对手车库 (<span id="cpu-count">16</span>)</h2>
+            <div id="cpu-card" class="card hidden-card">
+                <img id="cpu-img" src="" alt="未知车辆">
+                <h3 id="cpu-name">???</h3>
+                <div class="stats">
+                    <p>马力 (HP): <span id="c-power">?</span></p>
+                    <p>极速 (km/h): <span id="c-top_speed">?</span></p>
+                    <p>0-100加速 (s): <span id="c-acceleration">?</span></p>
+                    <p>扭矩 (Nm): <span id="c-torque">?</span></p>
+                    <p>稀有度/身价: <span id="c-rarity">?</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
