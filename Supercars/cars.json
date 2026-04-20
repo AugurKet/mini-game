@@ -1,0 +1,290 @@
+[
+  {
+    "id": 1,
+    "name": "Bugatti Chiron",
+    "power": 1500,
+    "top_speed": 420,
+    "acceleration": 2.4,
+    "torque": 1600,
+    "rarity": 95
+  },
+  {
+    "id": 2,
+    "name": "Ferrari LaFerrari",
+    "power": 950,
+    "top_speed": 350,
+    "acceleration": 2.6,
+    "torque": 900,
+    "rarity": 92
+  },
+  {
+    "id": 3,
+    "name": "McLaren P1",
+    "power": 903,
+    "top_speed": 350,
+    "acceleration": 2.8,
+    "torque": 900,
+    "rarity": 90
+  },
+  {
+    "id": 4,
+    "name": "Porsche 918 Spyder",
+    "power": 887,
+    "top_speed": 345,
+    "acceleration": 2.5,
+    "torque": 1280,
+    "rarity": 89
+  },
+  {
+    "id": 5,
+    "name": "Lamborghini Aventador SVJ",
+    "power": 770,
+    "top_speed": 350,
+    "acceleration": 2.8,
+    "torque": 720,
+    "rarity": 85
+  },
+  {
+    "id": 6,
+    "name": "Koenigsegg Jesko",
+    "power": 1600,
+    "top_speed": 480,
+    "acceleration": 2.5,
+    "torque": 1500,
+    "rarity": 97
+  },
+  {
+    "id": 7,
+    "name": "Pagani Huayra",
+    "power": 730,
+    "top_speed": 383,
+    "acceleration": 2.8,
+    "torque": 1000,
+    "rarity": 94
+  },
+  {
+    "id": 8,
+    "name": "Aston Martin Valkyrie",
+    "power": 1160,
+    "top_speed": 402,
+    "acceleration": 2.6,
+    "torque": 900,
+    "rarity": 98
+  },
+  {
+    "id": 9,
+    "name": "McLaren F1",
+    "power": 627,
+    "top_speed": 386,
+    "acceleration": 3.2,
+    "torque": 650,
+    "rarity": 100
+  },
+  {
+    "id": 10,
+    "name": "Ferrari F40",
+    "power": 471,
+    "top_speed": 324,
+    "acceleration": 4.1,
+    "torque": 577,
+    "rarity": 96
+  },
+  {
+    "id": 11,
+    "name": "Porsche Carrera GT",
+    "power": 603,
+    "top_speed": 330,
+    "acceleration": 3.5,
+    "torque": 590,
+    "rarity": 91
+  },
+  {
+    "id": 12,
+    "name": "Lamborghini Countach LP5000",
+    "power": 455,
+    "top_speed": 295,
+    "acceleration": 4.8,
+    "torque": 500,
+    "rarity": 88
+  },
+  {
+    "id": 13,
+    "name": "Nissan Skyline GT-R R34 V-Spec",
+    "power": 330,
+    "top_speed": 250,
+    "acceleration": 4.9,
+    "torque": 392,
+    "rarity": 82
+  },
+  {
+    "id": 14,
+    "name": "Ford GT40 Mk II",
+    "power": 485,
+    "top_speed": 338,
+    "acceleration": 4.2,
+    "torque": 644,
+    "rarity": 99
+  },
+  {
+    "id": 15,
+    "name": "Lexus LFA",
+    "power": 552,
+    "top_speed": 325,
+    "acceleration": 3.7,
+    "torque": 480,
+    "rarity": 87
+  },
+  {
+    "id": 16,
+    "name": "Mercedes-Benz SLR McLaren",
+    "power": 617,
+    "top_speed": 334,
+    "acceleration": 3.8,
+    "torque": 780,
+    "rarity": 84
+  },
+  {
+    "id": 17,
+    "name": "Bugatti Veyron Super Sport",
+    "power": 1200,
+    "top_speed": 431,
+    "acceleration": 2.5,
+    "torque": 1500,
+    "rarity": 93
+  },
+  {
+    "id": 18,
+    "name": "SSC Tuatara",
+    "power": 1750,
+    "top_speed": 455,
+    "acceleration": 2.5,
+    "torque": 1735,
+    "rarity": 96
+  },
+  {
+    "id": 19,
+    "name": "Hennessey Venom F5",
+    "power": 1817,
+    "top_speed": 482,
+    "acceleration": 2.6,
+    "torque": 1617,
+    "rarity": 97
+  },
+  {
+    "id": 20,
+    "name": "Rimac Nevera",
+    "power": 1914,
+    "top_speed": 412,
+    "acceleration": 1.85,
+    "torque": 2360,
+    "rarity": 95
+  },
+  {
+    "id": 21,
+    "name": "Lotus Evija",
+    "power": 2000,
+    "top_speed": 320,
+    "acceleration": 2.9,
+    "torque": 1704,
+    "rarity": 94
+  },
+  {
+    "id": 22,
+    "name": "Aston Martin One-77",
+    "power": 750,
+    "top_speed": 354,
+    "acceleration": 3.7,
+    "torque": 750,
+    "rarity": 98
+  },
+  {
+    "id": 23,
+    "name": "Ferrari Enzo",
+    "power": 651,
+    "top_speed": 350,
+    "acceleration": 3.1,
+    "torque": 657,
+    "rarity": 97
+  },
+  {
+    "id": 24,
+    "name": "Porsche 959",
+    "power": 444,
+    "top_speed": 317,
+    "acceleration": 3.6,
+    "torque": 500,
+    "rarity": 99
+  },
+  {
+    "id": 25,
+    "name": "Jaguar XJ220",
+    "power": 542,
+    "top_speed": 342,
+    "acceleration": 3.6,
+    "torque": 644,
+    "rarity": 94
+  },
+  {
+    "id": 26,
+    "name": "Maserati MC12",
+    "power": 621,
+    "top_speed": 330,
+    "acceleration": 3.8,
+    "torque": 652,
+    "rarity": 98
+  },
+  {
+    "id": 27,
+    "name": "Dodge Viper ACR",
+    "power": 645,
+    "top_speed": 285,
+    "acceleration": 3.3,
+    "torque": 813,
+    "rarity": 80
+  },
+  {
+    "id": 28,
+    "name": "Chevrolet Corvette Z06 (C8)",
+    "power": 670,
+    "top_speed": 314,
+    "acceleration": 2.6,
+    "torque": 623,
+    "rarity": 75
+  },
+  {
+    "id": 29,
+    "name": "Ford GT (2017)",
+    "power": 647,
+    "top_speed": 348,
+    "acceleration": 2.8,
+    "torque": 746,
+    "rarity": 88
+  },
+  {
+    "id": 30,
+    "name": "Mercedes-AMG One",
+    "power": 1049,
+    "top_speed": 352,
+    "acceleration": 2.9,
+    "torque": 1400,
+    "rarity": 96
+  },
+  {
+    "id": 31,
+    "name": "McLaren Senna",
+    "power": 789,
+    "top_speed": 335,
+    "acceleration": 2.8,
+    "torque": 800,
+    "rarity": 92
+  },
+  {
+    "id": 32,
+    "name": "Toyota Supra A80",
+    "power": 320,
+    "top_speed": 250,
+    "acceleration": 4.6,
+    "torque": 427,
+    "rarity": 85
+  }
+]
