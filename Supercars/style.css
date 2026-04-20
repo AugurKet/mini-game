@@ -4,7 +4,7 @@
 body {
     background-color: #121212;
     /* 加入您刚才生成的仪表盘背景，并叠加深色半透明遮罩，保证文字清晰 */
-    background-image: linear-gradient(rgba(18, 18, 18, 0.75), rgba(18, 18, 18, 0.85)), url('images/dashboard-bg.jpg');
+    background-image: linear-gradient(rgba(18, 18, 18, 0.75), rgba(18, 18, 18, 0.85)), url('images/bg.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed; /* 背景固定，滚动时不跟着移动 */
