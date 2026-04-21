@@ -56,12 +56,19 @@ h1 {
     height: 320px;
     object-fit: cover;
     border-radius: 8px;
-    background-color: #333; 
-    border-bottom: 2px solid #ff3333; /* 图片底部分割线 */
+    background-color: #1a1a1a; /* 卡背深色底色 */
+    /* 用纯 CSS 画一个炫酷的赛车金属网格纹理作为盖牌背景 */
+    background-image: radial-gradient(#444 15%, transparent 16%), radial-gradient(#444 15%, transparent 16%);
+    background-size: 16px 16px;
+    background-position: 0 0, 8px 8px;
+    
+    border-bottom: 2px solid #ff3333;
+    display: block; /* 强制显示为块级元素，彻底解决高度塌陷 */
 }
 
 .hidden-card img {
-    filter: brightness(0.15) contrast(1.2); /* 电脑牌未开时变暗加对比度 */
+    filter: brightness(0.3) contrast(1.2); /* 变暗一点，更有盖牌神秘感 */
+    color: transparent; /* 隐藏掉自带的“未知车辆”文字 */
 }
 
 h3 {
