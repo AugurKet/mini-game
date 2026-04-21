@@ -199,3 +199,96 @@ button:hover {
         margin: 10px 0;
     }
 }
+
+/* =========================================
+   右上角音乐控制按钮
+   ========================================= */
+#music-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(26, 26, 26, 0.8);
+    border: 1px solid #ff3333;
+    border-left: none; /* 去掉仪表盘样式，回归普通按钮 */
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 14px;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+    text-align: center;
+}
+
+#music-toggle:hover {
+    background: #ff3333;
+    padding-left: 15px; /* 覆盖掉全局button的油门推背效果 */
+    box-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+}
+
+/* =========================================
+   游戏结算/胜利全屏画面
+   ========================================= */
+.hidden-screen {
+    opacity: 0;
+    pointer-events: none; /* 隐藏时不可点击 */
+    transition: opacity 1s ease-in-out;
+}
+
+#end-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95); /* 极暗的纯黑遮罩 */
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#end-screen.show {
+    opacity: 1;
+    pointer-events: auto; /* 显示后恢复点击 */
+}
+
+.glow-text {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite; /* 呼吸灯动画 */
+}
+
+/* 呼吸灯动画效果 */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#end-desc {
+    font-size: 1.5rem;
+    color: #ccc;
+    margin-bottom: 40px;
+    font-weight: bold;
+}
+
+.restart-btn {
+    font-size: 1.2rem;
+    padding: 15px 30px;
+    border-radius: 8px;
+    border: 2px solid #00e5ff; /* 电光蓝边框 */
+    background: transparent;
+    color: #00e5ff;
+    text-align: center;
+    border-left: 2px solid #00e5ff;
+    display: inline-block;
+}
+
+.restart-btn:hover {
+    background: #00e5ff;
+    color: #000;
+    box-shadow: 0 0 20px #00e5ff;
+    padding-left: 30px;
+}
