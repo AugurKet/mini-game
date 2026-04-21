@@ -14,8 +14,15 @@ fetch('cars.json')
 
 // 更新界面显示
 function updateUI() {
-    if (playerDeck.length === 0) { alert("你输了！你的车库被清空了。"); return; }
-    if (cpuDeck.length === 0) { alert("恭喜！你赢得了所有顶级超跑！"); return; }
+    // === 核心修改：触发全屏结局特效 ===
+    if (playerDeck.length === 0) { 
+        showEndScreen(false); // 传 false 代表输了
+        return; 
+    }
+    if (cpuDeck.length === 0) { 
+        showEndScreen(true);  // 传 true 代表赢了
+        return; 
+    }
 
     document.getElementById('player-count').innerText = playerDeck.length;
     document.getElementById('cpu-count').innerText = cpuDeck.length;
@@ -99,4 +106,43 @@ function playRound(attribute) {
     
     // 延迟 2.5 秒后进入下一回合
     setTimeout(updateUI, 2500);
+}
+
+// 游戏结算画面渲染
+function showEndScreen(isWin) {
+    let screen = document.getElementById('end-screen');
+    let title = document.getElementById('end-title');
+    let desc = document.getElementById('end-desc');
+
+    if (isWin) {
+        title.innerText = "🏆 终极车神 🏆";
+        title.style.color = "#ffd700"; // 金色
+        title.style.textShadow = "0 0 20px #ffd700, 0 0 40px #ff8c00";
+        desc.innerText = "引擎轰鸣，你已制霸全场，赢下了所有顶级超跑！";
+    } else {
+        title.innerText = "💥 破产清算 💥";
+        title.style.color = "#ff3333"; // 红色
+        title.style.textShadow = "0 0 20px #ff3333, 0 0 40px #aa0000";
+        desc.innerText = "你的车库已被洗劫一空，回驾校重新深造吧！";
+    }
+    
+    // 取消隐藏类的同时加入显示类，触发CSS淡入动画
+    screen.classList.remove('hidden-screen');
+    screen.classList.add('show');
+}
+
+// 音乐控制逻辑
+let isMusicPlaying = false;
+function toggleMusic() {
+    let bgMusic = document.getElementById('bg-music');
+    let btn = document.getElementById('music-toggle');
+    if (isMusicPlaying) {
+        bgMusic.pause();
+        btn.innerText = "🎵 播放音乐";
+        isMusicPlaying = false;
+    } else {
+        bgMusic.play();
+        btn.innerText = "🔊 暂停音乐";
+        isMusicPlaying = true;
+    }
 }
