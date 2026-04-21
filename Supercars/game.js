@@ -41,7 +41,8 @@ function updateUI() {
     document.getElementById('c-acceleration').innerText = "?";
     document.getElementById('c-torque').innerText = "?";
     document.getElementById('c-rarity').innerText = "?";
-    document.getElementById('cpu-img').src = ``;
+    // 使用 1x1 透明像素占位，防止高度塌陷
+    document.getElementById('cpu-img').src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     document.getElementById('cpu-card').classList.add('hidden-card');
     
     // 重置中间的提示文字
