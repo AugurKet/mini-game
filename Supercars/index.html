@@ -7,6 +7,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 背景音乐音频标签 -->
+    <audio id="bg-music" loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 右上角音乐控制按钮 -->
+    <button id="music-toggle" onclick="toggleMusic()">🎵 播放音乐</button>
+
+    <!-- 游戏结束/胜利的全屏遮罩层 (默认隐藏) -->
+    <div id="end-screen" class="hidden-screen">
+        <h1 id="end-title" class="glow-text">🏆 终极车神 🏆</h1>
+        <p id="end-desc">你已制霸全场，赢下了所有顶级超跑！</p>
+        <button class="restart-btn" onclick="location.reload()">再来一局 (RESTART)</button>
+    </div>
+    
     <h1>顶级超跑对决 (Top Trumps)</h1>
     <div class="game-board">
         <div class="player-area">
