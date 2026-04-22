@@ -130,47 +130,77 @@ button span, .stats p span {
 /* =========================================
    5. 手机端响应式 (核心大换血：启用 Grid 强行平分)
    ========================================= */
+/* =========================================
+   手机端响应式适配 (采用超跑成功逻辑 + 强行破除 240px 锁定)
+   ========================================= */
 @media screen and (max-width: 768px) {
-    body {
-        justify-content: flex-start; /* 手机上从顶部往下排，避免被切断 */
-        padding-top: 60px; /* 给右上角的音乐按钮留出空间 */
-    }
-
-    /* 魔法：把屏幕劈成两半 */
     .game-board {
-        display: grid;
-        grid-template-columns: 1fr 1fr; 
-        gap: 10px;
-        padding: 0 10px;
+        display: flex !important;
+        flex-wrap: wrap !important; 
+        gap: 10px !important; 
+        padding: 0 10px !important; 
+        justify-content: space-between !important; 
+        margin-top: 20px;
     }
 
-    /* 战况文字移到最上面，横跨两格 */
+    /* 战况播报移到最上面 */
     .center-area {
-        grid-column: 1 / span 2;
-        width: 100%;
-        order: -1; 
-        padding: 10px;
+        width: 100% !important;
+        order: -1 !important; 
+        margin-bottom: 15px;
     }
 
-    /* 玩家和电脑各占一格 */
+    #round-result {
+        margin-top: 0; 
+        font-size: 18px;
+    }
+
+    /* 左右区域严格平分 */
     .player-area, .cpu-area {
-        width: 100%;
+        width: 48% !important;
+        margin: 0 !important;
     }
 
-    /* 缩小卡牌内边距和图片高度 */
-    .card { padding: 6px; }
-    .card img { height: 130px; }
-    .card h3 { font-size: 16px; }
+    /* 核心覆盖：强制摧毁上面 240px 的锁定，跟随 48% 的区域宽度 */
+    #player-card, #cpu-card, .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important; 
+        padding: 8px !important; 
+    }
 
-    /* 缩小按钮和字体 */
-    .stats { gap: 4px; }
+    /* 核心覆盖：压制图片的固定高度 */
+    #player-img, #cpu-img, .card img {
+        height: 160px !important; 
+        width: 100% !important;
+        object-fit: cover !important;
+    }
+
+    /* 以下完全照搬你的超跑成功设定 */
+    .stats {
+        gap: 6px;
+    }
+
     .stats button, .stats p {
-        padding: 4px 6px;
-        font-size: 11px;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        font-size: 12px !important;
+        padding: 6px !important;
+        margin: 0;
+        box-sizing: border-box;
+        white-space: nowrap; /* 确保文字数字不换行 */
     }
-    button span, .stats p span { font-size: 12px; }
-    
-    h1 { font-size: 18px; margin: 0 0 5px 0; }
-    h2 { font-size: 12px; }
-    #round-result { font-size: 14px; }
+
+    h1 {
+        font-size: 20px;
+    }
+    h2 {
+        font-size: 14px;
+        margin-top: 0;
+    }
+    .card h3 {
+        font-size: 14px;
+        margin: 10px 0;
+    }
 }
