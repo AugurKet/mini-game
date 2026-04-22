@@ -173,18 +173,19 @@ button span, .stats p span {
         margin: 0 !important;
     }
 
-    /* 终极核武器：放大卡牌锁死的尺寸 */
-    #player-card, #cpu-card {
-    width: 320px !important; /* 原为 240px */
-    max-width: 320px !important;
+  /* 核心覆盖：必须是 100%，绝对不能是 320px！ */
+    #player-card, #cpu-card, .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important; 
+        padding: 8px !important; 
     }
 
-    #player-img, #cpu-img {
-    width: 100% !important;
-    height: 260px !important; /* 原为 190px，让图片更高更大 */
-    object-fit: cover !important;
-    object-position: top !important;
-    display: block !important;
+    /* 核心覆盖：图片高度压低，绝不能是 260px！ */
+    #player-img, #cpu-img, .card img {
+        height: 160px !important; 
+        width: 100% !important;
+        object-fit: cover !important;
     }
 
     /* 以下完全照搬你的超跑成功设定 */
