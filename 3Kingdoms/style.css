@@ -189,58 +189,80 @@ button span, .stats p span {
 /* =========================================
    手机端响应式适配 (强化版)
    ========================================= */
+/* =========================================
+   手机端响应式适配 - 终极并排优化版
+   ========================================= */
 @media screen and (max-width: 768px) {
+    /* 1. 核心容器：允许换行，但中间播报占整行 */
     .game-board {
+        display: flex;
         flex-wrap: wrap; 
-        gap: 8px; /* 缩小整体间距 */
-        padding: 0 5px; /* 减少边缘留白，给卡牌更多空间 */
         justify-content: space-between; 
+        gap: 5px; 
+        padding: 0 5px; 
     }
 
+    /* 2. 让对战提示文字在最上方横跨全屏 */
     .center-area {
         width: 100%;
         order: -1; 
         margin-bottom: 10px;
     }
+    .center-area h2 {
+        font-size: 14px;
+        padding: 5px;
+        border: 1px solid #b8860b;
+        background: rgba(0,0,0,0.5);
+    }
 
+    /* 3. 强制玩家和电脑区域左右平分 (48% 留一点空隙) */
     .player-area, .cpu-area {
-        width: 49%; /* 让卡牌尽可能占满左右空间 */
+        width: 48.5%; 
+        display: flex;
+        flex-direction: column;
     }
 
+    /* 4. 卡牌容器：取消固定宽度，强制填充父容器 */
     .card {
-        width: 100%;
+        width: 100% !important; /* 覆盖之前的 250px */
+        max-width: 100%;
+        padding: 5px;
         box-sizing: border-box; 
-        padding: 6px; /* 极小化卡牌内边距 */
     }
 
+    /* 5. 图片适配：高度调低，确保屏幕能放下按钮 */
     .card img {
-        height: 140px; /* 图片稍微改矮一点，把屏幕空间留给下方按钮 */
+        height: 120px; 
+        object-fit: cover;
     }
 
+    .card h3 {
+        font-size: 14px;
+        margin: 5px 0;
+    }
+
+    /* 6. 属性按钮：极简化处理 */
     .stats {
-        gap: 5px; /* 按钮上下之间的间距缩小 */
-        margin-top: 10px;
+        gap: 3px; 
     }
 
-    /* 这里的 flex 是魔法核心，确保文字和数字分居左右不会被切断 */
     .stats button, .stats p {
         display: flex;
-        justify-content: space-between; /* 属性名靠左，数值靠右 */
-        align-items: center;
-        width: 100%;
-        box-sizing: border-box;
-        font-size: 11px; /* 字体稍微缩小以适应手机 */
-        padding: 5px 8px; /* 上下内边距减小，左右保留 */
-        margin: 0;
-        min-height: 28px; /* 防止按钮被挤得太扁看不清 */
-        white-space: nowrap; /* 强制不换行 */
+        justify-content: space-between; /* 名字左，数字右 */
+        padding: 4px 6px;
+        font-size: 10px; /* 字体缩小以适应窄屏 */
+        min-height: 24px;
+        border-radius: 3px;
+        white-space: nowrap;
     }
 
+    /* 7. 顶部标题缩小 */
     h1 {
-        font-size: 18px;
+        font-size: 16px;
+        margin: 10px 0;
     }
-    h2 {
-        font-size: 12px;
-        margin-bottom: 5px;
+    .player-area h2, .cpu-area h2 {
+        font-size: 11px;
+        margin-bottom: 4px;
     }
 }
