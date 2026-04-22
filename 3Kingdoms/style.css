@@ -195,39 +195,43 @@ button span, .stats p span {
 /* =========================================
    手机端响应式适配 - 绝对并排版 (CSS Grid)
    ========================================= */
+/* =========================================
+   手机端响应式适配 - 绝对并排版 (CSS Grid 终极防御版)
+   ========================================= */
 @media screen and (max-width: 768px) {
-    /* 放弃 Flex，使用更强硬的 Grid 网格布局 */
+    /* 1. 强行把屏幕精准劈成两半 */
     .game-board {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 魔法：强行把屏幕精准劈成两半 */
-        gap: 8px; /* 两张牌中间的空隙 */
+        grid-template-columns: 1fr 1fr; 
+        gap: 8px; 
         padding: 5px;
     }
 
-    /* 战况播报框强行占满第一行的两列空间 */
+    /* 2. 战况播报框强行占满第一行的两列空间 */
     .center-area {
         grid-column: 1 / span 2; 
         margin-bottom: 5px;
     }
 
-    /* 玩家和电脑各占一列，宽度 100% 填满自己的半边屏幕 */
     .player-area, .cpu-area {
         width: 100%; 
         margin: 0;
     }
 
-    /* 卡牌强行自适应网格大小，不准溢出 */
-    .card {
+    /* 3. 【关键修复】专门压制“终极核武器”的 ID 优先级！ */
+    #player-card, #cpu-card, .card {
         width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box;
         padding: 6px;
         margin: 0;
     }
 
-    .card img {
-        height: 140px; 
-        width: 100%;
-        object-fit: cover;
+    /* 4. 【关键修复】同步压制图片的 ID 优先级！ */
+    #player-img, #cpu-img, .card img {
+        height: 140px !important; 
+        width: 100% !important;
+        object-fit: cover !important;
     }
 
     .stats {
@@ -235,7 +239,7 @@ button span, .stats p span {
         margin-top: 8px;
     }
 
-    /* 强行让文字和数字分居左右，绝不换行 */
+    /* 5. 强行让文字和数字分居左右，绝不换行 */
     .stats button, .stats p {
         display: flex;
         justify-content: space-between;
@@ -247,7 +251,7 @@ button span, .stats p span {
         margin: 0;
     }
 
-    /* 让消失的数字变成亮金色，确保一眼就能看到 */
+    /* 6. 让数字变成亮金色，确保一眼就能看到 */
     .stats button span, .stats p span {
         color: #ffd700; 
         font-weight: bold;
