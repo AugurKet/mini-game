@@ -98,7 +98,7 @@ h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
 
 /* 当卡牌处于“未翻开”状态时，强行替换为卡背图片 */
 .hidden-card img {
-    content: url('images/card-back.jpg'); /* 读取你刚生成的卡背 */
+    content: url('Images/card-back.jpg'); /* 读取你刚生成的卡背 */
     filter: none !important; /* 关掉之前的变黑滤镜 */
     box-shadow: 0 0 15px rgba(184, 134, 11, 0.5); /* 加上暗金色的微光 */
 }
