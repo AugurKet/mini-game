@@ -23,8 +23,14 @@ fetch('characters.json')
 
 // 更新界面显示
 function updateUI() {
-    if (playerDeck.length === 0) { alert("你输了！被对方赢光了卡牌。"); return; }
-    if (cpuDeck.length === 0) { alert("恭喜！你赢得了所有卡牌！"); return; }
+   if (playerDeck.length === 0) { 
+        showEndScreen("败走麦城...", "你的武将被对方赢光了，大业未成！", false);
+        return; 
+    }
+    if (cpuDeck.length === 0) { 
+        showEndScreen("天下无双！", "恭喜主公！你赢得了所有武将，一统三国！", true);
+        return; 
+    }
 
     document.getElementById('player-count').innerText = playerDeck.length;
     document.getElementById('cpu-count').innerText = cpuDeck.length;
@@ -105,4 +111,20 @@ function toggleBGM() {
         btn.innerText = "🔇 暂停战歌";
     }
     bgmPlaying = !bgmPlaying;
+}
+
+// 召唤游戏结束画面
+function showEndScreen(title, desc, isVictory) {
+    document.getElementById('end-title').innerText = title;
+    document.getElementById('end-desc').innerText = desc;
+    
+    // 如果输了，不仅文字变灰，呼吸灯光晕也会变成幽暗的蓝紫色
+    if(!isVictory) {
+        let titleEl = document.getElementById('end-title');
+        titleEl.style.color = "#aaaaaa";
+        titleEl.style.textShadow = "0 0 20px #0000ff, 0 0 40px #4b0082";
+    }
+    
+    // 呼出全屏遮罩
+    document.getElementById('end-screen').classList.add('show');
 }
