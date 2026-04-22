@@ -96,7 +96,17 @@ h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
     display: block; 
 }
 
-.hidden-card img { filter: brightness(0.1) grayscale(100%); }
+/* 当卡牌处于“未翻开”状态时，强行替换为卡背图片 */
+.hidden-card img {
+    content: url('images/card-back.jpg'); /* 读取你刚生成的卡背 */
+    filter: none !important; /* 关掉之前的变黑滤镜 */
+    box-shadow: 0 0 15px rgba(184, 134, 11, 0.5); /* 加上暗金色的微光 */
+}
+
+/* （可选）把对方隐藏状态下的名字和属性文字也一起隐藏，更具神秘感 */
+.hidden-card h3, .hidden-card .stats {
+    opacity: 0;
+}
 
 .card h3 {
     font-family: "KaiTi", "STKaiti", "楷体", serif;
@@ -204,4 +214,79 @@ button span, .stats p span {
         font-size: 14px;
         margin: 10px 0;
     }
+}
+
+/* =========================================
+   游戏结算/胜利全屏画面 (三国史诗版)
+   ========================================= */
+.hidden-screen {
+    opacity: 0;
+    pointer-events: none; 
+    transition: opacity 1s ease-in-out;
+}
+
+#end-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.90); /* 极暗遮罩 */
+    backdrop-filter: blur(10px); /* 强烈毛玻璃效果，虚化战场 */
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#end-screen.show {
+    opacity: 1;
+    pointer-events: auto; 
+}
+
+.glow-text {
+    font-family: "KaiTi", "STKaiti", "楷体", serif;
+    font-size: 5rem; /* 极大字体 */
+    margin-bottom: 20px;
+    color: #ffd700;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #b8860b; /* 默认：胜利的金红交织光晕 */
+    animation: pulse 2s infinite; 
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#end-desc {
+    font-size: 1.5rem;
+    color: #ccc;
+    margin-bottom: 40px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.restart-btn {
+    font-size: 1.5rem;
+    padding: 15px 40px;
+    border-radius: 8px;
+    border: 2px solid #b8860b;
+    background: linear-gradient(145deg, #3a2305, #1a1002);
+    color: #ffd700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.restart-btn:hover {
+    background: #b8860b;
+    color: #000;
+    box-shadow: 0 0 20px #b8860b;
+    transform: scale(1.1);
+}
+
+/* 手机端适配字体大小 */
+@media screen and (max-width: 768px) {
+    .glow-text { font-size: 3.5rem; }
+    #end-desc { font-size: 1.2rem; }
+    .restart-btn { font-size: 1.2rem; padding: 10px 30px;}
 }
