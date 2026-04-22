@@ -192,77 +192,69 @@ button span, .stats p span {
 /* =========================================
    手机端响应式适配 - 终极并排优化版
    ========================================= */
+/* =========================================
+   手机端响应式适配 - 绝对并排版 (CSS Grid)
+   ========================================= */
 @media screen and (max-width: 768px) {
-    /* 1. 核心容器：允许换行，但中间播报占整行 */
+    /* 放弃 Flex，使用更强硬的 Grid 网格布局 */
     .game-board {
-        display: flex;
-        flex-wrap: wrap; 
-        justify-content: space-between; 
-        gap: 5px; 
-        padding: 0 5px; 
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 魔法：强行把屏幕精准劈成两半 */
+        gap: 8px; /* 两张牌中间的空隙 */
+        padding: 5px;
     }
 
-    /* 2. 让对战提示文字在最上方横跨全屏 */
+    /* 战况播报框强行占满第一行的两列空间 */
     .center-area {
-        width: 100%;
-        order: -1; 
-        margin-bottom: 10px;
-    }
-    .center-area h2 {
-        font-size: 14px;
-        padding: 5px;
-        border: 1px solid #b8860b;
-        background: rgba(0,0,0,0.5);
+        grid-column: 1 / span 2; 
+        margin-bottom: 5px;
     }
 
-    /* 3. 强制玩家和电脑区域左右平分 (48% 留一点空隙) */
+    /* 玩家和电脑各占一列，宽度 100% 填满自己的半边屏幕 */
     .player-area, .cpu-area {
-        width: 48.5%; 
-        display: flex;
-        flex-direction: column;
+        width: 100%; 
+        margin: 0;
     }
 
-    /* 4. 卡牌容器：取消固定宽度，强制填充父容器 */
+    /* 卡牌强行自适应网格大小，不准溢出 */
     .card {
-        width: 100% !important; /* 覆盖之前的 250px */
-        max-width: 100%;
-        padding: 5px;
-        box-sizing: border-box; 
+        width: 100% !important;
+        box-sizing: border-box;
+        padding: 6px;
+        margin: 0;
     }
 
-    /* 5. 图片适配：高度调低，确保屏幕能放下按钮 */
     .card img {
-        height: 120px; 
+        height: 140px; 
+        width: 100%;
         object-fit: cover;
     }
 
-    .card h3 {
-        font-size: 14px;
-        margin: 5px 0;
-    }
-
-    /* 6. 属性按钮：极简化处理 */
     .stats {
-        gap: 3px; 
+        gap: 4px;
+        margin-top: 8px;
     }
 
+    /* 强行让文字和数字分居左右，绝不换行 */
     .stats button, .stats p {
         display: flex;
-        justify-content: space-between; /* 名字左，数字右 */
-        padding: 4px 6px;
-        font-size: 10px; /* 字体缩小以适应窄屏 */
-        min-height: 24px;
-        border-radius: 3px;
-        white-space: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 8px;
+        font-size: 11px;
+        margin: 0;
     }
 
-    /* 7. 顶部标题缩小 */
-    h1 {
-        font-size: 16px;
-        margin: 10px 0;
+    /* 让消失的数字变成亮金色，确保一眼就能看到 */
+    .stats button span, .stats p span {
+        color: #ffd700; 
+        font-weight: bold;
     }
-    .player-area h2, .cpu-area h2 {
-        font-size: 11px;
-        margin-bottom: 4px;
+
+    h2 {
+        font-size: 12px;
+        margin: 5px 0;
     }
 }
