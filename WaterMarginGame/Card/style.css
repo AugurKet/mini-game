@@ -1,126 +1,244 @@
-let playerDeck = [];
-let cpuDeck = [];
-
-// 初始化游戏：读取 JSON 数据
-fetch('characters.json')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("HTTP 错误，状态码: " + response.status);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("成功读取数据：", data);
-        let shuffledDeck = data.sort(() => Math.random() - 0.5); // 随机洗牌
-        playerDeck = shuffledDeck.slice(0, 16); // 分给玩家16张
-        cpuDeck = shuffledDeck.slice(16, 32);   // 分给电脑16张
-        updateUI(); // 开始更新界面
-    })
-    .catch(error => {
-        console.error("读取 JSON 失败:", error);
-        document.getElementById('round-result').innerText = "数据加载失败，请按 F12 检查！";
-    });
-
-// 更新界面显示
-function updateUI() {
-    if (playerDeck.length === 0) {
-        showEndScreen("发配沧州...", "你的好汉全被抓了，大聚义失败！", false);
-        return;
-    }
-    if (cpuDeck.length === 0) {
-        showEndScreen("聚义梁山！", "恭喜哥哥！你集齐了所有好汉，替天行道！", true);
-        return;
-    }
-
-    document.getElementById('player-count').innerText = playerDeck.length;
-    document.getElementById('cpu-count').innerText = cpuDeck.length;
-
-    let pCard = playerDeck[0];
-    document.getElementById('player-name').innerText = pCard.name;
-    document.getElementById('p-strength').innerText = pCard.strength;
-    document.getElementById('p-dexterity').innerText = pCard.dexterity;
-    document.getElementById('p-wisdom').innerText = pCard.wisdom;
-    document.getElementById('p-integrity').innerText = pCard.integrity;
-    document.getElementById('p-mercy').innerText = pCard.mercy;
-    document.getElementById('p-courage').innerText = pCard.courage;
-    document.getElementById('player-img').src = `images/${pCard.image}`;
-
-    // 电脑牌先重置为问号
-    document.getElementById('cpu-name').innerText = "???";
-    document.getElementById('c-strength').innerText = "?";
-    document.getElementById('c-dexterity').innerText = "?";
-    document.getElementById('c-wisdom').innerText = "?";
-    document.getElementById('c-integrity').innerText = "?";
-    document.getElementById('c-mercy').innerText = "?";
-    document.getElementById('c-courage').innerText = "?";
-    document.getElementById('cpu-img').src = ``;
-    document.getElementById('cpu-card').classList.add('hidden-card');
+* {
+    box-sizing: border-box;
+}
+body {
+    /* 建议换一张水浒/梁山相关的背景图，比如 liangshan.jpg */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('images/liangshan.jpg') no-repeat center center;
+    background-size: cover;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 10px 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-x: hidden;
 }
 
-// 玩家点击属性进行对决
-function playRound(attribute) {
-    let pCard = playerDeck[0];
-    let cCard = cpuDeck[0];
+h1 { margin: 10px 0; font-size: 24px; color: #fce69d; text-shadow: 0 2px 4px #000; }
+h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
 
-    // 展示电脑真实数据
-    document.getElementById('cpu-name').innerText = cCard.name;
-    document.getElementById('c-strength').innerText = cCard.strength;
-    document.getElementById('c-dexterity').innerText = cCard.dexterity;
-    document.getElementById('c-wisdom').innerText = cCard.wisdom;
-    document.getElementById('c-integrity').innerText = cCard.integrity;
-    document.getElementById('c-mercy').innerText = cCard.mercy;
-    document.getElementById('c-courage').innerText = cCard.courage;
-    document.getElementById('cpu-img').src = `images/${cCard.image}`;
-    document.getElementById('cpu-card').classList.remove('hidden-card');
-
-    let pValue = pCard[attribute];
-    let cValue = cCard[attribute];
-    let resultText = "";
-
-    if (pValue > cValue) {
-        resultText = `你用 ${pValue} 点战胜了对手的 ${cValue} 点！好汉归你！`;
-        playerDeck.push(playerDeck.shift(), cpuDeck.shift());
-    } else if (pValue < cValue) {
-        resultText = `你的 ${pValue} 点不敌对手的 ${cValue} 点！好汉被抓！`;
-        cpuDeck.push(cpuDeck.shift(), playerDeck.shift());
-    } else {
-        resultText = "不分伯仲！各自退回阵中。";
-        playerDeck.push(playerDeck.shift());
-        cpuDeck.push(cpuDeck.shift());
-    }
-
-    document.getElementById('round-result').innerText = resultText;
-
-    // 延迟 2.5 秒后进入下一回合
-    setTimeout(updateUI, 2500);
+#bgm-btn {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #b8860b;
+    color: #fce69d;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 14px;
 }
 
-// ====== 音乐控制逻辑 ======
-let bgmPlaying = false;
-function toggleBGM() {
-    let bgm = document.getElementById('bgm');
-    let btn = document.getElementById('bgm-btn');
-
-    if (bgmPlaying) {
-        bgm.pause();
-        btn.innerText = " 🎵  播放好汉歌";
-    } else {
-        bgm.play();
-        btn.innerText = " 🔇  暂停好汉歌";
-    }
-    bgmPlaying = !bgmPlaying;
+.game-board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-// 召唤游戏结束画面
-function showEndScreen(title, desc, isVictory) {
-    document.getElementById('end-title').innerText = title;
-    document.getElementById('end-desc').innerText = desc;
+.player-area, .cpu-area {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+}
 
-    if(!isVictory) {
-        let titleEl = document.getElementById('end-title');
-        titleEl.style.color = "#aaaaaa";
-        titleEl.style.textShadow = "0 0 20px #0000ff, 0 0 40px #4b0082";
+.center-area {
+    width: 300px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #b8860b;
+    border-radius: 8px;
+    padding: 20px 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+
+#round-result {
+    font-size: 18px; color: #ffd700; margin: 0; line-height: 1.5;
+}
+
+.card {
+    background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+    border: 2px solid #b8860b;
+    border-radius: 10px;
+    width: 320px;
+    padding: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(184, 134, 11, 0.15);
+    box-sizing: border-box;
+}
+
+.card img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 5px;
+    border: 1px solid #000;
+    display: block;
+}
+
+.hidden-card img {
+    content: url('images/card-back.jpg');
+    filter: none !important;
+    box-shadow: 0 0 15px rgba(184, 134, 11, 0.5);
+}
+
+.hidden-card h3, .hidden-card .stats {
+    opacity: 0;
+}
+
+.card h3 {
+    font-family: "KaiTi", "STKaiti", "楷体", serif;
+    font-size: 22px; color: #fce69d;
+    margin: 8px 0; border-bottom: 1px dashed #555; padding-bottom: 5px;
+}
+
+/* 因为有6个属性，稍微缩小一点间距防止卡牌过长 */
+.stats { display: flex; flex-direction: column; gap: 5px; }
+
+.stats button, .stats p {
+    background: linear-gradient(to right, #333333, #222222);
+    color: #ccc; border: 1px solid #8b6508;
+    padding: 5px 12px; border-radius: 4px;
+    font-size: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 0; width: 100%;
+}
+
+.stats button { cursor: pointer; transition: all 0.2s ease; }
+.stats button:hover {
+    background: linear-gradient(to right, #b8860b, #daa520);
+    color: #000; transform: translateX(4px);
+}
+
+button span, .stats p span {
+    font-weight: bold; font-size: 16px; color: #ffd700;
+}
+
+.stats button:hover span { color: #000; }
+
+@media screen and (max-width: 768px) {
+    .game-board {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        padding: 0 10px !important;
+        justify-content: space-between !important;
+        margin-top: 20px;
     }
+    .center-area {
+        width: 100% !important;
+        order: -1 !important;
+        margin-bottom: 15px;
+    }
+    #round-result {
+        margin-top: 0;
+        font-size: 18px;
+    }
+    .player-area, .cpu-area {
+        width: 48% !important;
+        margin: 0 !important;
+    }
+    #player-card, #cpu-card, .card {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 8px !important;
+    }
+    #player-img, #cpu-img, .card img {
+        height: 140px !important; /* 手机端稍微压低一点图片给6个属性腾空间 */
+        width: 100% !important;
+        object-fit: cover !important;
+    }
+    .stats { gap: 4px; }
+    .stats button, .stats p {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        font-size: 12px !important;
+        padding: 4px !important;
+        margin: 0;
+        box-sizing: border-box;
+        white-space: nowrap;
+    }
+    h1 { font-size: 20px; }
+    h2 { font-size: 14px; margin-top: 0; }
+    .card h3 { font-size: 14px; margin: 8px 0; }
+}
 
-    document.getElementById('end-screen').classList.add('show');
+.hidden-screen {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease-in-out;
+}
+
+#end-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.90);
+    backdrop-filter: blur(10px);
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#end-screen.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.glow-text {
+    font-family: "KaiTi", "STKaiti", "楷体", serif;
+    font-size: 5rem;
+    margin-bottom: 20px;
+    color: #ffd700;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #b8860b;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#end-desc {
+    font-size: 1.5rem;
+    color: #ccc;
+    margin-bottom: 40px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.restart-btn {
+    font-size: 1.5rem;
+    padding: 15px 40px;
+    border-radius: 8px;
+    border: 2px solid #b8860b;
+    background: linear-gradient(145deg, #3a2305, #1a1002);
+    color: #ffd700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.restart-btn:hover {
+    background: #b8860b;
+    color: #000;
+    box-shadow: 0 0 20px #b8860b;
+    transform: scale(1.1);
+}
+
+@media screen and (max-width: 768px) {
+    .glow-text { font-size: 3.5rem; }
+    #end-desc { font-size: 1.2rem; }
+    .restart-btn { font-size: 1.2rem; padding: 10px 30px;}
 }
