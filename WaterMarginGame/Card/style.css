@@ -75,9 +75,9 @@ h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
 
 .card img {
     width: 100%;
-    height: 280px; /* 【修改这里】把高度从 190px 加高到 280px，让画面变修长 */
-    object-fit: cover;
-    object-position: center; /* 【修改这里】从 top 改成 center，这样就能精准显示人脸正中间 */
+    height: 280px; 
+    object-fit: contain; /* 【核心修改】从 cover 改成 contain，保证图片完整显示 */
+    background-color: #000; /* 【核心修改】给图片加上纯黑的底色 */
     border-radius: 5px;
     border: 1px solid #000;
     display: block;
@@ -152,10 +152,10 @@ button span, .stats p span {
         padding: 8px !important;
     }
     #player-img, #cpu-img, .card img {
-        height: 200px !important; /* 【修改这里】手机端也适当拉高一点，原来是 140px */
+        height: 200px !important; 
         width: 100% !important;
-        object-fit: cover !important;
-        object-position: center !important; /* 【修改这里】同样保持居中对齐 */
+        object-fit: contain !important; /* 【核心修改】手机端也保证完整显示 */
+        background-color: #000 !important; /* 【核心修改】手机端也加上纯黑底色 */
     }
     .stats { gap: 4px; }
     .stats button, .stats p {
