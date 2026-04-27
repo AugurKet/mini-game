@@ -43,7 +43,7 @@ function updateUI() {
     document.getElementById('p-integrity').innerText = pCard.integrity;
     document.getElementById('p-mercy').innerText = pCard.mercy;
     document.getElementById('p-courage').innerText = pCard.courage;
-    document.getElementById('player-img').src = `Images/${pCard.image}`;
+    document.getElementById('player-img').src = `images/${pCard.image}`;
 
     // 电脑牌先重置为问号
     document.getElementById('cpu-name').innerText = "???";
@@ -70,7 +70,7 @@ function playRound(attribute) {
     document.getElementById('c-integrity').innerText = cCard.integrity;
     document.getElementById('c-mercy').innerText = cCard.mercy;
     document.getElementById('c-courage').innerText = cCard.courage;
-    document.getElementById('cpu-img').src = `Images/${cCard.image}`;
+    document.getElementById('cpu-img').src = `images/${cCard.image}`;
     document.getElementById('cpu-card').classList.remove('hidden-card');
 
     let pValue = pCard[attribute];
