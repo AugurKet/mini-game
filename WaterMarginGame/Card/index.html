@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水浒卡牌对决</title>
+    <link rel="stylesheet" href="style.css?v=100">
+</head>
+<body>
+    <button id="bgm-btn" onclick="toggleBGM()"> 🎵  播放好汉歌</button>
+    <audio id="bgm" src="Images/bgm.mp3" loop></audio>
+
+    <h1>水浒卡牌对决 (Top Trumps)</h1>
+    <div class="game-board">
+        <div class="player-area">
+            <h2>你的好汉 (<span id="player-count">16</span>)</h2>
+            <div id="player-card" class="card">
+                <img id="player-img" src="" alt="好汉画像">
+                <h3 id="player-name">好汉名</h3>
+                <div class="stats">
+                    <button onclick="playRound('strength')">力量: <span id="p-strength"></span></button>
+                    <button onclick="playRound('dexterity')">敏捷: <span id="p-dexterity"></span></button>
+                    <button onclick="playRound('wisdom')">智慧: <span id="p-wisdom"></span></button>
+                    <button onclick="playRound('integrity')">忠义: <span id="p-integrity"></span></button>
+                    <button onclick="playRound('mercy')">仁慈: <span id="p-mercy"></span></button>
+                    <button onclick="playRound('courage')">勇气: <span id="p-courage"></span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-area">
+            <h2 id="round-result">点击你的属性开始比拼！</h2>
+        </div>
+
+        <div class="cpu-area">
+            <h2>对手好汉 (<span id="cpu-count">16</span>)</h2>
+            <div id="cpu-card" class="card hidden-card">
+                <img id="cpu-img" src="" alt="未知">
+                <h3 id="cpu-name">???</h3>
+                <div class="stats">
+                    <p>力量: <span id="c-strength">?</span></p>
+                    <p>敏捷: <span id="c-dexterity">?</span></p>
+                    <p>智慧: <span id="c-wisdom">?</span></p>
+                    <p>忠义: <span id="c-integrity">?</span></p>
+                    <p>仁慈: <span id="c-mercy">?</span></p>
+                    <p>勇气: <span id="c-courage">?</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="hidden-screen">
+        <h1 id="end-title" class="glow-text">聚义梁山！</h1>
+        <p id="end-desc">你集齐了所有好汉，替天行道！</p>
+        <button class="restart-btn" onclick="location.reload()">再战一局</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
