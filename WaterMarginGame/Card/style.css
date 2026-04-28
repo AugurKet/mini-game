@@ -3,7 +3,7 @@
 }
 body {
     /* 建议换一张水浒/梁山相关的背景图，比如 liangshan.jpg */
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('images/liangshan.jpg') no-repeat center center;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('images/liangshan.png') no-repeat center center;
     background-size: cover;
     color: #fff;
     font-family: 'Arial', sans-serif;
@@ -84,7 +84,7 @@ h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
 }
 
 .hidden-card img {
-    content: url('images/card-back.jpg');
+    content: url('images/card-back.png');
     filter: none !important;
     box-shadow: 0 0 15px rgba(184, 134, 11, 0.5);
 }
