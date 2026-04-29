@@ -2,113 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Vision Test — Color Difference (Odd Tile)</title>
+<title>Vision Test — Color Difference</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
   :root{
-    --bg:#0f172a;
-    --panel:#020617;
-    --ink:#e5e7eb;
-    --muted:#94a3b8;
-    --line:#1f2a44;
-    --btn:#2563eb;
-    --btn2:#334155;
+    --bg:#0f172a; --panel:#020617; --ink:#e5e7eb;
+    --muted:#94a3b8; --line:#1f2a44; --btn:#2563eb; --btn2:#334155;
   }
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family: Arial, Helvetica, sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family: Arial, sans-serif; display:flex;
+    justify-content:center; align-items:center; min-height:100vh;
   }
   .wrap{
-    width:100%;
-    max-width:420px;
-    background:var(--panel);
-    border-radius:14px;
-    padding:16px;
-    box-shadow:0 15px 40px rgba(0,0,0,.6);
-    margin: 10px;
+    width:100%; max-width:420px; background:var(--panel);
+    border-radius:14px; padding:16px; box-shadow:0 15px 40px rgba(0,0,0,.6);
   }
-  h2{ margin:6px 0 10px; text-align:center; letter-spacing: -0.5px; }
-  .sub{
-    margin:-2px 0 12px;
-    text-align:center;
-    color:var(--muted);
-    font-size:13px;
-    line-height:1.45;
-  }
-  .top{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:8px;
-    margin-bottom:10px;
-  }
-  .pill{
-    background:#0b1224;
-    border:1px solid var(--line);
-    padding:8px 10px;
-    border-radius:12px;
-    font-size:13px;
-    text-align: center;
-  }
-  .pill b{ color:#fff; }
-  .controls{
-    display:flex;
-    gap:10px;
-    margin:10px 0 8px;
-  }
-  button, select{
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:#0b1224;
-    color:var(--ink);
-    padding:10px;
-    font-size:14px;
-    transition: all 0.2s;
-  }
-  button{
-    cursor:pointer;
-    border:none;
-    background:var(--btn);
-    flex:1;
-    font-weight: bold;
-  }
-  button:hover { filter: brightness(1.1); }
-  button:active { transform: scale(0.96); }
-  button.secondary{ background:var(--btn2); }
-  select{ flex:1; cursor: pointer; }
-
-  .grid{
-    display:grid;
-    gap:8px;
-    margin:10px 0;
-    touch-action: manipulation;
-  }
+  h2{ margin:6px 0; text-align:center; }
+  .sub{ margin-bottom:12px; text-align:center; color:var(--muted); font-size:13px; }
   
-  .tile{
-    border-radius:10px;
-    cursor:pointer;
-    border:1px solid rgba(255,255,255,.06);
-    transition: transform .1s ease;
-  }
+  .top{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:10px; }
+  .pill{ background:#0b1224; border:1px solid var(--line); padding:8px; border-radius:12px; font-size:13px; text-align: center; }
+  
+  .controls{ display:flex; gap:10px; margin-bottom:10px; }
+  button, select{ border-radius:10px; border:1px solid var(--line); background:#0b1224; color:var(--ink); padding:10px; font-size:14px; }
+  button{ cursor:pointer; background:var(--btn); border:none; flex:1; font-weight:bold; }
+  button.secondary{ background:var(--btn2); }
+  select{ flex:1; }
 
-  /* Correct Answer Highlight */
+  .grid{ display:grid; gap:6px; margin:10px 0; touch-action: manipulation; }
+  .tile{ border-radius:8px; cursor:pointer; border:1px solid rgba(255,255,255,.05); position: relative; }
+
+  /* CRITICAL FIXES FOR THE OUTLINE */
   .tile.answer {
-    outline: 3px solid #22c55e;
-    outline-offset: 2px;
-    z-index: 10;
-    animation: pulse 0.6s infinite alternate;
+    outline: 4px solid #22c55e !important;
+    outline-offset: -4px !important; /* Forces outline INSIDE the tile */
+    z-index: 100;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
   }
 
-  /* Wrong Answer Highlight */
   .tile.wrong {
-    outline: 3px solid #ef4444;
-    outline-offset: 2px;
-    z-index: 10;
+    outline: 4px solid #ef4444 !important;
+    outline-offset: -4px !important; /* Forces outline INSIDE the tile */
+    z-index: 100;
     animation: shake 0.25s ease-in-out;
   }
 
@@ -118,55 +54,22 @@
     75% { transform: translateX(4px); }
   }
 
-  @keyframes pulse {
-    from { opacity: 1; transform: scale(1); }
-    to { opacity: 0.8; transform: scale(0.95); }
-  }
-
-  .panel {
-    background: rgba(255,255,255,0.03);
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 12px;
-  }
-  .panel h3{ margin:0 0 8px; font-size:15px; }
-  .panel p, .panel li{
-    color:var(--muted);
-    font-size:13px;
-    line-height:1.45;
-  }
-  .row{
-    display:flex;
-    gap:6px;
-    flex-wrap:wrap;
-    margin-bottom:10px;
-  }
-  .tag{
-    border:1px solid var(--line);
-    border-radius:999px;
-    padding:4px 10px;
-    font-size:11px;
-    font-weight: bold;
-    color:var(--muted);
-    background:#071022;
-  }
-  .good{ color:#bbf7d0; border-color:#14532d; background:#052013; }
-  .mid{ color:#fde68a; border-color:#7c5f00; background:#221a05; }
-  .low{ color:#fecaca; border-color:#7f1d1d; background:#220707; }
+  .panel { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px; margin-top: 10px; }
+  .tag{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:4px 10px; font-size:11px; margin: 2px; background:#071022; }
   .hidden{ display:none; }
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <h2>Vision Test: Odd Tile</h2>
-  <div class="sub">Tap the tile that is slightly different in color.</div>
+  <h2>Vision Test</h2>
+  <div class="sub">Find the tile with the different color.</div>
 
   <div class="top">
     <div class="pill">Level: <b id="level">1</b></div>
     <div class="pill">Best: <b id="best">—</b></div>
-    <div class="pill">Time: <b id="time">0.0</b>s</div>
     <div class="pill">Mistakes: <b id="mistakes">0</b></div>
+    <div class="pill">Time: <b id="time">0.0</b>s</div>
   </div>
 
   <div class="controls">
@@ -175,24 +78,15 @@
       <option value="hard">Hard</option>
       <option value="training">Training</option>
     </select>
-    <button id="start">Start Game</button>
+    <button id="start">Start</button>
     <button class="secondary" id="reset">Reset</button>
   </div>
 
   <div id="grid" class="grid"></div>
 
-  <div class="panel">
-    <h3>Your Result</h3>
-    <div id="resultTags" class="row hidden"></div>
-    <p id="resultText">Press <b>Start</b> to begin.</p>
-  </div>
-
-  <div class="panel">
-    <h3>Tips</h3>
-    <ul>
-      <li>Set brightness to 80%+.</li>
-      <li>Disable "Blue Light Filter" or "Night Shift".</li>
-    </ul>
+  <div class="panel" id="resultPanel">
+    <div id="resultTags"></div>
+    <p id="resultText" style="font-size:13px; color:var(--muted);">Press Start to begin.</p>
   </div>
 </div>
 
@@ -204,41 +98,14 @@
   const bestEl = document.getElementById("best");
   const modeEl = document.getElementById("mode");
   const startBtn = document.getElementById("start");
-  const resetBtn = document.getElementById("reset");
   const resultText = document.getElementById("resultText");
   const resultTags = document.getElementById("resultTags");
 
-  let level = 1;
-  let mistakes = 0;
-  let started = false;
-  let canClick = true; 
-  let startTs = 0;
-  let rafId = 0;
-  let answerIndex = 0;
+  let level = 1, mistakes = 0, started = false, canClick = true, startTs = 0, rafId = 0, answerIndex = 0;
 
-  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
-  function rgb(c){ return `rgb(${c.r},${c.g},${c.b})`; }
-  function bestKey(){ return `vision_best_${modeEl.value}`; }
-  
   function updateBestUI(){
-    const v = localStorage.getItem(bestKey()) || "0";
-    bestEl.textContent = v !== "0" ? v : "—";
-  }
-
-  function randomBaseColor(){
-    const r = Math.floor(60 + Math.random()*130);
-    const g = Math.floor(60 + Math.random()*130);
-    const b = Math.floor(60 + Math.random()*130);
-    return {r,g,b};
-  }
-
-  function makeDiffColor(base, delta){
-    const channel = Math.floor(Math.random()*3);
-    const sign = Math.random() < 0.5 ? -1 : 1;
-    const c = {...base};
-    const key = ['r','g','b'][channel];
-    c[key] = clamp(c[key] + (sign * delta), 0, 255);
-    return c;
+    const b = localStorage.getItem("vision_best_" + modeEl.value) || "—";
+    bestEl.textContent = b;
   }
 
   function tick(){
@@ -247,98 +114,67 @@
     rafId = requestAnimationFrame(tick);
   }
 
-  function difficultyForLevel(lvl){
-    const mode = modeEl.value;
-    const size = clamp(2 + Math.floor(lvl/3), 2, 8);
-    let delta = (mode === "training") ? (60 - lvl*1.5) : (mode === "hard" ? (40 - lvl*2.5) : (50 - lvl*2));
-    delta = clamp(delta, 4, 70);
-    return { size, total: size*size, delta, tileH: clamp(65 - size*3, 35, 65) };
-  }
-
   function buildBoard(){
-    const { size, total, delta, tileH } = difficultyForLevel(level);
+    const mode = modeEl.value;
+    const size = Math.min(2 + Math.floor(level/3), 8);
+    let delta = (mode === "training") ? (60 - level*1.5) : (mode === "hard" ? (40 - level*2.5) : (50 - level*2));
+    delta = Math.max(delta, 4);
+
     gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     gridEl.innerHTML = "";
     
-    const base = randomBaseColor();
-    const diff = makeDiffColor(base, delta);
-    answerIndex = Math.floor(Math.random() * total);
+    const r = Math.floor(60 + Math.random()*130), g = Math.floor(60 + Math.random()*130), b = Math.floor(60 + Math.random()*130);
+    const base = `rgb(${r},${g},${b})`;
+    
+    const ch = Math.floor(Math.random()*3);
+    const diffColor = [r,g,b];
+    diffColor[ch] = Math.min(255, Math.max(0, diffColor[ch] + (Math.random() < 0.5 ? -delta : delta)));
+    const diff = `rgb(${diffColor[0]},${diffColor[1]},${diffColor[2]})`;
 
-    for (let i=0; i<total; i++){
+    answerIndex = Math.floor(Math.random() * (size * size));
+
+    for (let i=0; i < (size*size); i++){
       const tile = document.createElement("div");
       tile.className = "tile";
-      tile.style.height = tileH + "px";
-      tile.style.background = (i === answerIndex) ? rgb(diff) : rgb(base);
+      tile.style.height = (size > 6 ? "40px" : "60px");
+      tile.style.background = (i === answerIndex) ? diff : base;
       tile.onclick = () => onPick(i, tile);
       gridEl.appendChild(tile);
     }
     levelEl.textContent = level;
   }
 
-  function onPick(i, clickedEl){
+  function onPick(i, el){
     if (!started || !canClick) return;
-
     if (i === answerIndex){
-      level++;
-      buildBoard();
+      level++; buildBoard();
     } else {
-      // MISTAKE LOGIC
-      canClick = false; 
-      mistakes++;
-      mistakesEl.textContent = mistakes;
+      canClick = false; started = false;
+      mistakes++; mistakesEl.textContent = mistakes;
       
-      // Show red on clicked, green on target
-      clickedEl.classList.add('wrong');
-      const tiles = gridEl.getElementsByClassName('tile');
-      tiles[answerIndex].classList.add('answer');
+      // SHOW OUTLINES
+      el.classList.add('wrong');
+      gridEl.children[answerIndex].classList.add('answer');
 
-      // End game after a short delay
       setTimeout(() => {
-        stopRun();
-        finish();
-      }, 800);
+        const best = parseInt(localStorage.getItem("vision_best_" + modeEl.value) || 0);
+        if (level > best) localStorage.setItem("vision_best_" + modeEl.value, level);
+        updateBestUI();
+        resultText.textContent = `Game Over. You reached Level ${level}. The correct tile is highlighted in green.`;
+      }, 500);
     }
   }
 
-  function finish(){
-    const t = parseFloat(timeEl.textContent);
-    const best = parseInt(localStorage.getItem(bestKey()) || "0");
-    if (level > best) localStorage.setItem(bestKey(), level);
-    
-    updateBestUI();
-    resultTags.classList.remove("hidden");
-    resultTags.innerHTML = `<span class="tag">Level ${level}</span><span class="tag">Time ${t}s</span>`;
-    resultText.textContent = `Game Over! You reached level ${level}. High brightness helps with subtle differences.`;
-  }
-
-  function stopRun(){
-    started = false;
-    cancelAnimationFrame(rafId);
-  }
-
   startBtn.onclick = () => {
-    level = 1; mistakes = 0; canClick = true;
-    resultTags.classList.add("hidden");
-    resultText.textContent = "Find the different tile!";
+    level = 1; mistakes = 0; canClick = true; started = true;
     startTs = performance.now();
-    started = true;
-    tick();
-    buildBoard();
+    tick(); buildBoard();
+    resultText.textContent = "Find the odd tile!";
   };
 
-  resetBtn.onclick = () => {
-    stopRun();
-    level = 1; mistakes = 0; canClick = true;
-    timeEl.textContent = "0.0";
-    levelEl.textContent = "1";
-    mistakesEl.textContent = "0";
-    buildBoard();
-    resultText.textContent = "Press Start to begin.";
-  };
-
+  document.getElementById("reset").onclick = () => location.reload();
   modeEl.onchange = updateBestUI;
-  updateBestUI();
-  buildBoard();
+  updateBestUI(); buildBoard();
 </script>
 </body>
 </html>
