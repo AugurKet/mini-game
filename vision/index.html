@@ -95,15 +95,14 @@
 
 /* correct answer = green outline */
 .tile.answer{
-  border:2px solid #22c55e;
-  box-shadow: 0 0 0 1px rgba(34,197,94,.25);
+  outline: 3px solid #22c55e;
+  outline-offset: 2px;
 }
 
-/* wrong selected tile = red tint */
 .tile.wrong{
-  border:2px solid #ef4444;
-  box-shadow: 0 0 0 1px rgba(239,68,68,.20);
-  filter: brightness(0.92);
+  outline: 3px solid #ef4444;
+  outline-offset: 2px;
+  transform: scale(0.98);
 }
   .panel h3{
     margin:0 0 8px;
