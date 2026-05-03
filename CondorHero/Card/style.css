@@ -1,0 +1,130 @@
+/* =========================================
+   1. 全局与基础设置
+========================================= */
+* { box-sizing: border-box; }
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('Images/shediao-bg.jpg') no-repeat center center;
+    background-size: cover;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0; padding: 10px 0;
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    overflow-x: hidden;
+}
+h1 { margin: 10px 0; font-size: 24px; color: #fce69d; text-shadow: 0 2px 4px #000; }
+h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
+
+#bgm-btn {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(0, 0, 0, 0.6); border: 1px solid #b8860b;
+    color: #fce69d; border-radius: 20px; padding: 8px 16px;
+    cursor: pointer; z-index: 100; font-size: 14px;
+}
+
+/* =========================================
+   2. 电脑端布局
+========================================= */
+.game-board {
+    display: flex; justify-content: center; align-items: center;
+    gap: 30px; width: 100%; max-width: 900px; margin: 0 auto;
+}
+.player-area, .cpu-area { width: 320px; display: flex; flex-direction: column; }
+
+.center-area {
+    width: 300px; background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #b8860b; border-radius: 8px;
+    padding: 20px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+#round-result { font-size: 18px; color: #ffd700; margin: 0; line-height: 1.5; }
+
+/* =========================================
+   3. 卡牌通用外观
+========================================= */
+.card {
+    background: linear-gradient(145deg, #2c2c2c, #1a1a1a);
+    border: 2px solid #b8860b; border-radius: 10px; width: 320px;
+    padding: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(184, 134, 11, 0.15);
+}
+.card img {
+    width: 100%; height: 180px; object-fit: cover; object-position: top;
+    border-radius: 5px; border: 1px solid #000; display: block;
+}
+.hidden-card img {
+    content: url('Images/shediao-card-back.jpg');
+    box-shadow: 0 0 15px rgba(184, 134, 11, 0.5);
+}
+.hidden-card h3, .hidden-card .stats { opacity: 0; }
+.card h3 {
+    font-family: "KaiTi", "STKaiti", "楷体", serif; font-size: 22px; color: #fce69d;
+    margin: 8px 0; border-bottom: 1px dashed #555; padding-bottom: 5px;
+}
+
+/* =========================================
+   4. 按钮属性区 (微调间距以容纳6个属性)
+========================================= */
+.stats { display: flex; flex-direction: column; gap: 5px; }
+.stats button, .stats p {
+    background: linear-gradient(to right, #333333, #222222);
+    color: #ccc; border: 1px solid #8b6508;
+    padding: 5px 12px; border-radius: 4px; font-size: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 0; width: 100%;
+}
+.stats button { cursor: pointer; transition: all 0.2s ease; }
+.stats button:hover {
+    background: linear-gradient(to right, #b8860b, #daa520);
+    color: #000; transform: translateX(4px);
+}
+button span, .stats p span { font-weight: bold; font-size: 15px; color: #ffd700; }
+.stats button:hover span { color: #000; }
+
+/* =========================================
+   5. 手机端响应式
+========================================= */
+@media screen and (max-width: 768px) {
+    .game-board {
+        display: flex !important; flex-wrap: wrap !important;
+        gap: 10px !important; padding: 0 10px !important;
+        justify-content: space-between !important; margin-top: 20px;
+    }
+    .center-area { width: 100% !important; order: -1 !important; margin-bottom: 15px; }
+    .player-area, .cpu-area { width: 48% !important; margin: 0 !important; }
+    #player-card, #cpu-card, .card { width: 100% !important; padding: 8px !important; }
+    #player-img, #cpu-img, .card img { height: 140px !important; }
+    .stats { gap: 4px; }
+    .stats button, .stats p { font-size: 11px !important; padding: 5px !important; white-space: nowrap; }
+    h1 { font-size: 20px; } h2 { font-size: 14px; margin-top: 0; }
+    .card h3 { font-size: 14px; margin: 8px 0; }
+}
+
+/* =========================================
+   6. 游戏结算全屏画面
+========================================= */
+.hidden-screen { opacity: 0; pointer-events: none; transition: opacity 1s ease-in-out; }
+#end-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.90); backdrop-filter: blur(10px); z-index: 999;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+#end-screen.show { opacity: 1; pointer-events: auto; }
+.glow-text {
+    font-family: "KaiTi", "STKaiti", "楷体", serif; font-size: 5rem; margin-bottom: 20px; color: #ffd700;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #b8860b; animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+#end-desc { font-size: 1.5rem; color: #ccc; margin-bottom: 40px; font-weight: bold; letter-spacing: 2px; }
+.restart-btn {
+    font-size: 1.5rem; padding: 15px 40px; border-radius: 8px; border: 2px solid #b8860b;
+    background: linear-gradient(145deg, #3a2305, #1a1002); color: #ffd700; cursor: pointer; transition: all 0.3s ease;
+}
+.restart-btn:hover { background: #b8860b; color: #000; box-shadow: 0 0 20px #b8860b; transform: scale(1.1); }
+@media screen and (max-width: 768px) {
+    .glow-text { font-size: 3.5rem; } #end-desc { font-size: 1.2rem; } .restart-btn { font-size: 1.2rem; padding: 10px 30px;}
+}
