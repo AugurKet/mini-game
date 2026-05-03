@@ -41,7 +41,7 @@ function updateUI() {
     document.getElementById('p-chivalry').innerText = pCard.chivalry;
     document.getElementById('p-loyalty').innerText = pCard.loyalty;
     document.getElementById('p-charisma').innerText = pCard.charisma;
-    document.getElementById('player-img').src = `Images/${pCard.image}`;
+    document.getElementById('player-img').src = `images/${pCard.image}`;
 
     // 电脑牌先重置为问号
     document.getElementById('cpu-name').innerText = "???";
@@ -68,7 +68,7 @@ function playRound(attribute) {
     document.getElementById('c-chivalry').innerText = cCard.chivalry;
     document.getElementById('c-loyalty').innerText = cCard.loyalty;
     document.getElementById('c-charisma').innerText = cCard.charisma;
-    document.getElementById('cpu-img').src = `Images/${cCard.image}`;
+    document.getElementById('cpu-img').src = `images/${cCard.image}`;
     document.getElementById('cpu-card').classList.remove('hidden-card');
 
     let pValue = pCard[attribute];
