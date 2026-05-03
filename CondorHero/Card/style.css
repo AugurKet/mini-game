@@ -53,7 +53,7 @@ h2 { font-size: 18px; margin: 5px 0 10px 0; color: #ccc; }
     border-radius: 5px; border: 1px solid #000; display: block;
 }
 .hidden-card img {
-    content: url('images/shediao-card-back.jpg');
+    content: url('images/shediao-card-back.png');
     box-shadow: 0 0 15px rgba(184, 134, 11, 0.5);
 }
 .hidden-card h3, .hidden-card .stats { opacity: 0; }
