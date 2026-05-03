@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>射雕英雄传卡牌对决</title>
+    <link rel="stylesheet" href="style.css?v=100">
+</head>
+<body>
+    <button id="bgm-btn" onclick="toggleBGM()"> 🎵  播放战歌</button>
+    <audio id="bgm" src="Images/bgm.mp3" loop></audio>
+
+    <h1>射雕英雄传 (Top Trumps)</h1>
+    
+    <div class="game-board">
+        <div class="player-area">
+            <h2>你的卡牌 (<span id="player-count">16</span>)</h2>
+            <div id="player-card" class="card">
+                <img id="player-img" src="" alt="侠客画像">
+                <h3 id="player-name">侠客名</h3>
+                <div class="stats">
+                    <button onclick="playRound('martial')">武功: <span id="p-martial"></span></button>
+                    <button onclick="playRound('comprehension')">悟性: <span id="p-comprehension"></span></button>
+                    <button onclick="playRound('constitution')">体质: <span id="p-constitution"></span></button>
+                    <button onclick="playRound('chivalry')">侠义: <span id="p-chivalry"></span></button>
+                    <button onclick="playRound('loyalty')">情义: <span id="p-loyalty"></span></button>
+                    <button onclick="playRound('charisma')">魅力: <span id="p-charisma"></span></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-area">
+            <h2 id="round-result">点击你的属性开始华山论剑！</h2>
+        </div>
+
+        <div class="cpu-area">
+            <h2>对手卡牌 (<span id="cpu-count">16</span>)</h2>
+            <div id="cpu-card" class="card hidden-card">
+                <img id="cpu-img" src="" alt="未知">
+                <h3 id="cpu-name">???</h3>
+                <div class="stats">
+                    <p>武功: <span id="c-martial">?</span></p>
+                    <p>悟性: <span id="c-comprehension">?</span></p>
+                    <p>体质: <span id="c-constitution">?</span></p>
+                    <p>侠义: <span id="c-chivalry">?</span></p>
+                    <p>情义: <span id="c-loyalty">?</span></p>
+                    <p>魅力: <span id="c-charisma">?</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="hidden-screen">
+        <h1 id="end-title" class="glow-text">天下第一！</h1>
+        <p id="end-desc">你赢得了所有侠客，威震江湖！</p>
+        <button class="restart-btn" onclick="location.reload()">再战江湖</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
