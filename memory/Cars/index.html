@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Car Brand Memory Game</title>
+    <style>
+        :root {
+            --primary-bg: #f4f4f9;
+            --text-color: #333;
+            --card-back: #2c3e50;
+            --card-border: #ddd;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        h1 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .stats {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Game Board */
+        .game-board {
+            display: grid;
+            gap: 8px;
+            width: 100%;
+            max-width: 600px; /* Adjusts for larger screens */
+            margin: 0 auto;
+        }
+
+        /* Card Styling */
+        .card {
+            aspect-ratio: 1 / 1;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card.empty {
+            visibility: hidden; /* For odd grids like 3x3 and 5x5 */
+            cursor: default;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card.flip .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-back {
+            background-color: var(--card-back);
+            background-image: radial-gradient(#4a6b8c 1px, transparent 1px);
+            background-size: 10px 10px;
+            border: 2px solid #1a252f;
+        }
+
+        .card-back::after {
+            content: '?';
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .card-front {
+            background-color: white;
+            transform: rotateY(180deg);
+            border: 2px solid var(--card-border);
+            padding: 5px;
+        }
+
+        .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Responsive scaling */
+        @media (max-width: 400px) {
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .card-back::after {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Car Brand Memory Game</h1>
+
+    <div class="controls">
+        <div>
+            <label for="gridSize">Grid Size: </label>
+            <select id="gridSize">
+                <option value="3">3 x 3</option>
+                <option value="4" selected>4 x 4</option>
+                <option value="5">5 x 5</option>
+                <option value="6">6 x 6</option>
+            </select>
+        </div>
+        <div class="stats">Clicks: <span id="clickCount">0</span></div>
+        <button id="restartBtn">Restart Game</button>
+    </div>
+
+    <div class="game-board" id="gameBoard"></div>
+
+    <script>
+        // Array matching the exact filenames provided
+        const allImages = [
+            'suzuki.jpeg', 'volkswagen.jpeg', 'kia.png', 'landrover.jpeg',
+            'lexus.jpeg', 'lincoln.png', 'volvo.jpeg', 'chevolet.jpeg',
+            'alfaromeo.jpeg', 'chery.jpeg', 'nissan.png', 'mazda.png',
+            'tesla.png', 'bugatti.png', 'marserati.png', 'astonmartin.png',
+            'bentley.png', 'audi.png', 'bmw.jpeg', 'porsche.jpeg',
+            'lamborghini.png', 'mitsubishi.png', 'rollsroyce.png', 'mustang.png',
+            'ferrari.png', 'ford.jpeg', 'proton.jpeg', 'hyndai.jpeg', 
+            'honday.jpeg', 'toyota.jpg', 'byd.png', 'mercedes.png'
+        ];
+
+        const gameBoard = document.getElementById('gameBoard');
+        const clickCountDisplay = document.getElementById('clickCount');
+        const gridSizeSelect = document.getElementById('gridSize');
+        const restartBtn = document.getElementById('restartBtn');
+
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let clickCount = 0;
+        let matchedPairs = 0;
+        let totalPairs = 0;
+
+        function initGame() {
+            // Reset variables
+            gameBoard.innerHTML = '';
+            clickCount = 0;
+            matchedPairs = 0;
+            clickCountDisplay.textContent = clickCount;
+            hasFlippedCard = false;
+            lockBoard = false;
+            firstCard = null;
+            secondCard = null;
+
+            const size = parseInt(gridSizeSelect.value);
+            const totalCells = size * size;
+            const isOdd = totalCells % 2 !== 0;
+            
+            // If odd (like 3x3=9 or 5x5=25), we need 1 empty cell in the middle
+            totalPairs = Math.floor(totalCells / 2);
+
+            // Setup CSS Grid dynamically based on selection
+            gameBoard.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+            // Shuffle and pick necessary images
+            const shuffledImages = [...allImages].sort(() => 0.5 - Math.random());
+            const selectedImages = shuffledImages.slice(0, totalPairs);
+
+            // Create pairs and shuffle them
+            let cardDeck = [...selectedImages, ...selectedImages];
+            cardDeck.sort(() => 0.5 - Math.random());
+
+            // If the grid is odd, insert an 'empty' placeholder exactly in the middle
+            if (isOdd) {
+                const centerIndex = Math.floor(totalCells / 2);
+                cardDeck.splice(centerIndex, 0, 'empty');
+            }
+
+            // Generate HTML for cards
+            cardDeck.forEach(image => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                
+                if (image === 'empty') {
+                    card.classList.add('empty');
+                } else {
+                    card.dataset.name = image;
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-back"></div>
+                            <div class="card-front">
+                                <img src="${image}" alt="Car Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' fill=\\'none\\' viewBox=\\'0 0 24 24\\' stroke=\\'%23ccc\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'2\\' d=\\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\\' /></svg>'">
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', flipCard);
+                }
+                gameBoard.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.add('flip');
+
+            // Only increment click count on a valid flip
+            if (!hasFlippedCard || firstCard) {
+                clickCount++;
+                clickCountDisplay.textContent = clickCount;
+            }
+
+            if (!hasFlippedCard) {
+                // First click
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            // Second click
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+
+            if (isMatch) {
+                disableCards();
+                matchedPairs++;
+                if (matchedPairs === totalPairs) {
+                    setTimeout(() => {
+                        alert(`Congratulations! You won in ${clickCount} clicks.`);
+                    }, 500);
+                }
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+            resetBoard();
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove('flip');
+                secondCard.classList.remove('flip');
+                resetBoard();
+            }, 1000); // 1 second delay before flipping back
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        // Event Listeners
+        gridSizeSelect.addEventListener('change', initGame);
+        restartBtn.addEventListener('click', initGame);
+
+        // Initialize game on load
+        window.onload = initGame;
+    </script>
+</body>
+</html>
