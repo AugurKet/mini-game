@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水浒点将 - 记忆翻牌试炼</title>
+    <style>
+        body { font-family: "Microsoft YaHei", sans-serif; background-color: #f4ecd8; text-align: center; padding: 20px; color: #333; margin: 0; background-image: url('images/bg.jpg'); background-size: cover; background-position: center; background-attachment: fixed; }
+        
+        .container { 
+            background: rgba(255, 250, 240, 0.95); 
+            border: 4px solid #5c3a21; 
+            border-radius: 10px; 
+            width: 95%; 
+            margin: 0 auto; 
+            padding: 20px; 
+            box-shadow: 5px 5px 20px rgba(0,0,0,0.6); 
+            transition: max-width 0.3s ease;
+        }
+        
+        h1 { color: #8b0000; font-size: 24px; margin-bottom: 10px; border-bottom: 2px dashed #b89f7d; padding-bottom: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        
+        .stats-bar { font-size: 16px; font-weight: bold; background: rgba(139, 0, 0, 0.9); color: #fff; padding: 8px 15px; border-radius: 5px; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        .controls { margin-bottom: 20px; }
+        .controls select { padding: 8px 15px; font-size: 16px; border-radius: 5px; border: 2px solid #5c3a21; background: #e8dcc4; font-weight: bold; cursor: pointer; }
+        
+        .memory-board {
+            display: grid;
+            gap: 10px; 
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 100%;
+            aspect-ratio: 1 / 1.25;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+
+        .card.flipped, .card.matched { 
+            transform: rotateY(180deg); 
+        }
+
+        .card.matched { 
+            cursor: default; 
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 184, 0, 0.8); 
+        }
+        .card.matched .card-front {
+            border-color: #ffb800; 
+            filter: brightness(0.85); 
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            border: 3px solid #5c3a21;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .card-back {
+            background-color: #8b0000;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.15) 10px, rgba(0,0,0,0.15) 20px);
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .card-front {
+            background: #e8dcc4;
+            transform: rotateY(180deg);
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+
+        .card-front img {
+            width: 100%;
+            height: 72%;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .card-front .hero-name {
+            background: #4a3320;
+            color: #fff;
+            width: 100%;
+            height: 28%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            border-top: 2px solid #5c3a21;
+        }
+
+        /* 替天行道特殊牌样式 */
+        .wildcard-front {
+            background: linear-gradient(135deg, #ffd700, #ff8c00) !important;
+            color: #8b0000;
+            font-size: 24px;
+            font-weight: bold;
+            writing-mode: vertical-rl;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        .btn { background-color: #2e8b57; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); margin-left: 10px; }
+        .btn:hover { background-color: #1e6b40; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="container" id="gameContainer">
+    <h1>校场试炼：盲牌点将</h1>
+    
+    <div class="controls">
+        <select id="gridSize" onchange="initGame()">
+            <option value="3">3x3 (9张) - 新兵</option>
+            <option value="4" selected>4x4 (16张) - 教头</option>
+            <option value="5">5x5 (25张) - 统领</option>
+            <option value="6">6x6 (36张) - 寨主</option>
+        </select>
+        <button class="btn" onclick="initGame()">重新排兵布阵</button>
+    </div>
+
+    <div class="stats-bar">
+        已点将：<span id="matchCount">0</span> / <span id="totalMatches">8</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
+        点击：<span id="clickCount">0</span> &nbsp;&nbsp;|&nbsp;&nbsp;
+        步数：<span id="moveCount">0</span>
+    </div>
+    
+    <div class="memory-board" id="memoryBoard"></div>
+</div>
+
+<audio id="sndMatch" src="correct.mp3"></audio>
+
+<script>
+    const allHeroes = [
+        { id: "h1", name: "宋江", img: "songjiang.jpg" }, { id: "h2", name: "卢俊义", img: "lujunyi.jpg" },
+        { id: "h3", name: "吴用", img: "wuyong.jpg" }, { id: "h4", name: "公孙胜", img: "gongsunsheng.jpg" },
+        { id: "h5", name: "关胜", img: "guansheng.jpg" }, { id: "h6", name: "林冲", img: "linchong.jpg" },
+        { id: "h7", name: "秦明", img: "qinming.jpg" }, { id: "h8", name: "呼延灼", img: "huyanzhuo.jpg" },
+        { id: "h9", name: "花荣", img: "huarong.jpg" }, { id: "h10", name: "柴进", img: "chaijin.jpg" },
+        { id: "h11", name: "李应", img: "liying.jpg" }, { id: "h12", name: "朱仝", img: "zhutong.jpg" },
+        { id: "h13", name: "鲁智深", img: "luzhishen.jpg" }, { id: "h14", name: "武松", img: "wusong.jpg" },
+        { id: "h15", name: "董平", img: "dongping.jpg" }, { id: "h16", name: "张清", img: "zhangqing.jpg" },
+        { id: "h17", name: "杨志", img: "yangzhi.jpg" }, { id: "h18", name: "徐宁", img: "xuning.jpg" },
+        { id: "h19", name: "索超", img: "suochao.jpg" }, { id: "h20", name: "戴宗", img: "daizong.jpg" },
+        { id: "h21", name: "刘唐", img: "liutang.jpg" }, { id: "h22", name: "李逵", img: "likui.jpg" },
+        { id: "h23", name: "史进", img: "shijin.jpg" }, { id: "h24", name: "穆弘", img: "muhong.jpg" },
+        { id: "h25", name: "雷横", img: "leiheng.jpg" }, { id: "h26", name: "李俊", img: "lijun.jpg" },
+        { id: "h27", name: "阮小二", img: "ruanxiaoer.jpg" }, { id: "h28", name: "张横", img: "zhangheng.jpg" },
+        { id: "h29", name: "阮小五", img: "ruanxiaowu.jpg" }, { id: "h30", name: "张顺", img: "zhangshun.jpg" },
+        { id: "h31", name: "阮小七", img: "ruanxiaoqi.jpg" }, { id: "h32", name: "杨雄", img: "yangxiong.jpg" },
+        { id: "h33", name: "石秀", img: "shixiu.jpg" }, { id: "h34", name: "解珍", img: "xiezhen.jpg" },
+        { id: "h35", name: "解宝", img: "xiebao.jpg" }, { id: "h36", name: "燕青", img: "yanqing.jpg" }
+    ];
+
+    let cardsArray = [];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    
+    let matchCount = 0;
+    let clickCount = 0; // 新增点击计数器
+    let moveCount = 0;
+    let targetMatches = 0; // 动态过关目标
+
+    const board = document.getElementById("memoryBoard");
+    const container = document.getElementById("gameContainer");
+    const sndMatch = document.getElementById("sndMatch");
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function initGame() {
+        const size = parseInt(document.getElementById("gridSize").value);
+        const totalCards = size * size;
+        const pairsNeeded = Math.floor(totalCards / 2);
+        const hasWildcard = totalCards % 2 !== 0; // 检查是否是奇数卡牌（3x3或5x5）
+
+        // 设置目标匹配数（对数 + 可能存在的单张幸运牌）
+        targetMatches = pairsNeeded + (hasWildcard ? 1 : 0);
+        
+        // 动态调整布局参数
+        board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        // 根据不同尺寸调整容器最大宽度，确保视觉舒适
+        const widthMap = { 3: "350px", 4: "460px", 5: "550px", 6: "650px" };
+        container.style.maxWidth = widthMap[size];
+
+        // 重置状态
+        board.innerHTML = '';
+        matchCount = 0;
+        clickCount = 0;
+        moveCount = 0;
+        firstCard = null;
+        secondCard = null;
+        lockBoard = false;
+        updateStats();
+        document.getElementById("totalMatches").innerText = targetMatches;
+
+        // 生成卡牌数组
+        let shuffledHeroes = shuffle([...allHeroes]);
+        let selectedHeroes = shuffledHeroes.slice(0, pairsNeeded);
+        cardsArray = [...selectedHeroes, ...selectedHeroes];
+
+        // 如果是奇数，加入一张特殊的“替天行道”幸运牌
+        if (hasWildcard) {
+            cardsArray.push({ id: "wild", name: "替天行道", isWildcard: true });
+        }
+
+        cardsArray = shuffle(cardsArray);
+
+        // 渲染卡牌
+        cardsArray.forEach((hero) => {
+            const cardElement = document.createElement('div');
+            cardElement.classList.add('card');
+            cardElement.dataset.name = hero.name;
+
+            if (hero.isWildcard) {
+                cardElement.dataset.wildcard = "true";
+                cardElement.innerHTML = `
+                    <div class="card-face card-front wildcard-front">
+                        替天行道
+                    </div>
+                    <div class="card-face card-back">水浒</div>
+                `;
+            } else {
+                cardElement.innerHTML = `
+                    <div class="card-face card-front">
+                        <img src="images/${hero.img}" alt="${hero.name}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' fill=\\'none\\' viewBox=\\'0 0 24 24\\' stroke=\\'%23999\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'2\\' d=\\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\\'/></svg>'">
+                        <div class="hero-name">${hero.name}</div>
+                    </div>
+                    <div class="card-face card-back">水浒</div>
+                `;
+            }
+
+            cardElement.addEventListener('click', flipCard);
+            board.appendChild(cardElement);
+        });
+    }
+
+    function flipCard() {
+        if (lockBoard) return;
+        if (this === firstCard) return;
+
+        // 每点击一张牌，计数器+1
+        clickCount++; 
+        updateStats();
+
+        this.classList.add('flipped');
+
+        // 处理特殊的奇数幸运牌
+        if (this.dataset.wildcard === "true") {
+            this.removeEventListener('click', flipCard);
+            this.classList.add('matched');
+            matchCount++;
+            updateStats();
+            playMatchSound();
+            checkWin();
+            return;
+        }
+
+        if (!firstCard) {
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        moveCount++; // 翻开两张算作一步
+        updateStats();
+        checkForMatch();
+    }
+
+    function checkForMatch() {
+        let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+
+        if (isMatch) {
+            disableCards();
+            matchCount++;
+            updateStats();
+            playMatchSound();
+            checkWin();
+        } else {
+            unflipCards();
+        }
+    }
+
+    function playMatchSound() {
+        sndMatch.currentTime = 0;
+        sndMatch.play().catch(e => {}); 
+    }
+
+    function checkWin() {
+        if (matchCount === targetMatches) {
+            setTimeout(() => alert(`好记性！大当家，校场试炼完美通关！\n本次总共点击了 ${clickCount} 次。`), 500);
+        }
+    }
+
+    function disableCards() {
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        
+        firstCard.classList.add('matched');
+        secondCard.classList.add('matched');
+        
+        resetBoard();
+    }
+
+    function unflipCards() {
+        lockBoard = true;
+        setTimeout(() => {
+            firstCard.classList.remove('flipped');
+            secondCard.classList.remove('flipped');
+            resetBoard();
+        }, 800); 
+    }
+
+    function resetBoard() {
+        [firstCard, secondCard, lockBoard] = [null, null, false];
+    }
+
+    function updateStats() {
+        document.getElementById("matchCount").innerText = matchCount;
+        document.getElementById("clickCount").innerText = clickCount;
+        document.getElementById("moveCount").innerText = moveCount;
+    }
+
+    initGame();
+</script>
+
+</body>
+</html>
