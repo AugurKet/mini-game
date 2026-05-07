@@ -15,16 +15,22 @@
     align-items:center;
     min-height:100vh;
   }
+  
+  /* Responsive Game Container */
   .game{
-    width:360px;
+    width: 92%;
+    max-width: 380px; /* Mobile Default */
     background:#020617;
     border-radius:14px;
-    padding:14px;
+    padding:16px;
     box-shadow:0 15px 40px rgba(0,0,0,.6);
+    transition: max-width 0.3s ease, padding 0.3s ease;
   }
+  
   h2{
     text-align:center;
     margin:8px 0 10px;
+    transition: font-size 0.3s ease;
   }
   .top{
     display:flex;
@@ -43,14 +49,16 @@
     display:flex;
     gap:8px;
     align-items:center;
+    flex: 1;
+    justify-content: center;
   }
   .pill b{ color:#fff; }
   
-  /* Group the dropdowns together */
   .dropdowns {
     display: flex;
     gap: 8px;
     width: 100%;
+    margin-bottom: 10px;
   }
   
   select, button{
@@ -58,22 +66,33 @@
     border:1px solid #1f2a44;
     background:#0b1224;
     color:#e5e7eb;
-    padding:8px 10px;
+    padding:10px;
     font-size:14px;
-    flex: 1; /* Makes dropdowns stretch evenly */
+    flex: 1;
   }
   button{
     cursor:pointer;
     background:#2563eb;
     border:none;
+    font-weight: bold;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background:#1d4ed8;
   }
   button.secondary{
     background:#334155;
   }
+  button.secondary:hover {
+    background:#475569;
+  }
+  
   .grid{
     display:grid;
     gap:10px;
   }
+  
+  /* Card Styling - Heights are now controlled by CSS */
   .card{
     background:#334155;
     border-radius:10px;
@@ -83,10 +102,16 @@
     align-items:center;
     font-size:28px;
     user-select:none;
-    height:70px;
+    height:70px; /* Mobile Default */
     transition:transform .15s, background .15s;
-    overflow: hidden; /* Keeps images inside borders */
+    overflow: hidden;
   }
+  
+  /* Slightly smaller cards on mobile for Hard mode */
+  .grid.hard-layout .card {
+    height: 60px;
+  }
+  
   .card.flipped{
     background:#22c55e;
     transform:scale(1.03);
@@ -96,26 +121,104 @@
     cursor:default;
     opacity:.95;
   }
-  /* Style for image-based cards */
   .card img {
     max-width: 80%;
     max-height: 80%;
     object-fit: contain;
-    pointer-events: none; /* Prevents user from accidentally dragging the image */
+    pointer-events: none;
   }
+  
   .footer{
     margin-top:10px;
     display:flex;
     gap:10px;
   }
-  .footer button{
-    width:50%;
-  }
   .hint{
     font-size:12px;
     opacity:.8;
-    margin-top:8px;
+    margin-top:10px;
     text-align:center;
+  }
+
+  /* --- DESKTOP / WIDER SCREEN MEDIA QUERY --- */
+  @media (min-width: 600px) {
+    .game {
+      max-width: 650px; /* Expands on PC */
+      padding: 24px;
+    }
+    h2 {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .pill {
+      font-size: 15px;
+      padding: 10px 14px;
+    }
+    select, button {
+      font-size: 16px;
+      padding: 12px;
+    }
+    .card {
+      height: 110px; /* Much taller cards on PC */
+      font-size: 48px; /* Bigger emojis */
+      border-radius: 14px;
+    }
+    .grid.hard-layout .card {
+      height: 90px; /* Keep Hard mode cards fitting cleanly */
+    }
+    .grid {
+      gap: 14px; /* Slightly wider gaps on PC */
+    }
+  }
+
+  /* --- CUSTOM MODAL STYLES --- */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    background: #020617;
+    border: 1px solid #1f2a44;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    width: 85%;
+    max-width: 340px;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  }
+  .modal-overlay.active .modal {
+    transform: scale(1);
+  }
+  .modal h3 {
+    margin: 0 0 15px;
+    font-size: 26px;
+  }
+  .modal .stats {
+    background: #0b1224;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #cbd5e1;
+  }
+  .modal .stats b {
+    color: #fff;
   }
 </style>
 </head>
@@ -130,7 +233,7 @@
     <div class="pill">Best: <b id="best">—</b></div>
   </div>
  
-  <div class="dropdowns" style="margin-bottom: 10px;">
+  <div class="dropdowns">
     <select id="themeSelect" title="Theme">
       <option value="emojis" selected>Emojis</option>
       <option value="cars">Cars Brand</option>
@@ -156,10 +259,17 @@
   <div class="hint">Tip: Click Start, then match all pairs with fewer moves and faster time.</div>
 </div>
 
+<div id="victoryModal" class="modal-overlay">
+  <div class="modal">
+    <h3 id="modalTitle">🎉 New Best!</h3>
+    <div class="stats" id="modalStats">
+      </div>
+    <button id="modalBtn">Play Again</button>
+  </div>
+</div>
+
 <script>
   // ---------- Config ----------
-  
-  // New Theme Configuration Object
   const THEMES = {
     emojis: {
       type: 'text',
@@ -168,29 +278,21 @@
     cars: {
       type: 'image',
       folder: 'themes/cars/',
-      // Update these filenames to match the actual images in your folder. 
-      // Minimum 12 items needed for Hard mode!
       items: ['bmw.png', 'alfaromeo.png', 'toyota.png', 'tesla.png', 'honda.png', 'nissan.png', 'mercedes.png', 'minicooper.png', 'porsche.png', 'ferrari.png', 'lamborghini.png', 'renault.png']
     },
     classicHKcomedians: {
       type: 'image',
       folder: 'themes/classicHKcomedians/',
-      // Update these filenames to match the actual images in your folder. 
-      // Minimum 12 items needed for Hard mode!
       items: ['caochali.jpeg', 'chenbaixiang.jpg', 'fengsuifan.jpeg', 'hongjinbao.jpeg', 'lounanguang.jpeg', 'qinxianglin.jpeg', 'shenjianxun.jpeg', 'wangjing.jpeg', 'wuyaohan.jpeg', 'zengzhiwei.jpeg', 'zhengdansui.jpg', 'zhourunfa.jpg']
     },
     Classics: {
       type: 'image',
       folder: 'themes/Classics/',
-      // Update these filenames to match the actual images in your folder. 
-      // Minimum 12 items needed for Hard mode!
       items: ['3floppydisk.jpg', '5floppydisk.jpeg', 'crtmonitor.jpeg', 'gameboy.jpeg', 'icq.png', 'msdosprompt.png', 'netscapenavigator.jpeg', 'vhstape.webp', 'walkman.jpeg', 'winamp.png', 'windows95.jpeg', 'zipdisk.jpeg']
     },
     water_margin: {
       type: 'image',
       folder: 'themes/water_margin/',
-      // Update these filenames to match the actual images in your folder.
-      // Minimum 12 items needed for Hard mode!
       items: ['songjiang.png', 'linchong.png', 'wusong.png', 'luzhishen.png', 'likui.png', 'chaogai.png', 'wuyong.png', 'gongsunsheng.png', 'huarong.png', 'chaijin.png', 'lujunyi.png', 'yanqing.png']
     }
   };
@@ -210,6 +312,12 @@
   const themeEl = document.getElementById("themeSelect");
   const startBtn = document.getElementById("start");
   const restartBtn = document.getElementById("restart");
+  
+  // Modal Elements
+  const victoryModal = document.getElementById("victoryModal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalStats = document.getElementById("modalStats");
+  const modalBtn = document.getElementById("modalBtn");
 
   let first = null;
   let lock = false;
@@ -256,8 +364,12 @@
 
   function setGridLayout(cols, rows) {
     grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-    const cardHeight = (cols >= 6) ? 62 : 70;
-    grid.querySelectorAll(".card").forEach(c => c.style.height = cardHeight + "px");
+    // Add a helper class to CSS for Hard mode spacing instead of hardcoded JS pixels
+    if(cols >= 6) {
+      grid.classList.add('hard-layout');
+    } else {
+      grid.classList.remove('hard-layout');
+    }
   }
 
   function stopTimer() {
@@ -290,18 +402,16 @@
     const diff = difficultyEl.value;
     const themeKey = themeEl.value;
     const currentTheme = THEMES[themeKey];
-    
+   
     const { cols, rows } = DIFF[diff];
     const totalCards = cols * rows;
     const pairs = totalCards / 2;
 
-    // Check if the theme has enough items for the difficulty
     if (currentTheme.items.length < pairs) {
         alert(`Error: You need at least ${pairs} items in the "${themeKey}" theme for this difficulty.`);
         return;
     }
 
-    // Pick enough unique items based on selected theme
     const picks = shuffle(currentTheme.items).slice(0, pairs);
     const cards = shuffle([...picks, ...picks]);
 
@@ -311,7 +421,7 @@
     cards.forEach(icon => {
       const div = document.createElement("div");
       div.className = "card";
-      div.textContent = "❓";          // face-down state
+      div.textContent = "❓";
       div.dataset.icon = icon;
       div.addEventListener("click", () => flip(div));
       grid.appendChild(div);
@@ -325,18 +435,16 @@
     const themeKey = themeEl.value;
     const currentTheme = THEMES[themeKey];
 
-    // Check if we are rendering text (emojis) or HTML (images)
     if (currentTheme.type === 'text') {
       card.textContent = card.dataset.icon;
     } else {
-      // Build the image tag dynamically
       card.innerHTML = `<img src="${currentTheme.folder}${card.dataset.icon}" alt="card">`;
     }
   }
 
   function hide(card) {
     card.classList.remove("flipped");
-    card.textContent = "❓"; // Overwrites the image tag or emoji back to a question mark
+    card.textContent = "❓"; 
   }
 
   function markMatched(card) {
@@ -350,11 +458,25 @@
     tick();
   }
 
+  function showVictoryModal(isBetter, time, moves, diffText) {
+    if (isBetter) {
+      modalTitle.textContent = "🎉 New Best!";
+      modalTitle.style.color = "#22c55e"; 
+    } else {
+      modalTitle.textContent = "✅ Completed!";
+      modalTitle.style.color = "#e5e7eb";
+    }
+    
+    modalStats.innerHTML = `Difficulty: <b>${diffText}</b><br>Time: <b>${time.toFixed(1)}s</b><br>Moves: <b>${moves}</b>`;
+    victoryModal.classList.add("active");
+  }
+
   function finishGame() {
     started = false;
     stopTimer();
 
     const diff = difficultyEl.value;
+    const diffText = difficultyEl.options[difficultyEl.selectedIndex].text;
     const theme = themeEl.value;
     const time = parseFloat(timeEl.textContent);
     const record = loadBest(diff, theme);
@@ -368,11 +490,10 @@
     if (isBetter) saveBest(diff, theme, current);
     updateBestUI();
 
+    // Show modal after a slight delay so the final card finishes flipping
     setTimeout(() => {
-      alert(isBetter
-        ? `🎉 New Best on ${diff.toUpperCase()} (${theme})!\nTime: ${time.toFixed(1)}s\nMoves: ${moves}`
-        : `✅ Completed!\nTime: ${time.toFixed(1)}s\nMoves: ${moves}`);
-    }, 50);
+      showVictoryModal(isBetter, time, moves, diffText);
+    }, 400);
   }
 
   function flip(card) {
@@ -414,19 +535,13 @@
   }
 
   // ---------- UI Events ----------
-  difficultyEl.addEventListener("change", () => {
-    buildBoard();
-  });
-
-  themeEl.addEventListener("change", () => {
-    buildBoard();
-  });
-
-  startBtn.addEventListener("click", () => {
-    buildBoard();
-  });
-
-  restartBtn.addEventListener("click", () => {
+  difficultyEl.addEventListener("change", buildBoard);
+  themeEl.addEventListener("change", buildBoard);
+  startBtn.addEventListener("click", buildBoard);
+  restartBtn.addEventListener("click", buildBoard);
+  
+  modalBtn.addEventListener("click", () => {
+    victoryModal.classList.remove("active");
     buildBoard();
   });
 
