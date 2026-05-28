@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legends Top Trumps - Mobile Ready</title>
+    <title>Legends Top Trumps</title>
     <style>
         :root {
             --gold: #d4af37;
@@ -23,72 +23,76 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
         header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             width: 100%;
         }
 
         header h1 {
             color: var(--gold);
             margin: 0;
-            font-size: 1.4rem;
+            font-size: 1.8rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         #scoreboard {
-            font-size: 1.1rem;
-            margin-top: 5px;
+            font-size: 1.3rem;
+            margin-top: 8px;
             font-weight: bold;
         }
 
         #message-board {
-            height: 25px;
-            font-size: 1rem;
+            height: 30px;
+            font-size: 1.2rem;
             color: var(--gold);
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             text-align: center;
             width: 100%;
         }
 
-        /* The Arena - Forced Side-by-Side */
+        /* THE ARENA - Increased size and forced alignment */
         #arena {
             display: flex;
             flex-direction: row;
             justify-content: center;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: stretch; /* Locks both slots to the same height */
+            gap: 30px;
             width: 100%;
-            max-width: 600px; /* Keeps it compact on desktop */
+            max-width: 800px; /* Increased from 600px to make cards bigger */
         }
 
         .card-slot {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            width: 48%; /* Forces them to sit side-by-side even on small screens */
+            align-items: stretch; /* Stretches the card to fill the slot */
+            width: 48%;
         }
 
         .card-slot h2 {
-            margin: 0 0 5px 0;
+            margin: 0 0 10px 0;
             color: #888;
-            font-size: 0.85rem;
+            font-size: 1rem;
             text-transform: uppercase;
+            text-align: center;
         }
 
-        /* Card Styling */
+        /* CARD STYLING */
         .card {
             background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
             border: 2px solid var(--gold);
-            border-radius: 10px;
+            border-radius: 12px;
             width: 100%;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+            height: 100%; /* Forces card to fill available height */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
             overflow: hidden;
         }
 
@@ -96,19 +100,18 @@
             background: linear-gradient(90deg, #d4af37, #aa8529);
             color: #000;
             text-align: center;
-            padding: 6px;
+            padding: 10px;
             font-weight: 900;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* Adds "..." if name is too long for small screen */
+            text-overflow: ellipsis;
         }
 
-        /* 4:3 Aspect Ratio Image Container */
         .card-image-container {
             width: 100%;
-            aspect-ratio: 4 / 3; /* Locks the box to 4:3 proportion */
+            aspect-ratio: 4 / 3; /* Locks to 4:3 */
             background-color: #000;
             position: relative;
             display: flex;
@@ -126,36 +129,47 @@
             z-index: 2;
         }
 
-        /* The initials styling if the image is missing (e.g. FB or LF) */
         .initials-fallback {
-            font-size: 3rem;
+            font-size: 4rem;
             color: var(--gold);
             font-weight: normal;
             z-index: 1;
         }
 
+        /* Mystery Card Styling */
+        .mystery-q {
+            font-size: 5rem;
+            color: #555;
+            z-index: 1;
+        }
+
         .card-subtitle {
             text-align: center;
-            font-size: 0.7rem;
-            padding: 4px;
+            font-size: 0.85rem;
+            padding: 6px;
             background-color: #000;
             color: var(--gold);
-            border-bottom: 1px solid var(--gold);
+            border-bottom: 2px solid var(--gold);
             text-transform: uppercase;
         }
 
+        /* Flexible stats container to keep bottoms aligned */
         .card-stats {
-            padding: 6px;
+            padding: 10px;
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Spaces stats evenly */
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            padding: 5px 8px;
-            margin-bottom: 3px;
+            font-size: 1rem;
+            padding: 8px 12px;
+            margin-bottom: 4px;
             background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: default;
         }
 
@@ -182,14 +196,13 @@
 
         .hidden-stat {
             color: transparent;
-            text-shadow: 0 0 6px rgba(255,255,255,0.4);
         }
 
-        /* Extra adjustments for very small phones */
-        @media (max-width: 380px) {
-            .stat-row { font-size: 0.75rem; padding: 4px 5px; }
-            .card-header { font-size: 0.8rem; }
-            .initials-fallback { font-size: 2.2rem; }
+        @media (max-width: 480px) {
+            .stat-row { font-size: 0.85rem; padding: 6px 8px; }
+            .card-header { font-size: 0.9rem; }
+            .initials-fallback { font-size: 2.5rem; }
+            #arena { gap: 10px; }
         }
     </style>
 </head>
@@ -215,7 +228,7 @@
     </div>
 
     <script>
-        // Paste your full 48-player array here. I've left a few to keep it functioning.
+        // Paste your FULL 48-player array here
        const allPlayers = [
     // 🧤 GOALKEEPERS (4)
     { name: "Lev Yashin", era: "1960s", position: "Goalkeeper", stats: { pace: 50, shooting: 20, passing: 65, dribbling: 40, defending: 98, legacy: 97 }, image: "images/yashin.jpg" },
@@ -273,14 +286,12 @@
     { name: "Luís Figo", era: "2000s", position: "Attacker", stats: { pace: 88, shooting: 84, passing: 93, dribbling: 95, defending: 45, legacy: 92 }, image: "images/figo.jpg" },
     { name: "Romário", era: "1990s", position: "Attacker", stats: { pace: 92, shooting: 97, passing: 78, dribbling: 94, defending: 25, legacy: 94 }, image: "images/romario.jpg" }
 ];
-
         let playerScore = 0;
         let compScore = 0;
         let activePlayerCard = null;
         let activeCompCard = null;
         let roundActive = true;
 
-        // Extract initials for the text fallback (e.g., Franz Beckenbauer -> FB)
         function getInitials(name) {
             return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
         }
@@ -290,10 +301,12 @@
             return allPlayers[randomIndex];
         }
 
-        function buildCardHTML(player, isComputer = false) {
+        // Updated builder function to handle the "Mystery" state for the computer
+        function buildCardHTML(player, isComputer = false, isRevealed = true) {
             let statsHTML = '';
             for (const [statName, statValue] of Object.entries(player.stats)) {
-                const displayValue = isComputer ? `<span class="hidden-stat val-${statName}">${statValue}</span>` : `<span class="val-${statName}">${statValue}</span>`;
+                // Keep stats hidden if it's an unrevealed computer card
+                const displayValue = (isComputer && !isRevealed) ? `<span class="hidden-stat val-${statName}">??</span>` : `<span class="val-${statName}">${statValue}</span>`;
                 const onClick = (!isComputer) ? `onclick="playRound('${statName}')"` : '';
                 
                 statsHTML += `
@@ -304,17 +317,29 @@
                 `;
             }
 
-            const initials = getInitials(player.name);
+            // Determine what to show based on if the card should be revealed yet
+            const displayName = (isComputer && !isRevealed) ? "OPPONENT" : player.name;
+            const displaySubtitle = (isComputer && !isRevealed) ? "??? | ???" : `${player.position} | ${player.era}`;
+            
+            // Image fallback logic (Mystery Question Mark vs Real Image)
+            let imageContent = '';
+            if (isComputer && !isRevealed) {
+                imageContent = `<div class="mystery-q">?</div>`;
+            } else {
+                const initials = getInitials(player.name);
+                imageContent = `
+                    <div class="initials-fallback">${initials}</div>
+                    <img src="${player.image}" alt="${player.name}" onerror="this.style.display='none'">
+                `;
+            }
 
             return `
                 <div class="card">
-                    <div class="card-header">${player.name}</div>
+                    <div class="card-header">${displayName}</div>
                     <div class="card-image-container">
-                        <div class="initials-fallback">${initials}</div>
-                        <!-- If the image path fails, the image hides and shows the initials underneath -->
-                        <img src="${player.image}" alt="${player.name}" onerror="this.style.display='none'">
+                        ${imageContent}
                     </div>
-                    <div class="card-subtitle">${player.position} | ${player.era}</div>
+                    <div class="card-subtitle">${displaySubtitle}</div>
                     <div class="card-stats">
                         ${statsHTML}
                     </div>
@@ -334,19 +359,22 @@
                 activeCompCard = getRandomCard();
             }
 
-            document.getElementById('player-card').innerHTML = buildCardHTML(activePlayerCard, false);
-            document.getElementById('computer-card').innerHTML = buildCardHTML(activeCompCard, true);
+            // Render Player card normally (revealed)
+            document.getElementById('player-card').innerHTML = buildCardHTML(activePlayerCard, false, true);
+            
+            // Render Computer card hidden (isComputer = true, isRevealed = false)
+            document.getElementById('computer-card').innerHTML = buildCardHTML(activeCompCard, true, false);
         }
 
         function playRound(statSelected) {
             if (!roundActive) return;
             roundActive = false;
 
+            // REVEAL THE COMPUTER CARD NOW
+            document.getElementById('computer-card').innerHTML = buildCardHTML(activeCompCard, true, true);
+
             const playerVal = activePlayerCard.stats[statSelected];
             const compVal = activeCompCard.stats[statSelected];
-
-            const hiddenStats = document.querySelectorAll('.hidden-stat');
-            hiddenStats.forEach(el => el.classList.remove('hidden-stat'));
 
             const pRow = document.getElementById(`player-stat-${statSelected}`);
             const cRow = document.getElementById(`comp-stat-${statSelected}`);
@@ -374,7 +402,6 @@
             document.getElementById('score-player').innerText = playerScore;
             document.getElementById('score-comp').innerText = compScore;
 
-            // Wait exactly 1 second (1000 milliseconds) before dealing the next cards
             setTimeout(nextRound, 1000);
         }
 
