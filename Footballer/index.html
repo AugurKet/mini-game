@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legends Top Trumps - Playable Game</title>
+    <title>Legends Top Trumps - Mobile Ready</title>
     <style>
         :root {
             --gold: #d4af37;
@@ -23,116 +23,142 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
         header {
-            margin-top: 20px;
             text-align: center;
+            margin-bottom: 10px;
+            width: 100%;
         }
 
         header h1 {
             color: var(--gold);
             margin: 0;
+            font-size: 1.4rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         #scoreboard {
-            font-size: 1.5rem;
-            margin: 10px 0;
+            font-size: 1.1rem;
+            margin-top: 5px;
             font-weight: bold;
         }
 
         #message-board {
-            height: 40px;
-            font-size: 1.2rem;
-            color: var(--accent);
+            height: 25px;
+            font-size: 1rem;
+            color: var(--gold);
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
         }
 
+        /* The Arena - Forced Side-by-Side */
         #arena {
             display: flex;
-            gap: 50px;
+            flex-direction: row;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            gap: 10px;
             width: 100%;
-            max-width: 900px;
+            max-width: 600px; /* Keeps it compact on desktop */
         }
 
         .card-slot {
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 300px;
+            width: 48%; /* Forces them to sit side-by-side even on small screens */
         }
 
         .card-slot h2 {
-            margin-bottom: 10px;
+            margin: 0 0 5px 0;
             color: #888;
+            font-size: 0.85rem;
+            text-transform: uppercase;
         }
 
-        /* Upgraded Card Styling */
+        /* Card Styling */
         .card {
             background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
             border: 2px solid var(--gold);
-            border-radius: 16px;
+            border-radius: 10px;
             width: 100%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
             overflow: hidden;
-            transition: transform 0.3s;
         }
 
         .card-header {
             background: linear-gradient(90deg, #d4af37, #aa8529);
             color: #000;
             text-align: center;
-            padding: 12px;
+            padding: 6px;
             font-weight: 900;
-            font-size: 1.3rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Adds "..." if name is too long for small screen */
         }
 
+        /* 4:3 Aspect Ratio Image Container */
         .card-image-container {
             width: 100%;
-            height: 250px;
+            aspect-ratio: 4 / 3; /* Locks the box to 4:3 proportion */
             background-color: #000;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .card-image-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        /* The initials styling if the image is missing (e.g. FB or LF) */
+        .initials-fallback {
+            font-size: 3rem;
+            color: var(--gold);
+            font-weight: normal;
+            z-index: 1;
         }
 
         .card-subtitle {
             text-align: center;
-            font-size: 0.85rem;
-            padding: 6px;
+            font-size: 0.7rem;
+            padding: 4px;
             background-color: #000;
             color: var(--gold);
-            border-bottom: 2px solid var(--gold);
+            border-bottom: 1px solid var(--gold);
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .card-stats {
-            padding: 10px;
+            padding: 6px;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            font-size: 1.1rem;
-            padding: 8px 15px;
-            margin-bottom: 5px;
+            font-size: 0.85rem;
+            padding: 5px 8px;
+            margin-bottom: 3px;
             background-color: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: default;
-            transition: background-color 0.2s, color 0.2s;
         }
 
-        /* Only the player's stats are clickable */
         #player-card .stat-row {
             cursor: pointer;
         }
@@ -154,44 +180,27 @@
             color: #fff !important;
         }
 
-        /* Hide computer stats until round is played */
         .hidden-stat {
             color: transparent;
-            text-shadow: 0 0 8px rgba(255,255,255,0.5);
+            text-shadow: 0 0 6px rgba(255,255,255,0.4);
         }
 
-        button {
-            margin-top: 30px;
-            padding: 12px 30px;
-            font-size: 1.2rem;
-            background-color: var(--gold);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            display: none; /* Hidden until round ends */
-            transition: transform 0.2s;
+        /* Extra adjustments for very small phones */
+        @media (max-width: 380px) {
+            .stat-row { font-size: 0.75rem; padding: 4px 5px; }
+            .card-header { font-size: 0.8rem; }
+            .initials-fallback { font-size: 2.2rem; }
         }
-
-        button:hover {
-            transform: scale(1.05);
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
     </style>
 </head>
 <body>
 
     <header>
         <h1>Legends Top Trumps</h1>
-        <div id="scoreboard">Player: <span id="score-player">0</span> | Computer: <span id="score-comp">0</span></div>
+        <div id="scoreboard">Player: <span id="score-player">0</span> | Comp: <span id="score-comp">0</span></div>
     </header>
 
-    <div id="message-board">Select a stat from your card to challenge the computer!</div>
+    <div id="message-board">Select a stat to challenge!</div>
 
     <div id="arena">
         <div class="card-slot">
@@ -205,11 +214,8 @@
         </div>
     </div>
 
-    <button id="next-btn" onclick="nextRound()">Next Round ➔</button>
-
     <script>
-        // A curated subset of your legends for the game logic. 
-        // You can paste the rest of the 48 inside this array later.
+        // Paste your full 48-player array here. I've left a few to keep it functioning.
        const allPlayers = [
     // 🧤 GOALKEEPERS (4)
     { name: "Lev Yashin", era: "1960s", position: "Goalkeeper", stats: { pace: 50, shooting: 20, passing: 65, dribbling: 40, defending: 98, legacy: 97 }, image: "images/yashin.jpg" },
@@ -274,18 +280,17 @@
         let activeCompCard = null;
         let roundActive = true;
 
-        // Utility to get a random card
+        // Extract initials for the text fallback (e.g., Franz Beckenbauer -> FB)
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        }
+
         function getRandomCard() {
             const randomIndex = Math.floor(Math.random() * allPlayers.length);
             return allPlayers[randomIndex];
         }
 
-        // Generates the HTML for a card
-        // isComputer flag hides the stats so the player has to guess
         function buildCardHTML(player, isComputer = false) {
-            // Uses a web-based avatar generator if your local image isn't found
-            const fallbackImg = `https://ui-avatars.com/api/?name=${player.name.replace(' ', '+')}&background=1a1a1a&color=d4af37&size=250`;
-            
             let statsHTML = '';
             for (const [statName, statValue] of Object.entries(player.stats)) {
                 const displayValue = isComputer ? `<span class="hidden-stat val-${statName}">${statValue}</span>` : `<span class="val-${statName}">${statValue}</span>`;
@@ -299,11 +304,15 @@
                 `;
             }
 
+            const initials = getInitials(player.name);
+
             return `
                 <div class="card">
                     <div class="card-header">${player.name}</div>
                     <div class="card-image-container">
-                        <img src="${player.image}" onerror="this.src='${fallbackImg}'" alt="${player.name}">
+                        <div class="initials-fallback">${initials}</div>
+                        <!-- If the image path fails, the image hides and shows the initials underneath -->
+                        <img src="${player.image}" alt="${player.name}" onerror="this.style.display='none'">
                     </div>
                     <div class="card-subtitle">${player.position} | ${player.era}</div>
                     <div class="card-stats">
@@ -313,17 +322,14 @@
             `;
         }
 
-        // Starts a new round, dealing new cards
         function nextRound() {
             roundActive = true;
-            document.getElementById('message-board').innerText = "Select a stat from your card to challenge the computer!";
-            document.getElementById('message-board').style.color = "var(--text-light)";
-            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('message-board').innerText = "Select a stat to challenge!";
+            document.getElementById('message-board').style.color = "var(--gold)";
 
             activePlayerCard = getRandomCard();
             activeCompCard = getRandomCard();
 
-            // Prevent them getting the exact same card
             while(activeCompCard.name === activePlayerCard.name) {
                 activeCompCard = getRandomCard();
             }
@@ -332,15 +338,13 @@
             document.getElementById('computer-card').innerHTML = buildCardHTML(activeCompCard, true);
         }
 
-        // Handles the logic when you click a stat
         function playRound(statSelected) {
-            if (!roundActive) return; // Prevent clicking after round ends
+            if (!roundActive) return;
             roundActive = false;
 
             const playerVal = activePlayerCard.stats[statSelected];
             const compVal = activeCompCard.stats[statSelected];
 
-            // Reveal computer's hidden stats
             const hiddenStats = document.querySelectorAll('.hidden-stat');
             hiddenStats.forEach(el => el.classList.remove('hidden-stat'));
 
@@ -351,33 +355,30 @@
             if (playerVal > compVal) {
                 pRow.classList.add('winner');
                 cRow.classList.add('loser');
-                msg.innerText = `You win! ${playerVal} beats ${compVal}.`;
+                msg.innerText = "You Win! Next player in 1s...";
                 msg.style.color = "var(--win)";
                 playerScore++;
             } else if (compVal > playerVal) {
                 pRow.classList.add('loser');
                 cRow.classList.add('winner');
-                msg.innerText = `Computer wins! ${compVal} beats ${playerVal}.`;
+                msg.innerText = "Computer Wins! Next player in 1s...";
                 msg.style.color = "var(--accent)";
                 compScore++;
             } else {
                 pRow.style.backgroundColor = "gray";
                 cRow.style.backgroundColor = "gray";
-                msg.innerText = `It's a draw! Both have ${playerVal}.`;
-                msg.style.color = "var(--gold)";
+                msg.innerText = "Draw! Next player in 1s...";
+                msg.style.color = "var(--text-light)";
             }
 
-            // Update Scoreboard
             document.getElementById('score-player').innerText = playerScore;
             document.getElementById('score-comp').innerText = compScore;
 
-            // Show Next Button
-            document.getElementById('next-btn').style.display = 'block';
+            // Wait exactly 1 second (1000 milliseconds) before dealing the next cards
+            setTimeout(nextRound, 1000);
         }
 
-        // Initialize first round on load
         window.onload = nextRound;
-
     </script>
 </body>
 </html>
