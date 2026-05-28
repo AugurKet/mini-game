@@ -1,74 +1,102 @@
-Here is the complete, ready-to-run file containing the HTML, CSS, JavaScript, and the full 48-player JSON dataset.
-Save this entire block of code as your index.html file. Make sure your images are saved in the assets/legends/ folder with the exact filenames listed in the image fields below.
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legends Top Trumps</title>
+    <title>Legends Top Trumps - Playable Game</title>
     <style>
         :root {
             --gold: #d4af37;
-            --dark-bg: #1a1a1a;
-            --card-bg: #2c2c2c;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
             --text-light: #f4f4f4;
+            --accent: #ff4757;
+            --win: #2ed573;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--dark-bg);
             color: var(--text-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            padding: 20px;
-        }
-
-        #game-board {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 1400px;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 3px solid var(--gold);
-            border-radius: 12px;
-            width: 280px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
+        header {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--gold);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #scoreboard {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        #message-board {
+            height: 40px;
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #arena {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .card-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+        }
+
+        .card-slot h2 {
+            margin-bottom: 10px;
+            color: #888;
+        }
+
+        /* Upgraded Card Styling */
+        .card {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            transition: transform 0.3s;
         }
 
         .card-header {
-            background-color: var(--gold);
-            color: var(--dark-bg);
+            background: linear-gradient(90deg, #d4af37, #aa8529);
+            color: #000;
             text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            font-size: 1.2rem;
+            padding: 12px;
+            font-weight: 900;
+            font-size: 1.3rem;
             text-transform: uppercase;
         }
 
         .card-image-container {
             width: 100%;
-            height: 280px; /* Taller to fit portraits better */
+            height: 250px;
             background-color: #000;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .card-image-container img {
@@ -77,146 +105,279 @@ Save this entire block of code as your index.html file. Make sure your images ar
             object-fit: cover;
         }
 
-        .card-era-position {
+        .card-subtitle {
             text-align: center;
-            font-size: 0.9rem;
-            padding: 8px;
-            background-color: #111;
+            font-size: 0.85rem;
+            padding: 6px;
+            background-color: #000;
             color: var(--gold);
             border-bottom: 2px solid var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .card-stats {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            padding: 10px;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            font-size: 1rem;
-            padding: 4px 0;
-            border-bottom: 1px solid #444;
-            cursor: pointer;
-        }
-        
-        .stat-row:hover {
-            color: var(--gold);
+            font-size: 1.1rem;
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: default;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        .stat-row:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            color: var(--gold);
+        /* Only the player's stats are clickable */
+        #player-card .stat-row {
+            cursor: pointer;
         }
+
+        #player-card .stat-row:hover {
+            background-color: var(--gold);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .stat-row.winner {
+            background-color: var(--win) !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        .stat-row.loser {
+            background-color: var(--accent) !important;
+            color: #fff !important;
+        }
+
+        /* Hide computer stats until round is played */
+        .hidden-stat {
+            color: transparent;
+            text-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            background-color: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: none; /* Hidden until round ends */
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="game-board"></div>
+    <header>
+        <h1>Legends Top Trumps</h1>
+        <div id="scoreboard">Player: <span id="score-player">0</span> | Computer: <span id="score-comp">0</span></div>
+    </header>
+
+    <div id="message-board">Select a stat from your card to challenge the computer!</div>
+
+    <div id="arena">
+        <div class="card-slot">
+            <h2>Your Card</h2>
+            <div id="player-card"></div>
+        </div>
+
+        <div class="card-slot">
+            <h2>Computer</h2>
+            <div id="computer-card"></div>
+        </div>
+    </div>
+
+    <button id="next-btn" onclick="nextRound()">Next Round ➔</button>
 
     <script>
-        const players = [
-            // GOALKEEPERS
-            { id: 1, name: "Lev Yashin", era: "1960s", position: "Goalkeeper", stats: { pace: 50, shooting: 20, passing: 65, dribbling: 40, defending: 98, legacy: 97 }, image: "assets/legends/yashin.jpg" },
-            { id: 2, name: "Gianluigi Buffon", era: "2000s", position: "Goalkeeper", stats: { pace: 45, shooting: 15, passing: 60, dribbling: 35, defending: 97, legacy: 95 }, image: "assets/legends/buffon.jpg" },
-            { id: 3, name: "Peter Schmeichel", era: "1990s", position: "Goalkeeper", stats: { pace: 55, shooting: 30, passing: 68, dribbling: 45, defending: 95, legacy: 92 }, image: "assets/legends/schmeichel.jpg" },
-            { id: 4, name: "Iker Casillas", era: "2010s", position: "Goalkeeper", stats: { pace: 60, shooting: 18, passing: 70, dribbling: 50, defending: 96, legacy: 94 }, image: "assets/legends/casillas.jpg" },
+        // A curated subset of your legends for the game logic. 
+        // You can paste the rest of the 48 inside this array later.
+       const allPlayers = [
+    // 🧤 GOALKEEPERS (4)
+    { name: "Lev Yashin", era: "1960s", position: "Goalkeeper", stats: { pace: 50, shooting: 20, passing: 65, dribbling: 40, defending: 98, legacy: 97 }, image: "assets/legends/yashin.jpg" },
+    { name: "Gianluigi Buffon", era: "2000s", position: "Goalkeeper", stats: { pace: 45, shooting: 15, passing: 60, dribbling: 35, defending: 97, legacy: 95 }, image: "assets/legends/buffon.jpg" },
+    { name: "Peter Schmeichel", era: "1990s", position: "Goalkeeper", stats: { pace: 55, shooting: 30, passing: 68, dribbling: 45, defending: 95, legacy: 92 }, image: "assets/legends/schmeichel.jpg" },
+    { name: "Iker Casillas", era: "2010s", position: "Goalkeeper", stats: { pace: 60, shooting: 18, passing: 70, dribbling: 50, defending: 96, legacy: 94 }, image: "assets/legends/casillas.jpg" },
 
-            // DEFENDERS
-            { id: 5, name: "Franz Beckenbauer", era: "1970s", position: "Defender", stats: { pace: 78, shooting: 75, passing: 92, dribbling: 85, defending: 98, legacy: 98 }, image: "assets/legends/beckenbauer.jpg" },
-            { id: 6, name: "Paolo Maldini", era: "1990s", position: "Defender", stats: { pace: 85, shooting: 62, passing: 78, dribbling: 72, defending: 98, legacy: 96 }, image: "assets/legends/maldini.jpg" },
-            { id: 7, name: "Franco Baresi", era: "1990s", position: "Defender", stats: { pace: 76, shooting: 50, passing: 80, dribbling: 70, defending: 99, legacy: 95 }, image: "assets/legends/baresi.jpg" },
-            { id: 8, name: "Roberto Carlos", era: "2000s", position: "Defender", stats: { pace: 95, shooting: 88, passing: 82, dribbling: 84, defending: 80, legacy: 93 }, image: "assets/legends/roberto_carlos.jpg" },
-            { id: 9, name: "Cafu", era: "2000s", position: "Defender", stats: { pace: 92, shooting: 70, passing: 84, dribbling: 86, defending: 85, legacy: 92 }, image: "assets/legends/cafu.jpg" },
-            { id: 10, name: "Fabio Cannavaro", era: "2000s", position: "Defender", stats: { pace: 80, shooting: 45, passing: 65, dribbling: 60, defending: 98, legacy: 91 }, image: "assets/legends/cannavaro.jpg" },
-            { id: 11, name: "Bobby Moore", era: "1960s", position: "Defender", stats: { pace: 74, shooting: 55, passing: 85, dribbling: 76, defending: 97, legacy: 94 }, image: "assets/legends/moore.jpg" },
-            { id: 12, name: "Carles Puyol", era: "2010s", position: "Defender", stats: { pace: 75, shooting: 50, passing: 72, dribbling: 60, defending: 96, legacy: 90 }, image: "assets/legends/puyol.jpg" },
-            { id: 13, name: "Alessandro Nesta", era: "2000s", position: "Defender", stats: { pace: 78, shooting: 40, passing: 70, dribbling: 68, defending: 97, legacy: 91 }, image: "assets/legends/nesta.jpg" },
-            { id: 14, name: "Ronald Koeman", era: "1990s", position: "Defender", stats: { pace: 68, shooting: 92, passing: 88, dribbling: 74, defending: 88, legacy: 89 }, image: "assets/legends/koeman.jpg" },
+    // 🛡️ DEFENDERS (10)
+    { name: "Franz Beckenbauer", era: "1970s", position: "Defender", stats: { pace: 78, shooting: 75, passing: 92, dribbling: 85, defending: 98, legacy: 98 }, image: "assets/legends/beckenbauer.jpg" },
+    { name: "Paolo Maldini", era: "1990s", position: "Defender", stats: { pace: 85, shooting: 62, passing: 78, dribbling: 72, defending: 98, legacy: 96 }, image: "assets/legends/maldini.jpg" },
+    { name: "Franco Baresi", era: "1990s", position: "Defender", stats: { pace: 76, shooting: 50, passing: 80, dribbling: 70, defending: 99, legacy: 95 }, image: "assets/legends/baresi.jpg" },
+    { name: "Roberto Carlos", era: "2000s", position: "Defender", stats: { pace: 95, shooting: 88, passing: 82, dribbling: 84, defending: 80, legacy: 93 }, image: "assets/legends/roberto_carlos.jpg" },
+    { name: "Cafu", era: "2000s", position: "Defender", stats: { pace: 92, shooting: 70, passing: 84, dribbling: 86, defending: 85, legacy: 92 }, image: "assets/legends/cafu.jpg" },
+    { name: "Fabio Cannavaro", era: "2000s", position: "Defender", stats: { pace: 80, shooting: 45, passing: 65, dribbling: 60, defending: 98, legacy: 91 }, image: "assets/legends/cannavaro.jpg" },
+    { name: "Bobby Moore", era: "1960s", position: "Defender", stats: { pace: 74, shooting: 55, passing: 85, dribbling: 76, defending: 97, legacy: 94 }, image: "assets/legends/moore.jpg" },
+    { name: "Carles Puyol", era: "2010s", position: "Defender", stats: { pace: 75, shooting: 50, passing: 72, dribbling: 60, defending: 96, legacy: 90 }, image: "assets/legends/puyol.jpg" },
+    { name: "Alessandro Nesta", era: "2000s", position: "Defender", stats: { pace: 78, shooting: 40, passing: 70, dribbling: 68, defending: 97, legacy: 91 }, image: "assets/legends/nesta.jpg" },
+    { name: "Ronald Koeman", era: "1990s", position: "Defender", stats: { pace: 68, shooting: 92, passing: 88, dribbling: 74, defending: 88, legacy: 89 }, image: "assets/legends/koeman.jpg" },
 
-            // MIDFIELDERS
-            { id: 15, name: "Diego Maradona", era: "1980s", position: "Midfielder", stats: { pace: 88, shooting: 91, passing: 95, dribbling: 99, defending: 40, legacy: 99 }, image: "assets/legends/maradona.jpg" },
-            { id: 16, name: "Zinedine Zidane", era: "2000s", position: "Midfielder", stats: { pace: 76, shooting: 86, passing: 97, dribbling: 96, defending: 55, legacy: 98 }, image: "assets/legends/zidane.jpg" },
-            { id: 17, name: "Johan Cruyff", era: "1970s", position: "Midfielder", stats: { pace: 86, shooting: 89, passing: 95, dribbling: 97, defending: 50, legacy: 99 }, image: "assets/legends/cruyff.jpg" },
-            { id: 18, name: "Michel Platini", era: "1980s", position: "Midfielder", stats: { pace: 82, shooting: 90, passing: 96, dribbling: 90, defending: 55, legacy: 96 }, image: "assets/legends/platini.jpg" },
-            { id: 19, name: "David Beckham", era: "2000s", position: "Midfielder", stats: { pace: 76, shooting: 84, passing: 97, dribbling: 80, defending: 62, legacy: 91 }, image: "assets/legends/beckham.jpg" },
-            { id: 20, name: "Ronaldinho", era: "2000s", position: "Midfielder", stats: { pace: 90, shooting: 88, passing: 92, dribbling: 99, defending: 35, legacy: 95 }, image: "assets/legends/ronaldinho.jpg" },
-            { id: 21, name: "Kaká", era: "2000s", position: "Midfielder", stats: { pace: 93, shooting: 87, passing: 89, dribbling: 92, defending: 45, legacy: 92 }, image: "assets/legends/kaka.jpg" },
-            { id: 22, name: "Xavi Hernández", era: "2010s", position: "Midfielder", stats: { pace: 68, shooting: 74, passing: 99, dribbling: 90, defending: 65, legacy: 95 }, image: "assets/legends/xavi.jpg" },
-            { id: 23, name: "Andrés Iniesta", era: "2010s", position: "Midfielder", stats: { pace: 74, shooting: 76, passing: 98, dribbling: 97, defending: 60, legacy: 95 }, image: "assets/legends/iniesta.jpg" },
-            { id: 24, name: "Andrea Pirlo", era: "2010s", position: "Midfielder", stats: { pace: 60, shooting: 82, passing: 98, dribbling: 86, defending: 62, legacy: 93 }, image: "assets/legends/pirlo.jpg" },
-            { id: 25, name: "Lothar Matthäus", era: "1990s", position: "Midfielder", stats: { pace: 84, shooting: 88, passing: 91, dribbling: 82, defending: 90, legacy: 95 }, image: "assets/legends/matthaus.jpg" },
-            { id: 26, name: "Ruud Gullit", era: "1980s", position: "Midfielder", stats: { pace: 87, shooting: 86, passing: 88, dribbling: 87, defending: 82, legacy: 93 }, image: "assets/legends/gullit.jpg" },
-            { id: 27, name: "Steven Gerrard", era: "2000s", position: "Midfielder", stats: { pace: 78, shooting: 90, passing: 92, dribbling: 80, defending: 78, legacy: 92 }, image: "assets/legends/gerrard.jpg" },
-            { id: 28, name: "Frank Lampard", era: "2000s", position: "Midfielder", stats: { pace: 74, shooting: 91, passing: 89, dribbling: 78, defending: 70, legacy: 91 }, image: "assets/legends/lampard.jpg" },
-            { id: 29, name: "Paul Scholes", era: "1990s", position: "Midfielder", stats: { pace: 70, shooting: 88, passing: 96, dribbling: 82, defending: 65, legacy: 91 }, image: "assets/legends/scholes.jpg" },
-            { id: 30, name: "Patrick Vieira", era: "2000s", position: "Midfielder", stats: { pace: 82, shooting: 75, passing: 85, dribbling: 81, defending: 92, legacy: 92 }, image: "assets/legends/vieira.jpg" },
+    // 🧠 MIDFIELDERS (16)
+    { name: "Diego Maradona", era: "1980s", position: "Midfielder", stats: { pace: 88, shooting: 91, passing: 95, dribbling: 99, defending: 40, legacy: 99 }, image: "assets/legends/maradona.jpg" },
+    { name: "Zinedine Zidane", era: "2000s", position: "Midfielder", stats: { pace: 76, shooting: 86, passing: 97, dribbling: 96, defending: 55, legacy: 98 }, image: "assets/legends/zidane.jpg" },
+    { name: "Johan Cruyff", era: "1970s", position: "Midfielder", stats: { pace: 86, shooting: 89, passing: 95, dribbling: 97, defending: 50, legacy: 99 }, image: "assets/legends/cruyff.jpg" },
+    { name: "Michel Platini", era: "1980s", position: "Midfielder", stats: { pace: 82, shooting: 90, passing: 96, dribbling: 90, defending: 55, legacy: 96 }, image: "assets/legends/platini.jpg" },
+    { name: "David Beckham", era: "2000s", position: "Midfielder", stats: { pace: 76, shooting: 84, passing: 97, dribbling: 80, defending: 62, legacy: 91 }, image: "assets/legends/beckham.jpg" },
+    { name: "Ronaldinho", era: "2000s", position: "Midfielder", stats: { pace: 90, shooting: 88, passing: 92, dribbling: 99, defending: 35, legacy: 95 }, image: "assets/legends/ronaldinho.jpg" },
+    { name: "Kaká", era: "2000s", position: "Midfielder", stats: { pace: 93, shooting: 87, passing: 89, dribbling: 92, defending: 45, legacy: 92 }, image: "assets/legends/kaka.jpg" },
+    { name: "Xavi Hernández", era: "2010s", position: "Midfielder", stats: { pace: 68, shooting: 74, passing: 99, dribbling: 90, defending: 65, legacy: 95 }, image: "assets/legends/xavi.jpg" },
+    { name: "Andrés Iniesta", era: "2010s", position: "Midfielder", stats: { pace: 74, shooting: 76, passing: 98, dribbling: 97, defending: 60, legacy: 95 }, image: "assets/legends/iniesta.jpg" },
+    { name: "Andrea Pirlo", era: "2010s", position: "Midfielder", stats: { pace: 60, shooting: 82, passing: 98, dribbling: 86, defending: 62, legacy: 93 }, image: "assets/legends/pirlo.jpg" },
+    { name: "Lothar Matthäus", era: "1990s", position: "Midfielder", stats: { pace: 84, shooting: 88, passing: 91, dribbling: 82, defending: 90, legacy: 95 }, image: "assets/legends/matthaus.jpg" },
+    { name: "Ruud Gullit", era: "1980s", position: "Midfielder", stats: { pace: 87, shooting: 86, passing: 88, dribbling: 87, defending: 82, legacy: 93 }, image: "assets/legends/gullit.jpg" },
+    { name: "Steven Gerrard", era: "2000s", position: "Midfielder", stats: { pace: 78, shooting: 90, passing: 92, dribbling: 80, defending: 78, legacy: 92 }, image: "assets/legends/gerrard.jpg" },
+    { name: "Frank Lampard", era: "2000s", position: "Midfielder", stats: { pace: 74, shooting: 91, passing: 89, dribbling: 78, defending: 70, legacy: 91 }, image: "assets/legends/lampard.jpg" },
+    { name: "Paul Scholes", era: "1990s", position: "Midfielder", stats: { pace: 70, shooting: 88, passing: 96, dribbling: 82, defending: 65, legacy: 91 }, image: "assets/legends/scholes.jpg" },
+    { name: "Patrick Vieira", era: "2000s", position: "Midfielder", stats: { pace: 82, shooting: 75, passing: 85, dribbling: 81, defending: 92, legacy: 92 }, image: "assets/legends/vieira.jpg" },
 
-            // ATTACKERS
-            { id: 31, name: "Pelé", era: "1960s", position: "Attacker", stats: { pace: 94, shooting: 98, passing: 90, dribbling: 96, defending: 45, legacy: 100 }, image: "assets/legends/pele.jpg" },
-            { id: 32, name: "Ronaldo Nazário", era: "1990s", position: "Attacker", stats: { pace: 97, shooting: 98, passing: 80, dribbling: 98, defending: 30, legacy: 97 }, image: "assets/legends/ronaldo_nazario.jpg" },
-            { id: 33, name: "Thierry Henry", era: "2000s", position: "Attacker", stats: { pace: 96, shooting: 94, passing: 85, dribbling: 93, defending: 40, legacy: 94 }, image: "assets/legends/henry.jpg" },
-            { id: 34, name: "Marco van Basten", era: "1980s", position: "Attacker", stats: { pace: 84, shooting: 97, passing: 82, dribbling: 89, defending: 35, legacy: 95 }, image: "assets/legends/van_basten.jpg" },
-            { id: 35, name: "Gerd Müller", era: "1970s", position: "Attacker", stats: { pace: 82, shooting: 99, passing: 72, dribbling: 80, defending: 35, legacy: 96 }, image: "assets/legends/muller.jpg" },
-            { id: 36, name: "Ferenc Puskás", era: "1950s", position: "Attacker", stats: { pace: 85, shooting: 98, passing: 88, dribbling: 91, defending: 30, legacy: 97 }, image: "assets/legends/puskas.jpg" },
-            { id: 37, name: "Eusébio", era: "1960s", position: "Attacker", stats: { pace: 95, shooting: 96, passing: 78, dribbling: 92, defending: 35, legacy: 95 }, image: "assets/legends/eusebio.jpg" },
-            { id: 38, name: "George Best", era: "1960s", position: "Attacker", stats: { pace: 92, shooting: 88, passing: 86, dribbling: 98, defending: 45, legacy: 94 }, image: "assets/legends/best.jpg" },
-            { id: 39, name: "Alfredo Di Stéfano", era: "1950s", position: "Attacker", stats: { pace: 88, shooting: 94, passing: 90, dribbling: 91, defending: 65, legacy: 98 }, image: "assets/legends/di_stefano.jpg" },
-            { id: 40, name: "Roberto Baggio", era: "1990s", position: "Attacker", stats: { pace: 85, shooting: 90, passing: 92, dribbling: 95, defending: 35, legacy: 93 }, image: "assets/legends/baggio.jpg" },
-            { id: 41, name: "Gabriel Batistuta", era: "1990s", position: "Attacker", stats: { pace: 86, shooting: 97, passing: 70, dribbling: 82, defending: 40, legacy: 91 }, image: "assets/legends/batistuta.jpg" },
-            { id: 42, name: "Alessandro Del Piero", era: "1990s", position: "Attacker", stats: { pace: 84, shooting: 92, passing: 88, dribbling: 93, defending: 38, legacy: 92 }, image: "assets/legends/del_piero.jpg" },
-            { id: 43, name: "Francesco Totti", era: "2000s", position: "Attacker", stats: { pace: 78, shooting: 91, passing: 94, dribbling: 90, defending: 42, legacy: 92 }, image: "assets/legends/totti.jpg" },
-            { id: 44, name: "Wayne Rooney", era: "2000s", position: "Attacker", stats: { pace: 86, shooting: 92, passing: 86, dribbling: 85, defending: 68, legacy: 91 }, image: "assets/legends/rooney.jpg" },
-            { id: 45, name: "Dennis Bergkamp", era: "1990s", position: "Attacker", stats: { pace: 82, shooting: 90, passing: 94, dribbling: 96, defending: 35, legacy: 92 }, image: "assets/legends/bergkamp.jpg" },
-            { id: 46, name: "Zlatan Ibrahimović", era: "2010s", position: "Attacker", stats: { pace: 78, shooting: 95, passing: 84, dribbling: 90, defending: 40, legacy: 93 }, image: "assets/legends/ibrahimovic.jpg" },
-            { id: 47, name: "Luís Figo", era: "2000s", position: "Attacker", stats: { pace: 88, shooting: 84, passing: 93, dribbling: 95, defending: 45, legacy: 92 }, image: "assets/legends/figo.jpg" },
-            { id: 48, name: "Romário", era: "1990s", position: "Attacker", stats: { pace: 92, shooting: 97, passing: 78, dribbling: 94, defending: 25, legacy: 94 }, image: "assets/legends/romario.jpg" }
-        ];
+    // 🎯 ATTACKERS (18)
+    { name: "Pelé", era: "1960s", position: "Attacker", stats: { pace: 94, shooting: 98, passing: 90, dribbling: 96, defending: 45, legacy: 100 }, image: "assets/legends/pele.jpg" },
+    { name: "Ronaldo Nazário", era: "1990s", position: "Attacker", stats: { pace: 97, shooting: 98, passing: 80, dribbling: 98, defending: 30, legacy: 97 }, image: "assets/legends/ronaldo_nazario.jpg" },
+    { name: "Thierry Henry", era: "2000s", position: "Attacker", stats: { pace: 96, shooting: 94, passing: 85, dribbling: 93, defending: 40, legacy: 94 }, image: "assets/legends/henry.jpg" },
+    { name: "Marco van Basten", era: "1980s", position: "Attacker", stats: { pace: 84, shooting: 97, passing: 82, dribbling: 89, defending: 35, legacy: 95 }, image: "assets/legends/van_basten.jpg" },
+    { name: "Gerd Müller", era: "1970s", position: "Attacker", stats: { pace: 82, shooting: 99, passing: 72, dribbling: 80, defending: 35, legacy: 96 }, image: "assets/legends/muller.jpg" },
+    { name: "Ferenc Puskás", era: "1950s", position: "Attacker", stats: { pace: 85, shooting: 98, passing: 88, dribbling: 91, defending: 30, legacy: 97 }, image: "assets/legends/puskas.jpg" },
+    { name: "Eusébio", era: "1960s", position: "Attacker", stats: { pace: 95, shooting: 96, passing: 78, dribbling: 92, defending: 35, legacy: 95 }, image: "assets/legends/eusebio.jpg" },
+    { name: "George Best", era: "1960s", position: "Attacker", stats: { pace: 92, shooting: 88, passing: 86, dribbling: 98, defending: 45, legacy: 94 }, image: "assets/legends/best.jpg" },
+    { name: "Alfredo Di Stéfano", era: "1950s", position: "Attacker", stats: { pace: 88, shooting: 94, passing: 90, dribbling: 91, defending: 65, legacy: 98 }, image: "assets/legends/di_stefano.jpg" },
+    { name: "Roberto Baggio", era: "1990s", position: "Attacker", stats: { pace: 85, shooting: 90, passing: 92, dribbling: 95, defending: 35, legacy: 93 }, image: "assets/legends/baggio.jpg" },
+    { name: "Gabriel Batistuta", era: "1990s", position: "Attacker", stats: { pace: 86, shooting: 97, passing: 70, dribbling: 82, defending: 40, legacy: 91 }, image: "assets/legends/batistuta.jpg" },
+    { name: "Alessandro Del Piero", era: "1990s", position: "Attacker", stats: { pace: 84, shooting: 92, passing: 88, dribbling: 93, defending: 38, legacy: 92 }, image: "assets/legends/del_piero.jpg" },
+    { name: "Francesco Totti", era: "2000s", position: "Attacker", stats: { pace: 78, shooting: 91, passing: 94, dribbling: 90, defending: 42, legacy: 92 }, image: "assets/legends/totti.jpg" },
+    { name: "Wayne Rooney", era: "2000s", position: "Attacker", stats: { pace: 86, shooting: 92, passing: 86, dribbling: 85, defending: 68, legacy: 91 }, image: "assets/legends/rooney.jpg" },
+    { name: "Dennis Bergkamp", era: "1990s", position: "Attacker", stats: { pace: 82, shooting: 90, passing: 94, dribbling: 96, defending: 35, legacy: 92 }, image: "assets/legends/bergkamp.jpg" },
+    { name: "Zlatan Ibrahimović", era: "2010s", position: "Attacker", stats: { pace: 78, shooting: 95, passing: 84, dribbling: 90, defending: 40, legacy: 93 }, image: "assets/legends/ibrahimovic.jpg" },
+    { name: "Luís Figo", era: "2000s", position: "Attacker", stats: { pace: 88, shooting: 84, passing: 93, dribbling: 95, defending: 45, legacy: 92 }, image: "assets/legends/figo.jpg" },
+    { name: "Romário", era: "1990s", position: "Attacker", stats: { pace: 92, shooting: 97, passing: 78, dribbling: 94, defending: 25, legacy: 94 }, image: "assets/legends/romario.jpg" }
+];
 
-        function createCardHTML(player) {
+        let playerScore = 0;
+        let compScore = 0;
+        let activePlayerCard = null;
+        let activeCompCard = null;
+        let roundActive = true;
+
+        // Utility to get a random card
+        function getRandomCard() {
+            const randomIndex = Math.floor(Math.random() * allPlayers.length);
+            return allPlayers[randomIndex];
+        }
+
+        // Generates the HTML for a card
+        // isComputer flag hides the stats so the player has to guess
+        function buildCardHTML(player, isComputer = false) {
+            // Uses a web-based avatar generator if your local image isn't found
+            const fallbackImg = `https://ui-avatars.com/api/?name=${player.name.replace(' ', '+')}&background=1a1a1a&color=d4af37&size=250`;
+            
+            let statsHTML = '';
+            for (const [statName, statValue] of Object.entries(player.stats)) {
+                const displayValue = isComputer ? `<span class="hidden-stat val-${statName}">${statValue}</span>` : `<span class="val-${statName}">${statValue}</span>`;
+                const onClick = (!isComputer) ? `onclick="playRound('${statName}')"` : '';
+                
+                statsHTML += `
+                    <div class="stat-row" id="${isComputer ? 'comp' : 'player'}-stat-${statName}" ${onClick}>
+                        <span style="text-transform: capitalize;">${statName}</span>
+                        ${displayValue}
+                    </div>
+                `;
+            }
+
             return `
                 <div class="card">
                     <div class="card-header">${player.name}</div>
-                    
                     <div class="card-image-container">
-                        <img src="${player.image}" alt="${player.name}" onerror="this.src='https://via.placeholder.com/280x280?text=${player.name.replace(' ', '+')}'">
+                        <img src="${player.image}" onerror="this.src='${fallbackImg}'" alt="${player.name}">
                     </div>
-                    
-                    <div class="card-era-position">
-                        ${player.position} | Era: ${player.era}
-                    </div>
-                    
+                    <div class="card-subtitle">${player.position} | ${player.era}</div>
                     <div class="card-stats">
-                        <div class="stat-row">
-                            <span>Pace</span> <span>${player.stats.pace}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Shooting</span> <span>${player.stats.shooting}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Passing</span> <span>${player.stats.passing}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Dribbling</span> <span>${player.stats.dribbling}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Defending</span> <span>${player.stats.defending}</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Legacy</span> <span>${player.stats.legacy}</span>
-                        </div>
+                        ${statsHTML}
                     </div>
                 </div>
             `;
         }
 
-        const gameBoard = document.getElementById('game-board');
-        gameBoard.innerHTML = players.map(player => createCardHTML(player)).join('');
+        // Starts a new round, dealing new cards
+        function nextRound() {
+            roundActive = true;
+            document.getElementById('message-board').innerText = "Select a stat from your card to challenge the computer!";
+            document.getElementById('message-board').style.color = "var(--text-light)";
+            document.getElementById('next-btn').style.display = 'none';
+
+            activePlayerCard = getRandomCard();
+            activeCompCard = getRandomCard();
+
+            // Prevent them getting the exact same card
+            while(activeCompCard.name === activePlayerCard.name) {
+                activeCompCard = getRandomCard();
+            }
+
+            document.getElementById('player-card').innerHTML = buildCardHTML(activePlayerCard, false);
+            document.getElementById('computer-card').innerHTML = buildCardHTML(activeCompCard, true);
+        }
+
+        // Handles the logic when you click a stat
+        function playRound(statSelected) {
+            if (!roundActive) return; // Prevent clicking after round ends
+            roundActive = false;
+
+            const playerVal = activePlayerCard.stats[statSelected];
+            const compVal = activeCompCard.stats[statSelected];
+
+            // Reveal computer's hidden stats
+            const hiddenStats = document.querySelectorAll('.hidden-stat');
+            hiddenStats.forEach(el => el.classList.remove('hidden-stat'));
+
+            const pRow = document.getElementById(`player-stat-${statSelected}`);
+            const cRow = document.getElementById(`comp-stat-${statSelected}`);
+            const msg = document.getElementById('message-board');
+
+            if (playerVal > compVal) {
+                pRow.classList.add('winner');
+                cRow.classList.add('loser');
+                msg.innerText = `You win! ${playerVal} beats ${compVal}.`;
+                msg.style.color = "var(--win)";
+                playerScore++;
+            } else if (compVal > playerVal) {
+                pRow.classList.add('loser');
+                cRow.classList.add('winner');
+                msg.innerText = `Computer wins! ${compVal} beats ${playerVal}.`;
+                msg.style.color = "var(--accent)";
+                compScore++;
+            } else {
+                pRow.style.backgroundColor = "gray";
+                cRow.style.backgroundColor = "gray";
+                msg.innerText = `It's a draw! Both have ${playerVal}.`;
+                msg.style.color = "var(--gold)";
+            }
+
+            // Update Scoreboard
+            document.getElementById('score-player').innerText = playerScore;
+            document.getElementById('score-comp').innerText = compScore;
+
+            // Show Next Button
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        // Initialize first round on load
+        window.onload = nextRound;
+
     </script>
 </body>
 </html>
-
-```
