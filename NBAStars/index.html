@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legends Top Trumps</title>
+    <title>NBA Legends Top Trumps</title>
     <style>
         :root {
             --gold: #d4af37;
@@ -209,7 +209,7 @@
 <body>
 
     <header>
-        <h1>Legends Top Trumps</h1>
+        <h1>NBA Legends Top Trumps</h1>
         <div id="scoreboard">Cards: <span id="score-player">0</span> | Comp: <span id="score-comp">0</span></div>
     </header>
 
@@ -229,61 +229,54 @@
 
     <script>
         const allPlayers = [
-            // 🧤 GOALKEEPERS (4)
-            { name: "Lev Yashin", era: "1960s", position: "Goalkeeper", stats: { pace: 50, shooting: 20, passing: 65, dribbling: 40, defending: 98, legacy: 97 }, image: "images/yashin.jpg" },
-            { name: "Gianluigi Buffon", era: "2000s", position: "Goalkeeper", stats: { pace: 45, shooting: 15, passing: 60, dribbling: 35, defending: 97, legacy: 95 }, image: "images/buffon.jpg" },
-            { name: "Peter Schmeichel", era: "1990s", position: "Goalkeeper", stats: { pace: 55, shooting: 30, passing: 68, dribbling: 45, defending: 95, legacy: 92 }, image: "images/schmeichel.jpg" },
-            { name: "Iker Casillas", era: "2010s", position: "Goalkeeper", stats: { pace: 60, shooting: 18, passing: 70, dribbling: 50, defending: 96, legacy: 94 }, image: "images/casillas.jpg" },
-
-            // 🛡️ DEFENDERS (10)
-            { name: "Franz Beckenbauer", era: "1970s", position: "Defender", stats: { pace: 78, shooting: 75, passing: 92, dribbling: 85, defending: 98, legacy: 98 }, image: "images/beckenbauer.jpg" },
-            { name: "Paolo Maldini", era: "1990s", position: "Defender", stats: { pace: 85, shooting: 62, passing: 78, dribbling: 72, defending: 98, legacy: 96 }, image: "images/maldini.jpg" },
-            { name: "Franco Baresi", era: "1990s", position: "Defender", stats: { pace: 76, shooting: 50, passing: 80, dribbling: 70, defending: 99, legacy: 95 }, image: "images/baresi.jpg" },
-            { name: "Roberto Carlos", era: "2000s", position: "Defender", stats: { pace: 95, shooting: 88, passing: 82, dribbling: 84, defending: 80, legacy: 93 }, image: "images/roberto_carlos.jpg" },
-            { name: "Cafu", era: "2000s", position: "Defender", stats: { pace: 92, shooting: 70, passing: 84, dribbling: 86, defending: 85, legacy: 92 }, image: "images/cafu.jpg" },
-            { name: "Fabio Cannavaro", era: "2000s", position: "Defender", stats: { pace: 80, shooting: 45, passing: 65, dribbling: 60, defending: 98, legacy: 91 }, image: "images/cannavaro.jpg" },
-            { name: "Bobby Moore", era: "1960s", position: "Defender", stats: { pace: 74, shooting: 55, passing: 85, dribbling: 76, defending: 97, legacy: 94 }, image: "images/moore.jpg" },
-            { name: "Carles Puyol", era: "2010s", position: "Defender", stats: { pace: 75, shooting: 50, passing: 72, dribbling: 60, defending: 96, legacy: 90 }, image: "images/puyol.jpg" },
-            { name: "Alessandro Nesta", era: "2000s", position: "Defender", stats: { pace: 78, shooting: 40, passing: 70, dribbling: 68, defending: 97, legacy: 91 }, image: "images/nesta.jpg" },
-            { name: "Ronald Koeman", era: "1990s", position: "Defender", stats: { pace: 68, shooting: 92, passing: 88, dribbling: 74, defending: 88, legacy: 89 }, image: "images/koeman.jpg" },
-
-            // 🧠 MIDFIELDERS (16)
-            { name: "Diego Maradona", era: "1980s", position: "Midfielder", stats: { pace: 88, shooting: 91, passing: 95, dribbling: 99, defending: 40, legacy: 99 }, image: "images/maradona.jpg" },
-            { name: "Zinedine Zidane", era: "2000s", position: "Midfielder", stats: { pace: 76, shooting: 86, passing: 97, dribbling: 96, defending: 55, legacy: 98 }, image: "images/zidane.jpg" },
-            { name: "Johan Cruyff", era: "1970s", position: "Midfielder", stats: { pace: 86, shooting: 89, passing: 95, dribbling: 97, defending: 50, legacy: 99 }, image: "images/cruyff.jpg" },
-            { name: "Michel Platini", era: "1980s", position: "Midfielder", stats: { pace: 82, shooting: 90, passing: 96, dribbling: 90, defending: 55, legacy: 96 }, image: "images/platini.jpg" },
-            { name: "David Beckham", era: "2000s", position: "Midfielder", stats: { pace: 76, shooting: 84, passing: 97, dribbling: 80, defending: 62, legacy: 91 }, image: "images/beckham.jpg" },
-            { name: "Ronaldinho", era: "2000s", position: "Midfielder", stats: { pace: 90, shooting: 88, passing: 92, dribbling: 99, defending: 35, legacy: 95 }, image: "images/ronaldinho.jpg" },
-            { name: "Kaká", era: "2000s", position: "Midfielder", stats: { pace: 93, shooting: 87, passing: 89, dribbling: 92, defending: 45, legacy: 92 }, image: "images/kaka.jpg" },
-            { name: "Xavi Hernández", era: "2010s", position: "Midfielder", stats: { pace: 68, shooting: 74, passing: 99, dribbling: 90, defending: 65, legacy: 95 }, image: "images/xavi.jpg" },
-            { name: "Andrés Iniesta", era: "2010s", position: "Midfielder", stats: { pace: 74, shooting: 76, passing: 98, dribbling: 97, defending: 60, legacy: 95 }, image: "images/iniesta.jpg" },
-            { name: "Andrea Pirlo", era: "2010s", position: "Midfielder", stats: { pace: 60, shooting: 82, passing: 98, dribbling: 86, defending: 62, legacy: 93 }, image: "images/pirlo.jpg" },
-            { name: "Lothar Matthäus", era: "1990s", position: "Midfielder", stats: { pace: 84, shooting: 88, passing: 91, dribbling: 82, defending: 90, legacy: 95 }, image: "images/matthaus.jpg" },
-            { name: "Ruud Gullit", era: "1980s", position: "Midfielder", stats: { pace: 87, shooting: 86, passing: 88, dribbling: 87, defending: 82, legacy: 93 }, image: "images/gullit.jpg" },
-            { name: "Steven Gerrard", era: "2000s", position: "Midfielder", stats: { pace: 78, shooting: 90, passing: 92, dribbling: 80, defending: 78, legacy: 92 }, image: "images/gerrard.jpg" },
-            { name: "Frank Lampard", era: "2000s", position: "Midfielder", stats: { pace: 74, shooting: 91, passing: 89, dribbling: 78, defending: 70, legacy: 91 }, image: "images/lampard.jpg" },
-            { name: "Paul Scholes", era: "1990s", position: "Midfielder", stats: { pace: 70, shooting: 88, passing: 96, dribbling: 82, defending: 65, legacy: 91 }, image: "images/scholes.jpg" },
-            { name: "Patrick Vieira", era: "2000s", position: "Midfielder", stats: { pace: 82, shooting: 75, passing: 85, dribbling: 81, defending: 92, legacy: 92 }, image: "images/vieira.jpg" },
-
-            // 🎯 ATTACKERS (18)
-            { name: "Pelé", era: "1960s", position: "Attacker", stats: { pace: 94, shooting: 98, passing: 90, dribbling: 96, defending: 45, legacy: 100 }, image: "images/pele.jpg" },
-            { name: "Ronaldo Nazário", era: "1990s", position: "Attacker", stats: { pace: 97, shooting: 98, passing: 80, dribbling: 98, defending: 30, legacy: 97 }, image: "images/ronaldo_nazario.jpg" },
-            { name: "Thierry Henry", era: "2000s", position: "Attacker", stats: { pace: 96, shooting: 94, passing: 85, dribbling: 93, defending: 40, legacy: 94 }, image: "images/henry.jpg" },
-            { name: "Marco van Basten", era: "1980s", position: "Attacker", stats: { pace: 84, shooting: 97, passing: 82, dribbling: 89, defending: 35, legacy: 95 }, image: "images/van_basten.jpg" },
-            { name: "Gerd Müller", era: "1970s", position: "Attacker", stats: { pace: 82, shooting: 99, passing: 72, dribbling: 80, defending: 35, legacy: 96 }, image: "images/muller.jpg" },
-            { name: "Ferenc Puskás", era: "1950s", position: "Attacker", stats: { pace: 85, shooting: 98, passing: 88, dribbling: 91, defending: 30, legacy: 97 }, image: "images/puskas.jpg" },
-            { name: "Eusébio", era: "1960s", position: "Attacker", stats: { pace: 95, shooting: 96, passing: 78, dribbling: 92, defending: 35, legacy: 95 }, image: "images/eusebio.jpg" },
-            { name: "George Best", era: "1960s", position: "Attacker", stats: { pace: 92, shooting: 88, passing: 86, dribbling: 98, defending: 45, legacy: 94 }, image: "images/best.jpg" },
-            { name: "Alfredo Di Stéfano", era: "1950s", position: "Attacker", stats: { pace: 88, shooting: 94, passing: 90, dribbling: 91, defending: 65, legacy: 98 }, image: "images/di_stefano.jpg" },
-            { name: "Roberto Baggio", era: "1990s", position: "Attacker", stats: { pace: 85, shooting: 90, passing: 92, dribbling: 95, defending: 35, legacy: 93 }, image: "images/baggio.jpg" },
-            { name: "Gabriel Batistuta", era: "1990s", position: "Attacker", stats: { pace: 86, shooting: 97, passing: 70, dribbling: 82, defending: 40, legacy: 91 }, image: "images/batistuta.jpg" },
-            { name: "Alessandro Del Piero", era: "1990s", position: "Attacker", stats: { pace: 84, shooting: 92, passing: 88, dribbling: 93, defending: 38, legacy: 92 }, image: "images/del_piero.jpg" },
-            { name: "Francesco Totti", era: "2000s", position: "Attacker", stats: { pace: 78, shooting: 91, passing: 94, dribbling: 90, defending: 42, legacy: 92 }, image: "images/totti.jpg" },
-            { name: "Wayne Rooney", era: "2000s", position: "Attacker", stats: { pace: 86, shooting: 92, passing: 86, dribbling: 85, defending: 68, legacy: 91 }, image: "images/rooney.jpg" },
-            { name: "Dennis Bergkamp", era: "1990s", position: "Attacker", stats: { pace: 82, shooting: 90, passing: 94, dribbling: 96, defending: 35, legacy: 92 }, image: "images/bergkamp.jpg" },
-            { name: "Zlatan Ibrahimović", era: "2010s", position: "Attacker", stats: { pace: 78, shooting: 95, passing: 84, dribbling: 90, defending: 40, legacy: 93 }, image: "images/ibrahimovic.jpg" },
-            { name: "Luís Figo", era: "2000s", position: "Attacker", stats: { pace: 88, shooting: 84, passing: 93, dribbling: 95, defending: 45, legacy: 92 }, image: "images/figo.jpg" },
-            { name: "Romário", era: "1990s", position: "Attacker", stats: { pace: 92, shooting: 97, passing: 78, dribbling: 94, defending: 25, legacy: 94 }, image: "images/romario.jpg" }
+            { name: "Michael Jordan", era: "1990s", position: "Shooting Guard", stats: { pace: 94, shooting: 97, passing: 85, dribbling: 95, defending: 97, legacy: 99 }, image: "images/michael_jordan.jpg" },
+            { name: "LeBron James", era: "2010s", position: "Small Forward", stats: { pace: 92, shooting: 90, passing: 96, dribbling: 92, defending: 88, legacy: 99 }, image: "images/lebron_james.jpg" },
+            { name: "Kareem Abdul-Jabbar", era: "1980s", position: "Center", stats: { pace: 72, shooting: 96, passing: 80, dribbling: 78, defending: 94, legacy: 98 }, image: "images/kareem_abdul_jabbar.jpg" },
+            { name: "Bill Russell", era: "1960s", position: "Center", stats: { pace: 80, shooting: 70, passing: 82, dribbling: 65, defending: 99, legacy: 98 }, image: "images/bill_russell.jpg" },
+            { name: "Wilt Chamberlain", era: "1960s", position: "Center", stats: { pace: 85, shooting: 95, passing: 75, dribbling: 70, defending: 92, legacy: 97 }, image: "images/wilt_chamberlain.jpg" },
+            { name: "Magic Johnson", era: "1980s", position: "Point Guard", stats: { pace: 88, shooting: 82, passing: 99, dribbling: 94, defending: 80, legacy: 98 }, image: "images/magic_johnson.jpg" },
+            { name: "Larry Bird", era: "1980s", position: "Small Forward", stats: { pace: 75, shooting: 98, passing: 95, dribbling: 85, defending: 82, legacy: 97 }, image: "images/larry_bird.jpg" },
+            { name: "Kobe Bryant", era: "2000s", position: "Shooting Guard", stats: { pace: 90, shooting: 96, passing: 83, dribbling: 95, defending: 93, legacy: 98 }, image: "images/kobe_bryant.jpg" },
+            { name: "Shaquille O'Neal", era: "2000s", position: "Center", stats: { pace: 70, shooting: 94, passing: 75, dribbling: 65, defending: 90, legacy: 97 }, image: "images/shaquille_oneal.jpg" },
+            { name: "Tim Duncan", era: "2000s", position: "Power Forward", stats: { pace: 70, shooting: 88, passing: 82, dribbling: 75, defending: 97, legacy: 98 }, image: "images/tim_duncan.jpg" },
+            { name: "Hakeem Olajuwon", era: "1990s", position: "Center", stats: { pace: 82, shooting: 92, passing: 78, dribbling: 85, defending: 98, legacy: 96 }, image: "images/hakeem_olajuwon.jpg" },
+            { name: "Stephen Curry", era: "2010s", position: "Point Guard", stats: { pace: 88, shooting: 99, passing: 90, dribbling: 97, defending: 75, legacy: 96 }, image: "images/stephen_curry.jpg" },
+            { name: "Kevin Durant", era: "2010s", position: "Small Forward", stats: { pace: 85, shooting: 98, passing: 84, dribbling: 92, defending: 84, legacy: 95 }, image: "images/kevin_durant.jpg" },
+            { name: "Oscar Robertson", era: "1960s", position: "Point Guard", stats: { pace: 86, shooting: 88, passing: 96, dribbling: 90, defending: 82, legacy: 95 }, image: "images/oscar_robertson.jpg" },
+            { name: "Jerry West", era: "1960s", position: "Shooting Guard", stats: { pace: 85, shooting: 94, passing: 88, dribbling: 90, defending: 88, legacy: 95 }, image: "images/jerry_west.jpg" },
+            { name: "Julius Erving", era: "1980s", position: "Small Forward", stats: { pace: 92, shooting: 85, passing: 82, dribbling: 92, defending: 84, legacy: 94 }, image: "images/julius_erving.jpg" },
+            { name: "Moses Malone", era: "1980s", position: "Center", stats: { pace: 74, shooting: 86, passing: 65, dribbling: 70, defending: 88, legacy: 93 }, image: "images/moses_malone.jpg" },
+            { name: "Karl Malone", era: "1990s", position: "Power Forward", stats: { pace: 82, shooting: 90, passing: 80, dribbling: 78, defending: 88, legacy: 94 }, image: "images/karl_malone.jpg" },
+            { name: "Dirk Nowitzki", era: "2000s", position: "Power Forward", stats: { pace: 70, shooting: 96, passing: 78, dribbling: 82, defending: 75, legacy: 93 }, image: "images/dirk_nowitzki.jpg" },
+            { name: "Kevin Garnett", era: "2000s", position: "Power Forward", stats: { pace: 82, shooting: 85, passing: 86, dribbling: 80, defending: 97, legacy: 94 }, image: "images/kevin_garnett.jpg" },
+            { name: "Dwyane Wade", era: "2000s", position: "Shooting Guard", stats: { pace: 95, shooting: 88, passing: 85, dribbling: 94, defending: 90, legacy: 93 }, image: "images/dwyane_wade.jpg" },
+            { name: "Giannis Antetokounmpo", era: "2020s", position: "Power Forward", stats: { pace: 93, shooting: 78, passing: 84, dribbling: 88, defending: 95, legacy: 92 }, image: "images/giannis_antetokounmpo.jpg" },
+            { name: "Nikola Jokic", era: "2020s", position: "Center", stats: { pace: 65, shooting: 90, passing: 98, dribbling: 85, defending: 78, legacy: 92 }, image: "images/nikola_jokic.jpg" },
+            { name: "David Robinson", era: "1990s", position: "Center", stats: { pace: 86, shooting: 86, passing: 75, dribbling: 78, defending: 96, legacy: 92 }, image: "images/david_robinson.jpg" },
+            { name: "Charles Barkley", era: "1990s", position: "Power Forward", stats: { pace: 84, shooting: 88, passing: 85, dribbling: 86, defending: 80, legacy: 92 }, image: "images/charles_barkley.jpg" },
+            { name: "Scottie Pippen", era: "1990s", position: "Small Forward", stats: { pace: 88, shooting: 82, passing: 88, dribbling: 86, defending: 97, legacy: 92 }, image: "images/scottie_pippen.jpg" },
+            { name: "Isiah Thomas", era: "1980s", position: "Point Guard", stats: { pace: 94, shooting: 84, passing: 94, dribbling: 96, defending: 85, legacy: 91 }, image: "images/isiah_thomas.jpg" },
+            { name: "John Stockton", era: "1990s", position: "Point Guard", stats: { pace: 84, shooting: 86, passing: 99, dribbling: 88, defending: 92, legacy: 91 }, image: "images/john_stockton.jpg" },
+            { name: "Steve Nash", era: "2000s", position: "Point Guard", stats: { pace: 88, shooting: 94, passing: 98, dribbling: 94, defending: 65, legacy: 90 }, image: "images/steve_nash.jpg" },
+            { name: "Allen Iverson", era: "2000s", position: "Shooting Guard", stats: { pace: 97, shooting: 88, passing: 84, dribbling: 98, defending: 82, legacy: 91 }, image: "images/allen_iverson.jpg" },
+            { name: "Kawhi Leonard", era: "2010s", position: "Small Forward", stats: { pace: 82, shooting: 90, passing: 80, dribbling: 86, defending: 97, legacy: 90 }, image: "images/kawhi_leonard.jpg" },
+            { name: "James Harden", era: "2010s", position: "Shooting Guard", stats: { pace: 84, shooting: 92, passing: 94, dribbling: 95, defending: 72, legacy: 90 }, image: "images/james_harden.jpg" },
+            { name: "Jason Kidd", era: "2000s", position: "Point Guard", stats: { pace: 88, shooting: 78, passing: 97, dribbling: 90, defending: 92, legacy: 90 }, image: "images/jason_kidd.jpg" },
+            { name: "Chris Paul", era: "2010s", position: "Point Guard", stats: { pace: 84, shooting: 86, passing: 97, dribbling: 95, defending: 92, legacy: 90 }, image: "images/chris_paul.jpg" },
+            { name: "Elgin Baylor", era: "1960s", position: "Small Forward", stats: { pace: 86, shooting: 88, passing: 78, dribbling: 88, defending: 80, legacy: 90 }, image: "images/elgin_baylor.jpg" },
+            { name: "Bob Pettit", era: "1950s", position: "Power Forward", stats: { pace: 75, shooting: 88, passing: 72, dribbling: 70, defending: 84, legacy: 89 }, image: "images/bob_pettit.jpg" },
+            { name: "John Havlicek", era: "1970s", position: "Small Forward", stats: { pace: 88, shooting: 85, passing: 84, dribbling: 85, defending: 92, legacy: 90 }, image: "images/john_havlicek.jpg" },
+            { name: "Bob Cousy", era: "1950s", position: "Point Guard", stats: { pace: 85, shooting: 78, passing: 94, dribbling: 95, defending: 75, legacy: 89 }, image: "images/bob_cousy.jpg" },
+            { name: "Rick Barry", era: "1970s", position: "Small Forward", stats: { pace: 84, shooting: 92, passing: 85, dribbling: 86, defending: 82, legacy: 88 }, image: "images/rick_barry.jpg" },
+            { name: "Elvin Hayes", era: "1970s", position: "Power Forward", stats: { pace: 78, shooting: 84, passing: 68, dribbling: 72, defending: 88, legacy: 88 }, image: "images/elvin_hayes.jpg" },
+            { name: "George Mikan", era: "1950s", position: "Center", stats: { pace: 60, shooting: 82, passing: 65, dribbling: 60, defending: 90, legacy: 89 }, image: "images/george_mikan.jpg" },
+            { name: "Willis Reed", era: "1970s", position: "Center", stats: { pace: 72, shooting: 82, passing: 70, dribbling: 68, defending: 88, legacy: 88 }, image: "images/willis_reed.jpg" },
+            { name: "Walt Frazier", era: "1970s", position: "Point Guard", stats: { pace: 86, shooting: 84, passing: 90, dribbling: 92, defending: 94, legacy: 89 }, image: "images/walt_frazier.jpg" },
+            { name: "Patrick Ewing", era: "1990s", position: "Center", stats: { pace: 74, shooting: 88, passing: 70, dribbling: 72, defending: 94, legacy: 88 }, image: "images/patrick_ewing.jpg" },
+            { name: "Gary Payton", era: "1990s", position: "Point Guard", stats: { pace: 88, shooting: 82, passing: 92, dribbling: 90, defending: 98, legacy: 89 }, image: "images/gary_payton.jpg" },
+            { name: "Dominique Wilkins", era: "1980s", position: "Small Forward", stats: { pace: 92, shooting: 88, passing: 75, dribbling: 86, defending: 76, legacy: 88 }, image: "images/dominique_wilkins.jpg" },
+            { name: "Ray Allen", era: "2000s", position: "Shooting Guard", stats: { pace: 86, shooting: 97, passing: 80, dribbling: 88, defending: 80, legacy: 88 }, image: "images/ray_allen.jpg" },
+            { name: "Paul Pierce", era: "2000s", position: "Small Forward", stats: { pace: 80, shooting: 90, passing: 82, dribbling: 88, defending: 82, legacy: 88 }, image: "images/paul_pierce.jpg" }
         ];
 
         // NEW LOGIC: True Deck Implementation
