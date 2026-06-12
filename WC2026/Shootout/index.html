@@ -165,35 +165,39 @@
             resetBall();
         }
 
-        // Check Collisions
+       // Check Collisions
         function checkCollisions() {
-            // Goalkeeper Save Box
+        // 1. Goalkeeper Save Box Check
             if (ball.x > goalie.x - goalie.width/2 && 
                 ball.x < goalie.x + goalie.width/2 &&
                 ball.y > goalie.y - goalie.height/2 && 
                 ball.y < goalie.y + goalie.height/2) {
+        
                 gameState = 'saved';
                 setTimeout(resetBall, 2000);
+        
+                return; // <--- THE FIX: Exit the function so it doesn't count as a goal!
             }
 
-            // Goal Scoring Area Check
+        // 2. Goal Scoring Area Check
             if (ball.y <= goal.y + goal.height && ball.y >= goal.y) {
-                if (ball.x >= goal.x && ball.x <= goal.x + goal.width) {
-                    gameState = 'goal';
-                    score++;
-                    document.getElementById('score-display').innerText = `Goals: ${score} | Attempts: ${attempts}`;
-                    setTimeout(resetBall, 2000);
-                } else {
-                    gameState = 'missed';
-                    setTimeout(resetBall, 2000);
-                }
+            if (ball.x >= goal.x && ball.x <= goal.x + goal.width) {
+                gameState = 'goal';
+                score++;
+                document.getElementById('score-display').innerText = `Goals: ${score} | Attempts: ${attempts}`;
+                setTimeout(resetBall, 2000);
+            } else {
+                gameState = 'missed';
+                setTimeout(resetBall, 2000);
             }
+            return;
+        }
 
-            // Boundary limits
+        // 3. Boundary limits check (Ball went out of bounds)
             if (ball.x < 0 || ball.x > canvas.width || ball.y < 0) {
-                if (gameState === 'shooting') {
-                    gameState = 'missed';
-                    setTimeout(resetBall, 2000);
+            if (gameState === 'shooting') {
+                gameState = 'missed';
+                setTimeout(resetBall, 2000);
                 }
             }
         }
