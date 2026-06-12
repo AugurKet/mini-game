@@ -102,7 +102,8 @@
         const ballStart = { x: 400, y: 430 };
         let ball = { x: ballStart.x, y: ballStart.y, vx: 0, vy: 0, radius: 12 };
         
-        let goalie = { x: 400, y: 170, width: 50, height: 20, direction: 1 };
+        // Replace the old goalie line with this one:
+        let goalie = { x: 400, y: 200, width: 50, height: 20, direction: 1 };
         
         let mouse = { x: 0, y: 0, isDown: false };
 
@@ -166,42 +167,53 @@
         }
 
        // Check Collisions
-        function checkCollisions() {
-        // 1. Goalkeeper Save Box Check
-            if (ball.x > goalie.x - goalie.width/2 && 
-                ball.x < goalie.x + goalie.width/2 &&
-                ball.y > goalie.y - goalie.height/2 && 
-                ball.y < goalie.y + goalie.height/2) {
+function checkCollisions() {
+    // Calculate the actual edges of the ball (including its radius)
+    const ballTop = ball.y - ball.radius;
+    const ballBottom = ball.y + ball.radius;
+    const ballLeft = ball.x - ball.radius;
+    const ballRight = ball.x + ball.radius;
+
+    // Calculate the edges of the goalie
+    const goalieTop = goalie.y - goalie.height/2;
+    const goalieBottom = goalie.y + goalie.height/2;
+    const goalieLeft = goalie.x - goalie.width/2;
+    const goalieRight = goalie.x + goalie.width/2;
+
+    // 1. Goalkeeper Save Box Check (Now uses the outer edges!)
+    if (ballRight > goalieLeft && 
+        ballLeft < goalieRight && 
+        ballBottom > goalieTop && 
+        ballTop < goalieBottom) {
         
-                gameState = 'saved';
-                setTimeout(resetBall, 2000);
-        
-                return; // <--- THE FIX: Exit the function so it doesn't count as a goal!
-            }
+        gameState = 'saved';
+        setTimeout(resetBall, 2000);
+        return; 
+    }
 
-        // 2. Goal Scoring Area Check
-            if (ball.y <= goal.y + goal.height && ball.y >= goal.y) {
-            if (ball.x >= goal.x && ball.x <= goal.x + goal.width) {
-                gameState = 'goal';
-                score++;
-                document.getElementById('score-display').innerText = `Goals: ${score} | Attempts: ${attempts}`;
-                setTimeout(resetBall, 2000);
-            } else {
-                gameState = 'missed';
-                setTimeout(resetBall, 2000);
-            }
-            return;
+    // 2. Goal Scoring Area Check
+    // Ball is considered "in" if its top edge crosses the goal line
+    if (ballTop <= goal.y + goal.height && ballTop >= goal.y) {
+        if (ball.x >= goal.x && ball.x <= goal.x + goal.width) {
+            gameState = 'goal';
+            score++;
+            document.getElementById('score-display').innerText = `Goals: ${score} | Attempts: ${attempts}`;
+            setTimeout(resetBall, 2000);
+        } else {
+            gameState = 'missed';
+            setTimeout(resetBall, 2000);
         }
+        return;
+    }
 
-        // 3. Boundary limits check (Ball went out of bounds)
-            if (ball.x < 0 || ball.x > canvas.width || ball.y < 0) {
-            if (gameState === 'shooting') {
-                gameState = 'missed';
-                setTimeout(resetBall, 2000);
-                }
-            }
+    // 3. Boundary limits check (Ball went off screen)
+    if (ball.x < 0 || ball.x > canvas.width || ball.y < 0) {
+        if (gameState === 'shooting') {
+            gameState = 'missed';
+            setTimeout(resetBall, 2000);
         }
-
+    }
+}
         // Main Game Loop
         function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
