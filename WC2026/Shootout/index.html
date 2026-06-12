@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup 2026 Penalty Shootout</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #game-container {
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        canvas {
+            background-color: #2e7d32;
+            border: 4px solid #ffffff;
+            border-radius: 4px;
+            cursor: crosshair;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        select, button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hud">
+        <div id="stadium-display">Stadium: Toronto (BMO Field)</div>
+        <div id="score-display">Goals: 0 | Attempts: 0</div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+    </div>
+
+    <div class="controls">
+        <label for="stadium-select">Select Host City: </label>
+        <select id="stadium-select" onchange="changeStadium(this.value)">
+            <option value="toronto">Toronto (Sea Level - Normal Physics)</option>
+            <option value="mexico">Mexico City (High Altitude - Low Drag)</option>
+            <option value="seattle">Seattle (Coastal - Severe Crosswind)</option>
+            <option value="ny">New York (The Final - Elite Goalkeeper)</option>
+        </select>
+        <button onclick="resetGame()">Reset Match</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Stadium Configs
+        const stadiums = {
+            toronto: { name: "Toronto (BMO Field)", airDrag: 0.015, wind: 0, goalieSpeed: 3 },
+            mexico: { name: "Mexico City (Estadio Azteca)", airDrag: 0.003, wind: 0, goalieSpeed: 3.5 },
+            seattle: { name: "Seattle (Lumen Field)", airDrag: 0.015, wind: -2.5, goalieSpeed: 3 },
+            ny: { name: "New York (MetLife Stadium)", airDrag: 0.012, wind: 0.5, goalieSpeed: 6 }
+        };
+
+        let currentStadium = stadiums.toronto;
+
+        // Game State
+        let score = 0;
+        let attempts = 0;
+        let gameState = 'aiming'; // aiming, shooting, goal, missed, saved
+
+        // Physics Elements
+        const goal = { x: 200, y: 80, width: 400, height: 120 };
+        
+        const ballStart = { x: 400, y: 430 };
+        let ball = { x: ballStart.x, y: ballStart.y, vx: 0, vy: 0, radius: 12 };
+        
+        let goalie = { x: 400, y: 170, width: 50, height: 20, direction: 1 };
+        
+        let mouse = { x: 0, y: 0, isDown: false };
+
+        // Input Listeners
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameState !== 'aiming') return;
+            mouse.isDown = true;
+            getMousePos(e);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            getMousePos(e);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            if (!mouse.isDown || gameState !== 'aiming') return;
+            mouse.isDown = false;
+            shoot();
+        });
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+        }
+
+        function shoot() {
+            // Calculate velocity vector based on distance from ball to drag cursor
+            const dx = mouse.x - ball.x;
+            const dy = mouse.y - ball.y;
+            
+            // Scaled down to control speed
+            ball.vx = dx * 0.12;
+            ball.vy = dy * 0.12;
+            
+            gameState = 'shooting';
+            attempts++;
+            document.getElementById('score-display').innerText = `Goals: ${score} | Attempts: ${attempts}`;
+        }
+
+        function changeStadium(key) {
+            currentStadium = stadiums[key];
+            document.getElementById('stadium-display').innerText = `Stadium: ${currentStadium.name}`;
+            resetBall();
+        }
+
+        function resetBall() {
+            ball.x = ballStart.x;
+            ball.y = ballStart.y;
+            ball.vx = 0;
+            ball.vy = 0;
+            goalie.x = 400;
+            gameState = 'aiming';
+        }
+
+        function resetGame() {
+            score = 0;
+            attempts = 0;
+            document.getElementById('score-display').innerText = `Goals: 0 | Attempts: 0`;
+            resetBall();
+        }
+
+        // Check Collisions
+        function checkCollisions() {
+            // Goalkeeper Save Box
+            if (ball.x > goalie.x - goalie.width/2 && 
+                ball.x < goalie.x + goalie.width/2 &&
+                ball.y > goalie.y - goalie.height/2 && 
+                ball.y < goalie.y + goalie.height/2) {
+                gameState = 'saved';
+                setTimeout(resetBall, 2000);
+            }
+
+            // Goal Scoring Area Check
+            if (ball.y <= goal.y + goal.height && ball.y >= goal.y) {
+                if (ball.x >= goal.x && ball.x <= goal.x + goal.width) {
+                    gameState = 'goal';
+                    score++;
+                    document.getElementById('score-display').innerText = `Goals: ${score} | Attempts: ${attempts}`;
+                    setTimeout(resetBall, 2000);
+                } else {
+                    gameState = 'missed';
+                    setTimeout(resetBall, 2000);
+                }
+            }
+
+            // Boundary limits
+            if (ball.x < 0 || ball.x > canvas.width || ball.y < 0) {
+                if (gameState === 'shooting') {
+                    gameState = 'missed';
+                    setTimeout(resetBall, 2000);
+                }
+            }
+        }
+
+        // Main Game Loop
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Field Lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+            
+            // Penalty Box line
+            ctx.beginPath();
+            ctx.moveTo(150, 300);
+            ctx.lineTo(650, 300);
+            ctx.stroke();
+
+            // 2. Draw Goal Structure
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(goal.x, goal.y, goal.width, goal.height);
+
+            // 3. Update & Draw Goalkeeper
+            if (gameState === 'aiming') {
+                // Regular patrolling
+                goalie.x += currentStadium.goalieSpeed * goalie.direction;
+                if (goalie.x > goal.x + goal.width - 30 || goalie.x < goal.x + 30) {
+                    goalie.direction *= -1;
+                }
+            } else if (gameState === 'shooting') {
+                // Tracking the ball movement to intercept
+                const targetX = ball.x;
+                const diffX = targetX - goalie.x;
+                goalie.x += Math.sign(diffX) * (currentStadium.goalieSpeed * 1.2);
+            }
+
+            ctx.fillStyle = '#ff1744';
+            ctx.fillRect(goalie.x - goalie.width/2, goalie.y - goalie.height/2, goalie.width, goalie.height);
+
+            // 4. Update Physics if Ball is Active
+            if (gameState === 'shooting') {
+                // Apply wind force 
+                ball.vx += currentStadium.wind * 0.05;
+                
+                // Apply altitude-aware air drag 
+                ball.vx *= (1 - currentStadium.airDrag);
+                ball.vy *= (1 - currentStadium.airDrag);
+
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+
+                checkCollisions();
+            }
+
+            // 5. Draw Aiming Guide
+            if (mouse.isDown && gameState === 'aiming') {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(ball.x, ball.y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 6. Draw Ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#000000';
+            ctx.stroke();
+
+            // 7. Render Game Overlays (Goals / Misses)
+            if (gameState === 'goal' || gameState === 'saved' || gameState === 'missed') {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 36px sans-serif';
+                ctx.textAlign = 'center';
+                let txt = gameState === 'goal' ? 'GOAL!' : gameState === 'saved' ? 'SAVED!' : 'MISSED!';
+                ctx.fillText(txt, canvas.width/2, canvas.height/2);
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // Initialize Loop
+        loop();
+    </script>
+</body>
+</html>
