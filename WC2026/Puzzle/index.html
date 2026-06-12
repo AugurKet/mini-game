@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WC 2026: Third-Place Scramble</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .panel {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 450px;
+        }
+        h2 { margin-top: 0; color: #38bdf8; border-bottom: 2px solid #334155; padding-bottom: 10px; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #334155; }
+        th { color: #94a3b8; font-weight: normal; }
+        td:first-child { text-align: left; font-weight: bold; }
+        .cutoff { border-bottom: 3px dashed #ef4444; } /* The elimination line */
+        .player-row { background-color: #0369a1; }
+        .safe { color: #22c55e; }
+        .danger { color: #ef4444; }
+
+        /* Match Console Styles */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .clock { color: #fbbf24; font-family: monospace; font-size: 28px;}
+        
+        .tactic-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #334155;
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+        }
+        .tactic-btn:hover:not(:disabled) { background: #475569; border-color: #38bdf8; }
+        .tactic-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .tactic-desc { font-size: 12px; color: #94a3b8; display: block; margin-top: 4px; }
+
+        .log {
+            background: #0f172a;
+            padding: 10px;
+            height: 120px;
+            overflow-y: auto;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            margin-top: 20px;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panel">
+        <h2>Live 3rd-Place Table</h2>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: -10px;">Top 8 teams advance. Tiebreakers: 1. Pts | 2. GD | 3. GF | 4. Fair Play</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Pts</th>
+                    <th>GD</th>
+                    <th>GF</th>
+                    <th>FairPlay</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                </tbody>
+        </table>
+    </div>
+
+    <div class="panel">
+        <h2>Match Console</h2>
+        
+        <div class="scoreboard">
+            <div>US <span id="us-score">1</span></div>
+            <div class="clock"><span id="minute">75</span>'</div>
+            <div><span id="them-score">1</span> THEM</div>
+        </div>
+
+        <div id="controls">
+            <button class="tactic-btn" onclick="playTurn('attack')">
+                ⚔️ All-Out Attack
+                <span class="tactic-desc">40% chance to score. 40% chance to concede.</span>
+            </button>
+            <button class="tactic-btn" onclick="playTurn('defend')">
+                🛡️ Defend Deep
+                <span class="tactic-desc">5% chance to score. 15% chance to concede.</span>
+            </button>
+            <button class="tactic-btn" onclick="playTurn('foul')">
+                🛑 Tactical Fouling
+                <span class="tactic-desc">0% chance to concede. You WILL get a Yellow Card (-1 Fair Play).</span>
+            </button>
+        </div>
+
+        <div class="log" id="match-log">
+            [75'] Match resumes. A draw might be enough if you keep a clean sheet...<br>
+        </div>
+    </div>
+
+    <script>
+        // Initial Game State
+        let matchState = {
+            minute: 75,
+            usScore: 1,
+            themScore: 1,
+            yellowCards: 1, // We start with -1 Fair Play
+            isOver: false
+        };
+
+        // Static opponent teams (already finished their matches)
+        const staticTeams = [
+            { name: "Team A", pts: 4, gd: 2, gf: 4, fp: -1 },
+            { name: "Team B", pts: 4, gd: 1, gf: 3, fp: -2 },
+            { name: "Team C", pts: 4, gd: 0, gf: 2, fp: -1 },
+            { name: "Team D", pts: 3, gd: 1, gf: 3, fp: -3 },
+            { name: "Team E", pts: 3, gd: 0, gf: 2, fp: -2 },
+            { name: "Team F", pts: 3, gd: -1, gf: 3, fp: -1 },
+            { name: "Team G", pts: 3, gd: -1, gf: 2, fp: -1 },
+            // The Bubble Team (8th Place Cutoff)
+            { name: "Team H", pts: 3, gd: -1, gf: 2, fp: -3 }, 
+            // Eliminated Teams
+            { name: "Team J", pts: 2, gd: -2, gf: 1, fp: -2 },
+            { name: "Team K", pts: 1, gd: -3, gf: 1, fp: -1 },
+            { name: "Team L", pts: 1, gd: -4, gf: 0, fp: -4 }
+        ];
+
+        function logEvent(msg) {
+            const logBox = document.getElementById('match-log');
+            logBox.innerHTML = `[${matchState.minute}'] ${msg}<br>` + logBox.innerHTML;
+        }
+
+        function getOurTeamStats() {
+            // Base stats before this match started: Pts: 1, GD: -1, GF: 0
+            let currentPts = 1;
+            if (matchState.usScore > matchState.themScore) currentPts += 3;
+            else if (matchState.usScore === matchState.themScore) currentPts += 1;
+
+            let currentGD = -1 + (matchState.usScore - matchState.themScore);
+            let currentGF = 0 + matchState.usScore;
+            let currentFP = -matchState.yellowCards;
+
+            return { name: "YOUR TEAM", pts: currentPts, gd: currentGD, gf: currentGF, fp: currentFP, isPlayer: true };
+        }
+
+        function updateTable() {
+            let allTeams = [...staticTeams, getOurTeamStats()];
+
+            // SORTING LOGIC: FIFA Tiebreakers
+            allTeams.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;       // 1. Points
+                if (b.gd !== a.gd) return b.gd - a.gd;          // 2. Goal Difference
+                if (b.gf !== a.gf) return b.gf - a.gf;          // 3. Goals For
+                return b.fp - a.fp;                             // 4. Fair Play (closer to 0 is better)
+            });
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            let ourRank = 0;
+
+            allTeams.forEach((team, index) => {
+                let tr = document.createElement('tr');
+                if (team.isPlayer) {
+                    tr.classList.add('player-row');
+                    ourRank = index + 1;
+                }
+                if (index === 7) tr.classList.add('cutoff'); // Line after 8th place
+
+                tr.innerHTML = `
+                    <td>${index + 1}. ${team.name}</td>
+                    <td>${team.pts}</td>
+                    <td>${team.gd > 0 ? '+'+team.gd : team.gd}</td>
+                    <td>${team.gf}</td>
+                    <td>${team.fp}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            return ourRank;
+        }
+
+        function playTurn(tactic) {
+            if (matchState.isOver) return;
+
+            // Advance time
+            matchState.minute += 5;
+            document.getElementById('minute').innerText = matchState.minute;
+
+            // Resolve probabilities
+            let rand = Math.random();
+            let scored = false;
+            let conceded = false;
+
+            if (tactic === 'attack') {
+                if (rand < 0.40) scored = true;
+                else if (rand < 0.80) conceded = true;
+                logEvent("You sent men forward!");
+            } else if (tactic === 'defend') {
+                if (rand < 0.05) scored = true;
+                else if (rand < 0.20) conceded = true;
+                logEvent("Sitting deep, absorbing pressure.");
+            } else if (tactic === 'foul') {
+                matchState.yellowCards += 1;
+                logEvent("CRUNCH! Cynical tackle stops the counter. Yellow card shown.");
+            }
+
+            // Apply goals
+            if (scored) {
+                matchState.usScore++;
+                logEvent("⚽ GOAL! You scored a brilliant team goal!");
+            }
+            if (conceded) {
+                matchState.themScore++;
+                logEvent("❌ CONCEDED! The opponent breaks through and scores.");
+            }
+
+            // Update UI
+            document.getElementById('us-score').innerText = matchState.usScore;
+            document.getElementById('them-score').innerText = matchState.themScore;
+            
+            let rank = updateTable();
+
+            // End game check
+            if (matchState.minute >= 90) {
+                matchState.isOver = true;
+                document.getElementById('controls').innerHTML = ''; // Hide buttons
+                
+                if (rank <= 8) {
+                    logEvent(`🎉 FULL TIME! You finished ${rank}th and ADVANCE to the Knockout Stage!`);
+                    document.getElementById('minute').style.color = "#22c55e";
+                } else {
+                    logEvent(`💀 FULL TIME. You finished ${rank}th and are ELIMINATED.`);
+                    document.getElementById('minute').style.color = "#ef4444";
+                }
+            }
+        }
+
+        // Init
+        updateTable();
+    </script>
+</body>
+</html>
